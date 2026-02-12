@@ -526,6 +526,22 @@
             background: rgba(239, 68, 68, 0.05);
         }
         
+        .vendedor-box {
+            background: rgba(45, 45, 45, 0.6);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .vendedor-box h3 {
+            color: #3b82f6;
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+        }
+        
         .validacao-item h4 {
             color: #e0e0e0;
             margin-bottom: 15px;
@@ -848,8 +864,8 @@
             <h3>📱 Enviar Relatório via WhatsApp</h3>
             <div class="form-group">
                 <label>Número do WhatsApp (com DDD):</label>
-                <input type="tel" id="numeroWhatsApp" placeholder="41999007053" maxlength="11" style="font-size: 18px;">
-                <p style="color: #9ca3af; font-size: 13px; margin-top: 8px;">Digite apenas números, com DDD. Ex: 41999007053</p>
+                <input type="tel" id="numeroWhatsApp" placeholder="41 00000-0000" maxlength="13" style="font-size: 18px;">
+                <p style="color: #9ca3af; font-size: 13px; margin-top: 8px;">Digite apenas números, com DDD. Ex: 41 00000-0000</p>
             </div>
             <div class="action-buttons" style="margin-top: 25px;">
                 <button class="btn btn-whatsapp" onclick="confirmarEnvioWhatsApp()">📤 Enviar Relatório</button>
@@ -2189,90 +2205,271 @@
             const container = document.getElementById('afazeresValidacaoContainer');
             let html = '';
             
+            // Consolidar registros por vendedor+data
+            const registrosConsolidados = {};
+            
             registrosFiltrados.forEach(registro => {
-                const pontosTotal = (registro.afazeres || []).reduce((sum, af) => {
-                    return sum + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                }, 0);
+                const chave = `${registro.vendedor}_${registro.data}`;
                 
-                const afazeresValidados = (registro.afazeres || []).filter(af => 
-                    typeof af === 'object' && af.pontos !== undefined
-                ).length;
+                if (!registrosConsolidados[chave]) {
+                    registrosConsolidados[chave] = {
+                        vendedor: registro.vendedor,
+                        data: registro.data,
+                        afazeres: [],
+                        cashback: 0,
+                        avaliacoes: 0,
+                        observacoes: [],
+                        ids: []
+                    };
+                }
                 
-                html += `
-                    <div class="info-box" style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
-                        <h4 style="color: #3b82f6; margin-bottom: 10px; font-size: 18px;">
-                            ${registro.vendedor} - ${new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR')}
-                        </h4>
-                        <p style="color: #d1d5db; margin-bottom: 5px;">
-                            <strong>Total de Afazeres:</strong> ${registro.afazeres.length}
-                        </p>
-                        <p style="color: #d1d5db; margin-bottom: 5px;">
-                            <strong>Validados:</strong> ${afazeresValidados} / ${registro.afazeres.length}
-                        </p>
-                        <p style="color: #d1d5db;">
-                            <strong>Pontuação Total:</strong> <span style="color: #3b82f6; font-size: 20px; font-weight: 700;">${pontosTotal.toFixed(1)}</span> pontos
-                        </p>
-                    </div>
-                `;
-                
-                // Mostrar cada afazer
-                registro.afazeres.forEach((af, index) => {
-                    const afazerTexto = typeof af === 'object' ? af.texto : af;
-                    const pontos = typeof af === 'object' ? af.pontos : undefined;
-                    
-                    let statusClass = '';
-                    let statusBadge = '';
-                    
-                    if (pontos === 1) {
-                        statusClass = 'validado-correto';
-                        statusBadge = '<span class="pontuacao-badge correto">✓ Correto (+1 ponto)</span>';
-                    } else if (pontos === 0.5) {
-                        statusClass = 'validado-metade';
-                        statusBadge = '<span class="pontuacao-badge metade">◐ Metade (+0.5 ponto)</span>';
-                    } else if (pontos === -1) {
-                        statusClass = 'validado-incorreto';
-                        statusBadge = '<span class="pontuacao-badge incorreto">✗ Incorreto (-1 ponto)</span>';
-                    }
-                    
-                    html += `
-                        <div class="validacao-item ${statusClass}">
-                            <h4>Afazer ${index + 1}:</h4>
-                            <p style="color: #d1d5db; margin-bottom: 15px; font-size: 15px;">${afazerTexto}</p>
-                            ${statusBadge}
-                            <div class="pontuacao-buttons" style="margin-top: 15px;">
-                                <button class="btn btn-ponto-correto btn-small" onclick="atribuirPontos('${registro.id}', ${index}, 1)">
-                                    ✓ Correto (+1)
-                                </button>
-                                <button class="btn btn-ponto-metade btn-small" onclick="atribuirPontos('${registro.id}', ${index}, 0.5)">
-                                    ◐ Metade (+0.5)
-                                </button>
-                                <button class="btn btn-ponto-incorreto btn-small" onclick="atribuirPontos('${registro.id}', ${index}, -1)">
-                                    ✗ Incorreto (-1)
-                                </button>
-                                ${pontos !== undefined ? 
-                                    `<button class="btn btn-secondary btn-small" onclick="atribuirPontos('${registro.id}', ${index}, null)">
-                                        Resetar
-                                    </button>` : ''
-                                }
-                            </div>
-                        </div>
-                    `;
+                // Adicionar afazeres com referência ao registro original
+                registro.afazeres.forEach(af => {
+                    registrosConsolidados[chave].afazeres.push({
+                        conteudo: af,
+                        registroId: registro.id
+                    });
                 });
                 
-                // Campo de observações
-                html += `
-                    <div style="margin-top: 20px; margin-bottom: 40px;">
-                        <div class="form-group">
-                            <label>📝 Observações do Admin:</label>
-                            <textarea id="obs_${registro.id}" style="min-height: 100px;" placeholder="Adicione observações, feedback ou informações importantes sobre este registro...">${registro.observacoes || ''}</textarea>
-                        </div>
-                        <button class="btn btn-success btn-small" onclick="salvarObservacao('${registro.id}')">
-                            💾 Salvar Observação
-                        </button>
-                    </div>
-                    <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
-                `;
+                registrosConsolidados[chave].cashback += (registro.cashback || 0);
+                registrosConsolidados[chave].avaliacoes += (registro.avaliacoes || 0);
+                
+                if (registro.observacoes) {
+                    registrosConsolidados[chave].observacoes.push(registro.observacoes);
+                }
+                
+                registrosConsolidados[chave].ids.push(registro.id);
             });
+            
+            // Se for "todos os vendedores", agrupar por vendedor
+            if (vendedor === 'todos') {
+                const vendedoresUnicos = [...new Set(Object.values(registrosConsolidados).map(r => r.vendedor))];
+                
+                vendedoresUnicos.forEach(nomeVendedor => {
+                    const regsVendedor = Object.values(registrosConsolidados).filter(r => r.vendedor === nomeVendedor);
+                    
+                    html += `<div class="vendedor-box">`;
+                    html += `<h3>👤 ${nomeVendedor}</h3>`;
+                    
+                    regsVendedor.forEach(regConsolidado => {
+                        const pontosTotal = regConsolidado.afazeres.reduce((sum, af) => {
+                            const conteudo = af.conteudo;
+                            return sum + (typeof conteudo === 'object' ? (conteudo.pontos || 0) : 0);
+                        }, 0);
+                        
+                        const afazeresValidados = regConsolidado.afazeres.filter(af => {
+                            const conteudo = af.conteudo;
+                            return typeof conteudo === 'object' && conteudo.pontos !== undefined;
+                        }).length;
+                        
+                        html += `
+                            <div class="info-box" style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+                                <h4 style="color: #3b82f6; margin-bottom: 10px; font-size: 18px;">
+                                    📆 ${new Date(regConsolidado.data + 'T00:00:00').toLocaleDateString('pt-BR')}
+                                </h4>
+                                <p style="color: #d1d5db; margin-bottom: 5px;">
+                                    <strong>Total de Afazeres:</strong> ${regConsolidado.afazeres.length}
+                                </p>
+                                <p style="color: #d1d5db; margin-bottom: 5px;">
+                                    <strong>Validados:</strong> ${afazeresValidados} / ${regConsolidado.afazeres.length}
+                                </p>
+                                <p style="color: #d1d5db; margin-bottom: 5px;">
+                                    <strong>Pontuação Total:</strong> <span style="color: #3b82f6; font-size: 20px; font-weight: 700;">${pontosTotal.toFixed(1)}</span> pontos
+                                </p>
+                                <p style="color: #d1d5db; margin-bottom: 5px;">
+                                    <strong>CashBack:</strong> ${regConsolidado.cashback}
+                                </p>
+                                <p style="color: #d1d5db;">
+                                    <strong>Avaliações:</strong> ${regConsolidado.avaliacoes}
+                                </p>
+                            </div>
+                        `;
+                        
+                        // Mostrar cada afazer
+                        regConsolidado.afazeres.forEach((af, indexGlobal) => {
+                            const conteudo = af.conteudo;
+                            const afazerTexto = typeof conteudo === 'object' ? conteudo.texto : conteudo;
+                            const pontos = typeof conteudo === 'object' ? conteudo.pontos : undefined;
+                            const registroId = af.registroId;
+                            
+                            // Encontrar o index real no registro original
+                            const registroOriginal = registrosFiltrados.find(r => r.id === registroId);
+                            const indexReal = registroOriginal.afazeres.findIndex(a => {
+                                const txt = typeof a === 'object' ? a.texto : a;
+                                return txt === afazerTexto;
+                            });
+                            
+                            let statusClass = '';
+                            let statusBadge = '';
+                            
+                            if (pontos === 1) {
+                                statusClass = 'validado-correto';
+                                statusBadge = '<span class="pontuacao-badge correto">✓ Correto (+1 ponto)</span>';
+                            } else if (pontos === 0.5) {
+                                statusClass = 'validado-metade';
+                                statusBadge = '<span class="pontuacao-badge metade">◐ Metade (+0.5 ponto)</span>';
+                            } else if (pontos === -1) {
+                                statusClass = 'validado-incorreto';
+                                statusBadge = '<span class="pontuacao-badge incorreto">✗ Incorreto (-1 ponto)</span>';
+                            }
+                            
+                            html += `
+                                <div class="validacao-item ${statusClass}">
+                                    <h4>Afazer ${indexGlobal + 1}:</h4>
+                                    <p style="color: #d1d5db; margin-bottom: 15px; font-size: 15px;">${afazerTexto}</p>
+                                    ${statusBadge}
+                                    <div class="pontuacao-buttons" style="margin-top: 15px;">
+                                        <button class="btn btn-ponto-correto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 1)">
+                                            ✓ Correto (+1)
+                                        </button>
+                                        <button class="btn btn-ponto-metade btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 0.5)">
+                                            ◐ Metade (+0.5)
+                                        </button>
+                                        <button class="btn btn-ponto-incorreto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, -1)">
+                                            ✗ Incorreto (-1)
+                                        </button>
+                                        ${pontos !== undefined ? 
+                                            `<button class="btn btn-secondary btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, null)">
+                                                Resetar
+                                            </button>` : ''
+                                        }
+                                        <button class="btn btn-small" onclick="editarAfazerValidacao('${registroId}', ${indexReal})" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+                                            ✏️ Editar Texto
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        // Campo de observações consolidado
+                        const obsConsolidada = regConsolidado.observacoes.join('\n---\n');
+                        const primeiroId = regConsolidado.ids[0];
+                        
+                        html += `
+                            <div style="margin-top: 20px; margin-bottom: 40px;">
+                                <div class="form-group">
+                                    <label>📝 Observações do Admin:</label>
+                                    <textarea id="obs_${primeiroId}" style="min-height: 100px;" placeholder="Adicione observações, feedback ou informações importantes sobre este registro...">${obsConsolidada}</textarea>
+                                </div>
+                                <button class="btn btn-success btn-small" onclick="salvarObservacaoConsolidada('${regConsolidado.ids.join(',')}', '${primeiroId}')">
+                                    💾 Salvar Observação
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `</div>`; // Fecha vendedor-box
+                });
+            } else {
+                // Um vendedor específico
+                Object.values(registrosConsolidados).forEach(regConsolidado => {
+                    const pontosTotal = regConsolidado.afazeres.reduce((sum, af) => {
+                        const conteudo = af.conteudo;
+                        return sum + (typeof conteudo === 'object' ? (conteudo.pontos || 0) : 0);
+                    }, 0);
+                    
+                    const afazeresValidados = regConsolidado.afazeres.filter(af => {
+                        const conteudo = af.conteudo;
+                        return typeof conteudo === 'object' && conteudo.pontos !== undefined;
+                    }).length;
+                    
+                    html += `
+                        <div class="info-box" style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
+                            <h4 style="color: #3b82f6; margin-bottom: 10px; font-size: 18px;">
+                                ${regConsolidado.vendedor} - ${new Date(regConsolidado.data + 'T00:00:00').toLocaleDateString('pt-BR')}
+                            </h4>
+                            <p style="color: #d1d5db; margin-bottom: 5px;">
+                                <strong>Total de Afazeres:</strong> ${regConsolidado.afazeres.length}
+                            </p>
+                            <p style="color: #d1d5db; margin-bottom: 5px;">
+                                <strong>Validados:</strong> ${afazeresValidados} / ${regConsolidado.afazeres.length}
+                            </p>
+                            <p style="color: #d1d5db; margin-bottom: 5px;">
+                                <strong>Pontuação Total:</strong> <span style="color: #3b82f6; font-size: 20px; font-weight: 700;">${pontosTotal.toFixed(1)}</span> pontos
+                            </p>
+                            <p style="color: #d1d5db; margin-bottom: 5px;">
+                                <strong>CashBack:</strong> ${regConsolidado.cashback}
+                            </p>
+                            <p style="color: #d1d5db;">
+                                <strong>Avaliações:</strong> ${regConsolidado.avaliacoes}
+                            </p>
+                        </div>
+                    `;
+                    
+                    // Mostrar cada afazer
+                    regConsolidado.afazeres.forEach((af, indexGlobal) => {
+                        const conteudo = af.conteudo;
+                        const afazerTexto = typeof conteudo === 'object' ? conteudo.texto : conteudo;
+                        const pontos = typeof conteudo === 'object' ? conteudo.pontos : undefined;
+                        const registroId = af.registroId;
+                        
+                        // Encontrar o index real no registro original
+                        const registroOriginal = registrosFiltrados.find(r => r.id === registroId);
+                        const indexReal = registroOriginal.afazeres.findIndex(a => {
+                            const txt = typeof a === 'object' ? a.texto : a;
+                            return txt === afazerTexto;
+                        });
+                        
+                        let statusClass = '';
+                        let statusBadge = '';
+                        
+                        if (pontos === 1) {
+                            statusClass = 'validado-correto';
+                            statusBadge = '<span class="pontuacao-badge correto">✓ Correto (+1 ponto)</span>';
+                        } else if (pontos === 0.5) {
+                            statusClass = 'validado-metade';
+                            statusBadge = '<span class="pontuacao-badge metade">◐ Metade (+0.5 ponto)</span>';
+                        } else if (pontos === -1) {
+                            statusClass = 'validado-incorreto';
+                            statusBadge = '<span class="pontuacao-badge incorreto">✗ Incorreto (-1 ponto)</span>';
+                        }
+                        
+                        html += `
+                            <div class="validacao-item ${statusClass}">
+                                <h4>Afazer ${indexGlobal + 1}:</h4>
+                                <p style="color: #d1d5db; margin-bottom: 15px; font-size: 15px;">${afazerTexto}</p>
+                                ${statusBadge}
+                                <div class="pontuacao-buttons" style="margin-top: 15px;">
+                                    <button class="btn btn-ponto-correto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 1)">
+                                        ✓ Correto (+1)
+                                    </button>
+                                    <button class="btn btn-ponto-metade btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 0.5)">
+                                        ◐ Metade (+0.5)
+                                    </button>
+                                    <button class="btn btn-ponto-incorreto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, -1)">
+                                        ✗ Incorreto (-1)
+                                    </button>
+                                    ${pontos !== undefined ? 
+                                        `<button class="btn btn-secondary btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, null)">
+                                            Resetar
+                                        </button>` : ''
+                                    }
+                                    <button class="btn btn-small" onclick="editarAfazerValidacao('${registroId}', ${indexReal})" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
+                                        ✏️ Editar Texto
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    // Campo de observações consolidado
+                    const obsConsolidada = regConsolidado.observacoes.join('\n---\n');
+                    const primeiroId = regConsolidado.ids[0];
+                    
+                    html += `
+                        <div style="margin-top: 20px; margin-bottom: 40px;">
+                            <div class="form-group">
+                                <label>📝 Observações do Admin:</label>
+                                <textarea id="obs_${primeiroId}" style="min-height: 100px;" placeholder="Adicione observações, feedback ou informações importantes sobre este registro...">${obsConsolidada}</textarea>
+                            </div>
+                            <button class="btn btn-success btn-small" onclick="salvarObservacaoConsolidada('${regConsolidado.ids.join(',')}', '${primeiroId}')">
+                                💾 Salvar Observação
+                            </button>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+                    `;
+                });
+            }
             
             container.innerHTML = html;
         }
@@ -2336,6 +2533,65 @@
             const alertDiv = document.getElementById('validarAlert');
             alertDiv.innerHTML = '<div class="alert alert-success">✓ Observação salva com sucesso!</div>';
             setTimeout(() => alertDiv.innerHTML = '', 2000);
+        }
+        
+        function salvarObservacaoConsolidada(idsString, primeiroId) {
+            const observacoes = document.getElementById(`obs_${primeiroId}`).value.trim();
+            const ids = idsString.split(',');
+            
+            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+            
+            // Salvar a mesma observação em todos os registros do dia
+            ids.forEach(id => {
+                const registro = registros.find(r => r.id == id);
+                if (registro) {
+                    registro.observacoes = observacoes;
+                    const index = registros.findIndex(r => r.id == id);
+                    registros[index] = registro;
+                }
+            });
+            
+            localStorage.setItem('registros', JSON.stringify(registros));
+            
+            const alertDiv = document.getElementById('validarAlert');
+            alertDiv.innerHTML = '<div class="alert alert-success">✓ Observação salva em todos os registros do dia!</div>';
+            setTimeout(() => alertDiv.innerHTML = '', 2000);
+        }
+        
+        function editarAfazerValidacao(registroId, afazerIndex) {
+            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
+            const registro = registros.find(r => r.id == registroId);
+            
+            if (!registro) {
+                alert('Registro não encontrado!');
+                return;
+            }
+            
+            const afazer = registro.afazeres[afazerIndex];
+            const textoAtual = typeof afazer === 'object' ? afazer.texto : afazer;
+            
+            const novoTexto = prompt('Editar afazer:', textoAtual);
+            
+            if (novoTexto === null || novoTexto.trim() === '') {
+                return;
+            }
+            
+            // Preservar pontuação se existir
+            if (typeof afazer === 'object') {
+                registro.afazeres[afazerIndex].texto = novoTexto.trim();
+            } else {
+                registro.afazeres[afazerIndex] = novoTexto.trim();
+            }
+            
+            const index = registros.findIndex(r => r.id == registroId);
+            registros[index] = registro;
+            localStorage.setItem('registros', JSON.stringify(registros));
+            
+            const alertDiv = document.getElementById('validarAlert');
+            alertDiv.innerHTML = '<div class="alert alert-success">✓ Afazer editado com sucesso!</div>';
+            setTimeout(() => alertDiv.innerHTML = '', 2000);
+            
+            carregarAfazeresValidacao();
         }
     </script>
 </body>
