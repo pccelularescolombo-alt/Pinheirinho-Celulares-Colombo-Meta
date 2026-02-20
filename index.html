@@ -3,2596 +3,1571 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Controle de Vendedores</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <title>Sistema de Registro de Metas e Resultados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
-            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e4e4e4;
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
-        
-        .header {
-            background: rgba(45, 45, 45, 0.8);
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            padding: 25px 30px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #3b82f6;
-            margin-bottom: 8px;
-        }
-        
-        .header p {
-            color: #9ca3af;
-            font-size: 14px;
-        }
-        
-        .mode-selector {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-        
-        .mode-btn {
-            flex: 1;
-            min-width: 200px;
-            padding: 30px;
-            background: rgba(45, 45, 45, 0.6);
-            border: 2px solid rgba(59, 130, 246, 0.3);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-        
-        .mode-btn:hover {
-            background: rgba(59, 130, 246, 0.1);
-            border-color: #3b82f6;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.15);
-        }
-        
-        .mode-btn h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #3b82f6;
-        }
-        
-        .mode-btn p {
-            color: #9ca3af;
-            font-size: 14px;
-        }
-        
-        .card {
-            background: rgba(45, 45, 45, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 16px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .card h3 {
-            font-size: 20px;
-            margin-bottom: 20px;
-            color: #3b82f6;
-            font-weight: 600;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #d1d5db;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(26, 26, 26, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #e0e0e0;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background: rgba(26, 26, 26, 0.95);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
-            margin-left: 10px;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-        }
-        
-        .btn-whatsapp {
-            background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        }
-        
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-        
-        .afazer-item {
-            background: rgba(26, 26, 26, 0.6);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .afazer-item input {
-            margin-top: 5px;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        .back-btn {
-            margin-bottom: 20px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            border-radius: 15px;
+            padding: 25px;
             margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        
-        .stat-card {
-            background: rgba(59, 130, 246, 0.1);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+
+        h1 {
+            font-size: 2rem;
+            color: #fff;
+            margin-bottom: 15px;
             text-align: center;
         }
-        
-        .stat-card h4 {
-            font-size: 14px;
-            color: #9ca3af;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-        
-        .stat-card .value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #3b82f6;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-fill.warning {
-            background: linear-gradient(90deg, #f59e0b 0%, #fb923c 100%);
-        }
-        
-        .progress-fill.danger {
-            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
-        }
-        
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .dashboard-card {
-            background: rgba(45, 45, 45, 0.8);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-        
-        .dashboard-card h4 {
-            color: #3b82f6;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .meta-item {
-            background: rgba(26, 26, 26, 0.6);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .meta-item h5 {
-            color: #e0e0e0;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-        
-        .meta-info {
+
+        .header-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: #9ca3af;
-            font-size: 14px;
-            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
         }
-        
-        .meta-status {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
+
+        .metas-info {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .meta-item i {
+            font-size: 1.5rem;
+            color: #4CAF50;
+        }
+
+        .meta-item span {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        .meta-item strong {
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .user-mode {
+            text-align: center;
+            padding: 10px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #4CAF50;
             font-weight: 600;
         }
-        
-        .meta-status.atingida {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
+
+        .admin-mode {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
         }
-        
-        .meta-status.em-andamento {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
         }
-        
-        .meta-status.critica {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        
-        .modal-overlay {
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b0b0;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .vendedores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .vendedor-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .vendedor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .vendedor-card.selected {
+            border-color: currentColor;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .vendedor-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .vendedor-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .admin-panel {
+            display: none;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #b0b0b0;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
             backdrop-filter: blur(5px);
-        }
-        
-        .modal-overlay.active {
-            display: flex;
+            z-index: 1000;
             align-items: center;
             justify-content: center;
         }
-        
-        .modal-content {
-            background: rgba(45, 45, 45, 0.95);
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .modal-content h3 {
-            color: #3b82f6;
-            margin-bottom: 20px;
-            font-size: 22px;
-        }
-        
-        .modal-afazer-item {
-            background: rgba(26, 26, 26, 0.6);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .modal-afazer-item input {
-            width: 100%;
-            margin-top: 5px;
-        }
-        
-        .observacoes-box {
-            background: rgba(59, 130, 246, 0.05);
-            border-left: 3px solid #3b82f6;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        
-        .observacoes-box p {
-            color: #d1d5db;
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 0;
-            font-style: italic;
-        }
-        
-        .alert-box {
-            background: rgba(239, 68, 68, 0.1);
-            border-left: 4px solid #ef4444;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .alert-box.warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-left-color: #f59e0b;
-        }
-        
-        .alert-box.success {
-            background: rgba(16, 185, 129, 0.1);
-            border-left-color: #10b981;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin-bottom: 30px;
-            background: rgba(26, 26, 26, 0.4);
-            padding: 20px;
-            border-radius: 12px;
-        }
-        
-        .registro-item {
-            background: rgba(26, 26, 26, 0.6);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid #3b82f6;
-        }
-        
-        .registro-item h4 {
-            color: #3b82f6;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        
-        .registro-item p {
-            color: #d1d5db;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .registro-item .afazer-list {
-            margin-top: 10px;
-            padding-left: 20px;
-        }
-        
-        .registro-item .afazer-list li {
-            color: #9ca3af;
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-        
-        .filter-bar {
+
+        .modal.active {
             display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            align-items: center;
         }
-        
-        .filter-bar select {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px 16px;
-            background: rgba(26, 26, 26, 0.8);
+
+        .modal-content {
+            background: #1a1a2e;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: #e0e0e0;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #fff;
+            font-size: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
             transition: all 0.3s ease;
         }
-        
-        .filter-bar select:focus {
-            outline: none;
-            border-color: #3b82f6;
-            background: rgba(26, 26, 26, 0.95);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+
+        .close-modal:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
-        
-        .alert {
-            padding: 15px 20px;
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .alert-success {
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: #10b981;
-        }
-        
-        .alert-error {
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ef4444;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .validacao-item {
-            background: rgba(26, 26, 26, 0.6);
             padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 4px solid #9ca3af;
+            text-align: center;
         }
-        
-        .validacao-item.validado-correto {
-            border-left-color: #10b981;
-            background: rgba(16, 185, 129, 0.05);
+
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
-        
-        .validacao-item.validado-metade {
-            border-left-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.05);
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
         }
-        
-        .validacao-item.validado-incorreto {
-            border-left-color: #ef4444;
-            background: rgba(239, 68, 68, 0.05);
+
+        .stat-card .label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
         }
-        
-        .vendedor-box {
-            background: rgba(45, 45, 45, 0.6);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            border: 2px solid rgba(59, 130, 246, 0.3);
+
+        .full-width {
+            grid-column: 1 / -1;
         }
-        
-        .vendedor-box h3 {
-            color: #3b82f6;
-            font-size: 22px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(59, 130, 246, 0.2);
-        }
-        
-        .validacao-item h4 {
-            color: #e0e0e0;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        
-        .pontuacao-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .btn-ponto-correto {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            flex: 1;
-            min-width: 120px;
-        }
-        
-        .btn-ponto-metade {
-            background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-            flex: 1;
-            min-width: 120px;
-        }
-        
-        .btn-ponto-incorreto {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            flex: 1;
-            min-width: 120px;
-        }
-        
-        .pontuacao-badge {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        
-        .pontuacao-badge.correto {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-        
-        .pontuacao-badge.metade {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-        }
-        
-        .pontuacao-badge.incorreto {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-        
-        @media print {
-            body {
-                background: white;
-                color: black;
-            }
-            .header, .back-btn, .action-buttons, .mode-selector {
-                display: none;
-            }
-            .card {
-                box-shadow: none;
-                border: 1px solid #ccc;
-            }
-        }
-        
+
         @media (max-width: 768px) {
-            .mode-selector {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .header-info {
                 flex-direction: column;
             }
-            
-            .filter-bar {
-                flex-direction: column;
+
+            .vendedores-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-            
-            .filter-bar select {
-                width: 100%;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .action-buttons button {
-                width: 100%;
-            }
+        }
+
+        .password-input {
+            position: relative;
+        }
+
+        .password-input input {
+            padding-right: 45px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #b0b0b0;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Sistema de Controle de Vendedores</h1>
-            <p>Gestão de atividades e desempenho</p>
-        </div>
-
-        <!-- Tela Inicial -->
-        <div id="modeSelection" class="mode-selector">
-            <div class="mode-btn" onclick="selectMode('vendedor')">
-                <h2>👤 Vendedor</h2>
-                <p>Registrar atividades do dia</p>
-            </div>
-            <div class="mode-btn" onclick="selectMode('admin')">
-                <h2>🔐 Administrador</h2>
-                <p>Acessar relatórios e gestão</p>
-            </div>
-        </div>
-
-        <!-- Login Admin -->
-        <div id="adminLogin" class="hidden">
-            <div class="card">
-                <button class="btn btn-secondary back-btn" onclick="backToHome()">← Voltar</button>
-                <h3>Login do Administrador</h3>
-                <div id="loginAlert"></div>
-                <div class="form-group">
-                    <label>Senha:</label>
-                    <input type="password" id="adminPassword" placeholder="Digite a senha">
-                </div>
-                <button class="btn" onclick="loginAdmin()">Entrar</button>
-            </div>
-        </div>
-
-        <!-- Tela Vendedor -->
-        <div id="vendedorScreen" class="hidden">
-            <button class="btn btn-secondary back-btn" onclick="backToHome()">← Voltar</button>
-            
-            <div class="card">
-                <h3>Registro Diário</h3>
-                <div id="vendedorAlert"></div>
-                
-                <div class="form-group">
-                    <label>Selecione o Vendedor:</label>
-                    <select id="vendedorSelect">
-                        <option value="">-- Selecione --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Data:</label>
-                    <input type="date" id="dataRegistro">
-                </div>
-
-                <div class="form-group">
-                    <label>Afazeres do Dia:</label>
-                    <div id="afazeresContainer"></div>
-                    <button class="btn btn-secondary btn-small" onclick="addAfazer()" style="margin-top: 10px;">+ Adicionar Afazer</button>
-                </div>
-
-                <div class="form-group">
-                    <label>Quantidade de Cashback:</label>
-                    <input type="number" id="cashback" min="0" value="0" placeholder="0">
-                </div>
-
-                <div class="form-group">
-                    <label>Quantidade de Avaliações:</label>
-                    <input type="number" id="avaliacoes" min="0" value="0" placeholder="0">
-                </div>
-
-                <button class="btn btn-success" onclick="salvarRegistro()">💾 Salvar Informações</button>
-            </div>
-        </div>
-
-        <!-- Tela Admin -->
-        <div id="adminScreen" class="hidden">
-            <button class="btn btn-secondary back-btn" onclick="logout()">← Sair</button>
-            
-            <div class="card">
-                <h3>Painel Administrativo</h3>
-                
-                <div class="action-buttons">
-                    <button class="btn" onclick="showSection('dashboard')">🏠 Dashboard</button>
-                    <button class="btn" onclick="showSection('relatorios')">📊 Relatórios</button>
-                    <button class="btn" onclick="showSection('validar')">✅ Validar Afazeres</button>
-                    <button class="btn" onclick="showSection('gerenciar')">👥 Gerenciar Vendedores</button>
-                    <button class="btn" onclick="showSection('historico')">📋 Histórico</button>
-                </div>
-            </div>
-
-            <!-- Dashboard -->
-            <div id="dashboardSection" class="hidden">
-                <div class="card">
-                    <h3>📊 Dashboard - Visão Geral</h3>
-                    
-                    <div class="stats-grid" id="dashboardStats"></div>
-                    
-                    <div class="dashboard-grid">
-                        <div class="dashboard-card">
-                            <h4>🎯 Metas do Mês</h4>
-                            <div id="metasMes"></div>
+        <header>
+            <h1><i class="fas fa-chart-line"></i> Sistema de Registro de Metas e Resultados</h1>
+            <div class="header-info">
+                <div class="metas-info">
+                    <div class="meta-item">
+                        <i class="fas fa-gift"></i>
+                        <div>
+                            <span>Meta Mensal Cashback:</span>
+                            <strong>100</strong>
                         </div>
-                        
-                        <div class="dashboard-card">
-                            <h4>🏆 Destaques</h4>
-                            <div id="destaquesVendedores"></div>
-                        </div>
-                        
-                        <div class="dashboard-card">
-                            <h4>⚠️ Alertas</h4>
-                            <div id="alertasDashboard"></div>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-star"></i>
+                        <div>
+                            <span>Meta Mensal Avaliações:</span>
+                            <strong>15</strong>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Validar Afazeres -->
-            <div id="validarSection" class="hidden">
-                <div class="card">
-                    <h3>✅ Validar Afazeres</h3>
-                    <div id="validarAlert"></div>
-                    
-                    <div class="filter-bar">
-                        <select id="mesValidar" onchange="atualizarFiltrosValidacao()">
-                            <option value="">Selecione o mês</option>
-                        </select>
-                        <select id="vendedorValidar" onchange="carregarAfazeresValidacao()">
-                            <option value="">Selecione o vendedor</option>
-                        </select>
-                        <select id="dataValidar" onchange="carregarAfazeresValidacao()">
-                            <option value="">Selecione a data</option>
-                        </select>
+                <div>
+                    <div id="userModeIndicator" class="user-mode">
+                        <i class="fas fa-user"></i> Modo: Usuário Padrão
                     </div>
-
-                    <div id="afazeresValidacaoContainer"></div>
+                </div>
+                <div>
+                    <button id="adminToggle" class="btn btn-admin">
+                        <i class="fas fa-user-shield"></i>
+                        Entrar como Administrador
+                    </button>
+                    <button id="logoutBtn" class="btn btn-logout" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Sair do Admin
+                    </button>
                 </div>
             </div>
+        </header>
 
-            <!-- Gerenciar Vendedores -->
-            <div id="gerenciarSection" class="hidden">
-                <div class="card">
-                    <h3>Gerenciar Vendedores</h3>
-                    <div id="gerenciarAlert"></div>
+        <div class="main-content">
+            <div class="card">
+                <h2><i class="fas fa-plus-circle"></i> Registrar Dados Diários</h2>
+                <form id="registroForm">
+                    <div class="form-group">
+                        <label for="dataRegistro">Data</label>
+                        <input type="date" id="dataRegistro" required>
+                    </div>
                     
                     <div class="form-group">
-                        <label>Adicionar Novo Vendedor:</label>
-                        <input type="text" id="novoVendedor" placeholder="Nome do vendedor" onkeypress="if(event.key==='Enter') adicionarVendedor()">
+                        <label>Selecione o Vendedor</label>
+                        <div id="vendedoresGrid" class="vendedores-grid"></div>
+                        <input type="hidden" id="vendedorSelecionado" required>
                     </div>
-                    <button class="btn btn-success" onclick="adicionarVendedor()">+ Adicionar</button>
-                    
-                    <div style="margin-top: 30px;">
-                        <h4 style="color: #3b82f6; margin-bottom: 15px;">Vendedores Cadastrados:</h4>
-                        <div id="listaVendedores"></div>
+
+                    <div class="form-group">
+                        <label for="cashback">Quantidade de Cashback</label>
+                        <input type="number" id="cashback" min="0" required placeholder="0">
                     </div>
+
+                    <div class="form-group">
+                        <label for="avaliacoes">Quantidade de Avaliações</label>
+                        <input type="number" id="avaliacoes" min="0" required placeholder="0">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-save"></i>
+                        Salvar Dados do Dia
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-calendar-day"></i> Resumo de Hoje</h2>
+                <div id="resumoHoje"></div>
+            </div>
+        </div>
+
+        <div id="adminPanel" class="admin-panel card full-width">
+            <h2><i class="fas fa-user-shield"></i> Painel Administrativo</h2>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="relatorios">
+                    <i class="fas fa-chart-bar"></i> Relatórios
+                </div>
+                <div class="tab" data-tab="gerenciar">
+                    <i class="fas fa-edit"></i> Gerenciar Dados
+                </div>
+                <div class="tab" data-tab="vendedores">
+                    <i class="fas fa-users"></i> Gerenciar Vendedores
+                </div>
+                <div class="tab" data-tab="graficos">
+                    <i class="fas fa-chart-pie"></i> Gráficos de Desempenho
                 </div>
             </div>
 
-            <!-- Relatórios -->
-            <div id="relatoriosSection" class="hidden">
-                <div class="card">
-                    <h3>Relatórios de Desempenho</h3>
-                    
-                    <div class="filter-bar">
-                        <select id="mesRelatorio">
-                            <option value="">Selecione o mês</option>
-                        </select>
-                        <select id="vendedorRelatorio">
-                            <option value="todos">Todos os vendedores</option>
-                        </select>
-                        <select id="dataRelatorio">
-                            <option value="todas">Todas as datas</option>
-                        </select>
-                        <button class="btn" onclick="carregarRelatorio()">📊 Carregar Relatório</button>
+            <div id="relatorios" class="tab-content active">
+                <div class="form-group">
+                    <label for="vendedorRelatorio">Vendedor (opcional para relatório individual)</label>
+                    <select id="vendedorRelatorio">
+                        <option value="">Todos os Vendedores</option>
+                    </select>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="dataInicio">Data Início</label>
+                        <input type="date" id="dataInicio">
                     </div>
-
-                    <div id="relatorioCarregado" class="hidden">
-                        <div id="statsContainer" class="stats-grid"></div>
-
-                        <div class="chart-container">
-                            <canvas id="chartDesempenho"></canvas>
-                        </div>
-
-                        <div class="chart-container">
-                            <canvas id="chartMetricas"></canvas>
-                        </div>
-
-                        <div class="action-buttons" style="margin-top: 20px;">
-                            <button class="btn btn-whatsapp" onclick="mostrarModalWhatsApp()">📱 Enviar WhatsApp</button>
-                            <button class="btn" onclick="window.print()">🖨️ Imprimir</button>
-                        </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="dataFim">Data Fim</label>
+                        <input type="date" id="dataFim">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="opacity: 0;">.</label>
+                        <button id="gerarRelatorio" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-file-alt"></i>
+                            Gerar Relatório
+                        </button>
                     </div>
                 </div>
+                <div id="relatorioResultado"></div>
             </div>
 
-            <!-- Histórico -->
-            <div id="historicoSection" class="hidden">
-                <div class="card">
-                    <h3>Histórico de Registros</h3>
-                    
-                    <div class="filter-bar">
-                        <select id="mesHistorico" onchange="carregarHistorico()">
-                            <option value="">Selecione o mês</option>
-                        </select>
-                        <select id="vendedorHistorico" onchange="carregarHistorico()">
-                            <option value="todos">Todos os vendedores</option>
-                        </select>
-                    </div>
-
-                    <div id="historicoContainer"></div>
+            <div id="gerenciar" class="tab-content">
+                <div class="form-group">
+                    <label for="filtroVendedor">Filtrar por Vendedor</label>
+                    <select id="filtroVendedor">
+                        <option value="">Todos</option>
+                    </select>
                 </div>
+                <div id="gerenciarLista"></div>
+            </div>
+
+            <div id="vendedores" class="tab-content">
+                <button id="adicionarVendedor" class="btn btn-primary" style="margin-bottom: 20px;">
+                    <i class="fas fa-user-plus"></i>
+                    Adicionar Novo Vendedor
+                </button>
+                <div id="vendedoresLista"></div>
+            </div>
+
+            <div id="graficos" class="tab-content">
+                <div class="form-group">
+                    <label for="mesGrafico">Selecione o Mês</label>
+                    <input type="month" id="mesGrafico">
+                </div>
+                <button id="gerarGraficos" class="btn btn-primary" style="margin-bottom: 20px;">
+                    <i class="fas fa-chart-line"></i>
+                    Gerar Gráficos
+                </button>
+                <div id="graficosContainer"></div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Edição -->
-    <div id="modalEdicao" class="modal-overlay">
+    <!-- Modal Login Admin -->
+    <div id="adminLoginModal" class="modal">
         <div class="modal-content">
-            <h3>✏️ Editar Registro</h3>
-            <div id="modalEdicaoConteudo"></div>
-            <div class="action-buttons" style="margin-top: 25px;">
-                <button class="btn btn-success" onclick="salvarEdicao()">💾 Salvar Alterações</button>
-                <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+            <div class="modal-header">
+                <h3>Login de Administrador</h3>
+                <button class="close-modal" onclick="closeAdminModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            <form id="adminLoginForm">
+                <div class="form-group password-input">
+                    <label for="adminPassword">Senha de Administrador</label>
+                    <input type="password" id="adminPassword" required placeholder="Digite a senha">
+                    <button type="button" class="toggle-password" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Entrar
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Modal WhatsApp -->
-    <div id="modalWhatsApp" class="modal-overlay">
-        <div class="modal-content" style="max-width: 400px;">
-            <h3>📱 Enviar Relatório via WhatsApp</h3>
-            <div class="form-group">
-                <label>Número do WhatsApp (com DDD):</label>
-                <input type="tel" id="numeroWhatsApp" placeholder="41 00000-0000" maxlength="13" style="font-size: 18px;">
-                <p style="color: #9ca3af; font-size: 13px; margin-top: 8px;">Digite apenas números, com DDD. Ex: 41 00000-0000</p>
+    <!-- Modal Adicionar/Editar Vendedor -->
+    <div id="vendedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="vendedorModalTitle">Adicionar Vendedor</h3>
+                <button class="close-modal" onclick="closeVendedorModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="action-buttons" style="margin-top: 25px;">
-                <button class="btn btn-whatsapp" onclick="confirmarEnvioWhatsApp()">📤 Enviar Relatório</button>
-                <button class="btn btn-secondary" onclick="fecharModalWhatsApp()">Cancelar</button>
+            <form id="vendedorForm">
+                <input type="hidden" id="vendedorId">
+                <div class="form-group">
+                    <label for="vendedorNome">Nome do Vendedor</label>
+                    <input type="text" id="vendedorNome" required placeholder="Digite o nome">
+                </div>
+                <div class="form-group">
+                    <label for="vendedorCor">Cor</label>
+                    <input type="color" id="vendedorCor" required>
+                </div>
+                <div class="form-group">
+                    <label for="vendedorIcone">Ícone (FontAwesome class)</label>
+                    <select id="vendedorIcone" required>
+                        <option value="fa-user-tie">👔 Gravata</option>
+                        <option value="fa-user-ninja">🥷 Ninja</option>
+                        <option value="fa-user-astronaut">🚀 Astronauta</option>
+                        <option value="fa-user-secret">🕵️ Secreto</option>
+                        <option value="fa-user-graduate">🎓 Graduado</option>
+                        <option value="fa-crown">👑 Coroa</option>
+                        <option value="fa-trophy">🏆 Troféu</option>
+                        <option value="fa-star">⭐ Estrela</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i>
+                    Salvar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Registro -->
+    <div id="editarRegistroModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Registro</h3>
+                <button class="close-modal" onclick="closeEditarRegistroModal()">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            <form id="editarRegistroForm">
+                <input type="hidden" id="editarRegistroId">
+                <div class="form-group">
+                    <label for="editarData">Data</label>
+                    <input type="date" id="editarData" required>
+                </div>
+                <div class="form-group">
+                    <label for="editarCashback">Cashback</label>
+                    <input type="number" id="editarCashback" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="editarAvaliacoes">Avaliações</label>
+                    <input type="number" id="editarAvaliacoes" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-save"></i>
+                    Salvar Alterações
+                </button>
+            </form>
         </div>
     </div>
 
     <script>
-        // Configuração inicial
-        const ADMIN_PASSWORD = 'admin123';
+        // Configurações e dados iniciais
+        const ADMIN_PASSWORD = '19021998';
+        const META_CASHBACK = 100;
+        const META_AVALIACOES = 15;
         
-        // Metas padrão
-        const METAS = {
-            cashback: 100,
-            avaliacoes: 15
-        };
-        
+        let isAdmin = false;
+        let vendedores = [];
+        let registros = [];
+
         // Inicialização
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
-
-        function initializeApp() {
-            if (!localStorage.getItem('vendedores')) {
-                localStorage.setItem('vendedores', JSON.stringify(['Vendedor 1', 'Vendedor 2', 'Vendedor 3']));
-            }
-            
-            if (!localStorage.getItem('registros')) {
-                localStorage.setItem('registros', JSON.stringify([]));
-            }
-            
-            document.getElementById('dataRegistro').valueAsDate = new Date();
-            carregarVendedores();
+        function init() {
+            carregarDados();
+            setupEventListeners();
+            setDataHoje();
+            renderVendedores();
+            atualizarResumoHoje();
         }
 
-        function selectMode(mode) {
-            document.getElementById('modeSelection').classList.add('hidden');
+        function carregarDados() {
+            const vendedoresStorage = localStorage.getItem('vendedores');
+            const registrosStorage = localStorage.getItem('registros');
             
-            if (mode === 'vendedor') {
-                document.getElementById('vendedorScreen').classList.remove('hidden');
-                carregarVendedores();
-                addAfazer(); // Adiciona um afazer inicial
+            if (vendedoresStorage) {
+                vendedores = JSON.parse(vendedoresStorage);
             } else {
-                document.getElementById('adminLogin').classList.remove('hidden');
+                // Vendedores iniciais
+                vendedores = [
+                    { id: 1, nome: 'Mattheus', cor: '#3498db', icone: 'fa-user-tie' },
+                    { id: 2, nome: 'Kelly', cor: '#e74c3c', icone: 'fa-user-ninja' },
+                    { id: 3, nome: 'Miguel', cor: '#2ecc71', icone: 'fa-user-astronaut' },
+                    { id: 4, nome: 'Allyson', cor: '#f39c12', icone: 'fa-user-secret' }
+                ];
+                salvarVendedores();
+            }
+            
+            if (registrosStorage) {
+                registros = JSON.parse(registrosStorage);
             }
         }
 
-        function backToHome() {
-            document.getElementById('modeSelection').classList.remove('hidden');
-            document.getElementById('adminLogin').classList.add('hidden');
-            document.getElementById('vendedorScreen').classList.add('hidden');
-            document.getElementById('adminScreen').classList.add('hidden');
-            document.getElementById('adminPassword').value = '';
-            limparFormulario();
+        function salvarVendedores() {
+            localStorage.setItem('vendedores', JSON.stringify(vendedores));
         }
 
-        function loginAdmin() {
-            const password = document.getElementById('adminPassword').value;
-            const alertDiv = document.getElementById('loginAlert');
+        function salvarRegistros() {
+            localStorage.setItem('registros', JSON.stringify(registros));
+        }
+
+        function setupEventListeners() {
+            document.getElementById('adminToggle').addEventListener('click', () => {
+                document.getElementById('adminLoginModal').classList.add('active');
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                isAdmin = false;
+                atualizarModoUsuario();
+            });
+
+            document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const senha = document.getElementById('adminPassword').value;
+                if (senha === ADMIN_PASSWORD) {
+                    isAdmin = true;
+                    atualizarModoUsuario();
+                    closeAdminModal();
+                    document.getElementById('adminPassword').value = '';
+                } else {
+                    alert('Senha incorreta!');
+                }
+            });
+
+            document.getElementById('registroForm').addEventListener('submit', salvarRegistro);
             
-            if (password === ADMIN_PASSWORD) {
-                document.getElementById('adminLogin').classList.add('hidden');
-                document.getElementById('adminScreen').classList.remove('hidden');
-                carregarVendedores();
-                gerarOpcoesData();
-                showSection('dashboard'); // Mostra dashboard ao entrar
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+
+            // Relatórios
+            document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
+            
+            // Gráficos
+            document.getElementById('gerarGraficos').addEventListener('click', gerarGraficos);
+            
+            // Vendedores
+            document.getElementById('adicionarVendedor').addEventListener('click', () => {
+                document.getElementById('vendedorModalTitle').textContent = 'Adicionar Vendedor';
+                document.getElementById('vendedorId').value = '';
+                document.getElementById('vendedorNome').value = '';
+                document.getElementById('vendedorCor').value = '#3498db';
+                document.getElementById('vendedorIcone').value = 'fa-user-tie';
+                document.getElementById('vendedorModal').classList.add('active');
+            });
+
+            document.getElementById('vendedorForm').addEventListener('submit', salvarVendedor);
+            document.getElementById('editarRegistroForm').addEventListener('submit', salvarEdicaoRegistro);
+
+            // Filtro de vendedor em gerenciar
+            document.getElementById('filtroVendedor').addEventListener('change', renderGerenciarLista);
+        }
+
+        function setDataHoje() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataRegistro').value = hoje;
+            
+            // Set current month for charts
+            const mesAtual = new Date().toISOString().slice(0, 7);
+            document.getElementById('mesGrafico').value = mesAtual;
+        }
+
+        function atualizarModoUsuario() {
+            const indicator = document.getElementById('userModeIndicator');
+            const adminPanel = document.getElementById('adminPanel');
+            const adminToggle = document.getElementById('adminToggle');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (isAdmin) {
+                indicator.innerHTML = '<i class="fas fa-user-shield"></i> Modo: Administrador';
+                indicator.classList.remove('user-mode');
+                indicator.classList.add('admin-mode');
+                adminPanel.classList.add('active');
+                adminToggle.style.display = 'none';
+                logoutBtn.style.display = 'inline-flex';
+                atualizarSelectsVendedores();
+                renderGerenciarLista();
+                renderVendedoresAdmin();
             } else {
-                alertDiv.innerHTML = '<div class="alert alert-error">Senha incorreta!</div>';
-                setTimeout(() => alertDiv.innerHTML = '', 3000);
+                indicator.innerHTML = '<i class="fas fa-user"></i> Modo: Usuário Padrão';
+                indicator.classList.remove('admin-mode');
+                indicator.classList.add('user-mode');
+                adminPanel.classList.remove('active');
+                adminToggle.style.display = 'inline-flex';
+                logoutBtn.style.display = 'none';
             }
         }
 
-        function logout() {
-            backToHome();
+        function renderVendedores() {
+            const grid = document.getElementById('vendedoresGrid');
+            grid.innerHTML = '';
+            
+            vendedores.forEach(vendedor => {
+                const card = document.createElement('div');
+                card.className = 'vendedor-card';
+                card.style.color = vendedor.cor;
+                card.innerHTML = `
+                    <div class="vendedor-icon">
+                        <i class="fas ${vendedor.icone}"></i>
+                    </div>
+                    <div class="vendedor-name">${vendedor.nome}</div>
+                `;
+                card.addEventListener('click', () => selecionarVendedor(vendedor.id, card));
+                grid.appendChild(card);
+            });
         }
 
-        function carregarVendedores() {
-            const vendedores = JSON.parse(localStorage.getItem('vendedores'));
-            
-            // Atualizar select do vendedor
-            const select = document.getElementById('vendedorSelect');
-            if (select) {
-                select.innerHTML = '<option value="">-- Selecione --</option>';
-                vendedores.forEach(v => {
-                    select.innerHTML += `<option value="${v}">${v}</option>`;
-                });
-            }
-            
-            // Atualizar select de relatório
-            const selectRel = document.getElementById('vendedorRelatorio');
-            if (selectRel) {
-                selectRel.innerHTML = '<option value="todos">Todos os vendedores</option>';
-                vendedores.forEach(v => {
-                    selectRel.innerHTML += `<option value="${v}">${v}</option>`;
-                });
-            }
-            
-            // Atualizar select de histórico
-            const selectHist = document.getElementById('vendedorHistorico');
-            if (selectHist) {
-                selectHist.innerHTML = '<option value="todos">Todos os vendedores</option>';
-                vendedores.forEach(v => {
-                    selectHist.innerHTML += `<option value="${v}">${v}</option>`;
-                });
-            }
-            
-            // Atualizar select de validação
-            const selectVal = document.getElementById('vendedorValidar');
-            if (selectVal) {
-                selectVal.innerHTML = '<option value="">Selecione o vendedor</option>';
-                vendedores.forEach(v => {
-                    selectVal.innerHTML += `<option value="${v}">${v}</option>`;
-                });
-            }
+        function selecionarVendedor(id, card) {
+            document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            document.getElementById('vendedorSelecionado').value = id;
         }
 
-        function addAfazer() {
-            const container = document.getElementById('afazeresContainer');
-            const index = container.children.length;
+        function salvarRegistro(e) {
+            e.preventDefault();
             
-            const div = document.createElement('div');
-            div.className = 'afazer-item';
-            div.innerHTML = `
-                <label>Afazer ${index + 1}:</label>
-                <input type="text" class="afazer-input" placeholder="Descreva o afazer realizado">
-                ${index > 0 ? '<button class="btn btn-danger btn-small" onclick="this.parentElement.remove()" style="margin-top: 10px;">Remover</button>' : ''}
-            `;
-            
-            container.appendChild(div);
-        }
-
-        function salvarRegistro() {
-            const vendedor = document.getElementById('vendedorSelect').value;
             const data = document.getElementById('dataRegistro').value;
-            const cashback = parseInt(document.getElementById('cashback').value) || 0;
-            const avaliacoes = parseInt(document.getElementById('avaliacoes').value) || 0;
-            const alertDiv = document.getElementById('vendedorAlert');
-            
-            const afazeres = Array.from(document.querySelectorAll('.afazer-input'))
-                .map(input => input.value.trim())
-                .filter(val => val !== '');
-            
-            if (!vendedor) {
-                alertDiv.innerHTML = '<div class="alert alert-error">Selecione um vendedor!</div>';
-                setTimeout(() => alertDiv.innerHTML = '', 3000);
+            const vendedorId = parseInt(document.getElementById('vendedorSelecionado').value);
+            const cashback = parseInt(document.getElementById('cashback').value);
+            const avaliacoes = parseInt(document.getElementById('avaliacoes').value);
+
+            if (!vendedorId) {
+                alert('Por favor, selecione um vendedor!');
                 return;
             }
-            
-            if (!data) {
-                alertDiv.innerHTML = '<div class="alert alert-error">Selecione uma data!</div>';
-                setTimeout(() => alertDiv.innerHTML = '', 3000);
-                return;
-            }
-            
-            if (afazeres.length === 0) {
-                alertDiv.innerHTML = '<div class="alert alert-error">Adicione pelo menos um afazer!</div>';
-                setTimeout(() => alertDiv.innerHTML = '', 3000);
-                return;
-            }
-            
-            let registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            
+
             const registro = {
                 id: Date.now(),
-                vendedor: vendedor,
-                data: data,
-                afazeres: afazeres,
-                cashback: cashback,
-                avaliacoes: avaliacoes,
-                observacoes: '',
-                mes: data.substring(0, 7)
+                data,
+                vendedorId,
+                cashback,
+                avaliacoes,
+                timestamp: new Date().toISOString()
             };
-            
+
             registros.push(registro);
-            localStorage.setItem('registros', JSON.stringify(registros));
-            
-            console.log('Registro salvo:', registro);
-            console.log('Total de registros:', registros.length);
-            
-            alertDiv.innerHTML = '<div class="alert alert-success">✓ Registro salvo com sucesso!</div>';
-            setTimeout(() => {
-                alertDiv.innerHTML = '';
-                limparFormulario();
-            }, 2000);
-        }
+            salvarRegistros();
 
-        function limparFormulario() {
-            const vendedorSelect = document.getElementById('vendedorSelect');
-            const cashbackInput = document.getElementById('cashback');
-            const avaliacoesInput = document.getElementById('avaliacoes');
-            const afazeresContainer = document.getElementById('afazeresContainer');
-            const dataRegistro = document.getElementById('dataRegistro');
-            
-            if (vendedorSelect) vendedorSelect.value = '';
-            if (cashbackInput) cashbackInput.value = '0';
-            if (avaliacoesInput) avaliacoesInput.value = '0';
-            if (afazeresContainer) afazeresContainer.innerHTML = '';
-            if (dataRegistro) dataRegistro.valueAsDate = new Date();
-            
-            addAfazer();
-        }
+            // Limpar formulário
+            document.getElementById('cashback').value = '';
+            document.getElementById('avaliacoes').value = '';
+            document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById('vendedorSelecionado').value = '';
 
-        function showSection(section) {
-            document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('gerenciarSection').classList.add('hidden');
-            document.getElementById('relatoriosSection').classList.add('hidden');
-            document.getElementById('historicoSection').classList.add('hidden');
-            document.getElementById('validarSection').classList.add('hidden');
+            alert('Dados salvos com sucesso!');
+            atualizarResumoHoje();
             
-            if (section === 'dashboard') {
-                document.getElementById('dashboardSection').classList.remove('hidden');
-                carregarDashboard();
-            } else if (section === 'gerenciar') {
-                document.getElementById('gerenciarSection').classList.remove('hidden');
-                listarVendedores();
-            } else if (section === 'relatorios') {
-                document.getElementById('relatoriosSection').classList.remove('hidden');
-                document.getElementById('relatorioCarregado').classList.add('hidden');
-                gerarOpcoesData();
-            } else if (section === 'historico') {
-                document.getElementById('historicoSection').classList.remove('hidden');
-                gerarOpcoesData();
-                carregarHistorico();
-            } else if (section === 'validar') {
-                document.getElementById('validarSection').classList.remove('hidden');
-                carregarOpcoesValidacao();
+            if (isAdmin) {
+                renderGerenciarLista();
             }
         }
-        
-        function carregarRelatorio() {
-            const mes = document.getElementById('mesRelatorio').value;
-            const vendedor = document.getElementById('vendedorRelatorio').value;
+
+        function atualizarResumoHoje() {
+            const hoje = new Date().toISOString().split('T')[0];
+            const registrosHoje = registros.filter(r => r.data === hoje);
             
+            const container = document.getElementById('resumoHoje');
+            
+            if (registrosHoje.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>Nenhum registro hoje</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="stats-grid">';
+            
+            vendedores.forEach(vendedor => {
+                const regsVendedor = registrosHoje.filter(r => r.vendedorId === vendedor.id);
+                if (regsVendedor.length > 0) {
+                    const totalCashback = regsVendedor.reduce((sum, r) => sum + r.cashback, 0);
+                    const totalAvaliacoes = regsVendedor.reduce((sum, r) => sum + r.avaliacoes, 0);
+                    
+                    html += `
+                        <div class="stat-card" style="border-top: 3px solid ${vendedor.cor};">
+                            <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor};"></i>
+                            <div class="label">${vendedor.nome}</div>
+                            <div class="value" style="color: ${vendedor.cor};">${totalCashback}</div>
+                            <div class="label">Cashback</div>
+                            <div class="value" style="color: ${vendedor.cor}; font-size: 1.5rem;">${totalAvaliacoes}</div>
+                            <div class="label">Avaliações</div>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function atualizarSelectsVendedores() {
+            const selects = ['vendedorRelatorio', 'filtroVendedor'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                const valorAtual = select.value;
+                
+                // Manter primeira opção
+                const primeiraOpcao = select.options[0];
+                select.innerHTML = '';
+                select.appendChild(primeiraOpcao);
+                
+                vendedores.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v.id;
+                    option.textContent = v.nome;
+                    select.appendChild(option);
+                });
+                
+                if (valorAtual) {
+                    select.value = valorAtual;
+                }
+            });
+        }
+
+        function gerarRelatorio() {
+            const vendedorId = document.getElementById('vendedorRelatorio').value;
+            const dataInicio = document.getElementById('dataInicio').value;
+            const dataFim = document.getElementById('dataFim').value;
+            
+            let registrosFiltrados = [...registros];
+            
+            if (vendedorId) {
+                registrosFiltrados = registrosFiltrados.filter(r => r.vendedorId == vendedorId);
+            }
+            
+            if (dataInicio) {
+                registrosFiltrados = registrosFiltrados.filter(r => r.data >= dataInicio);
+            }
+            
+            if (dataFim) {
+                registrosFiltrados = registrosFiltrados.filter(r => r.data <= dataFim);
+            }
+            
+            const container = document.getElementById('relatorioResultado');
+            
+            if (registrosFiltrados.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Nenhum registro encontrado para os filtros selecionados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calcular totais por vendedor
+            const totaisPorVendedor = {};
+            registrosFiltrados.forEach(reg => {
+                if (!totaisPorVendedor[reg.vendedorId]) {
+                    totaisPorVendedor[reg.vendedorId] = { cashback: 0, avaliacoes: 0 };
+                }
+                totaisPorVendedor[reg.vendedorId].cashback += reg.cashback;
+                totaisPorVendedor[reg.vendedorId].avaliacoes += reg.avaliacoes;
+            });
+
+            let html = '<div class="stats-grid">';
+            
+            Object.keys(totaisPorVendedor).forEach(vendedorId => {
+                const vendedor = vendedores.find(v => v.id == vendedorId);
+                if (vendedor) {
+                    const totais = totaisPorVendedor[vendedorId];
+                    const progressoCashback = ((totais.cashback / META_CASHBACK) * 100).toFixed(1);
+                    const progressoAvaliacoes = ((totais.avaliacoes / META_AVALIACOES) * 100).toFixed(1);
+                    
+                    html += `
+                        <div class="stat-card" style="border-top: 3px solid ${vendedor.cor};">
+                            <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor}; font-size: 2.5rem;"></i>
+                            <h3 style="margin: 10px 0; color: ${vendedor.cor};">${vendedor.nome}</h3>
+                            <div style="margin: 15px 0;">
+                                <div class="label">Cashback Total</div>
+                                <div class="value" style="color: ${vendedor.cor};">${totais.cashback}</div>
+                                <div class="label">${progressoCashback}% da meta</div>
+                            </div>
+                            <div style="margin: 15px 0;">
+                                <div class="label">Avaliações Total</div>
+                                <div class="value" style="color: ${vendedor.cor};">${totais.avaliacoes}</div>
+                                <div class="label">${progressoAvaliacoes}% da meta</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            html += '</div>';
+            
+            // Tabela detalhada
+            html += `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Vendedor</th>
+                            <th>Cashback</th>
+                            <th>Avaliações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            registrosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(reg => {
+                const vendedor = vendedores.find(v => v.id === reg.vendedorId);
+                if (vendedor) {
+                    const dataFormatada = new Date(reg.data + 'T00:00:00').toLocaleDateString('pt-BR');
+                    html += `
+                        <tr>
+                            <td>${dataFormatada}</td>
+                            <td style="color: ${vendedor.cor}; font-weight: 600;">
+                                <i class="fas ${vendedor.icone}"></i> ${vendedor.nome}
+                            </td>
+                            <td>${reg.cashback}</td>
+                            <td>${reg.avaliacoes}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderGerenciarLista() {
+            const filtroVendedor = document.getElementById('filtroVendedor').value;
+            const container = document.getElementById('gerenciarLista');
+            
+            let registrosFiltrados = [...registros];
+            if (filtroVendedor) {
+                registrosFiltrados = registrosFiltrados.filter(r => r.vendedorId == filtroVendedor);
+            }
+            
+            if (registrosFiltrados.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-database"></i>
+                        <p>Nenhum registro encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Vendedor</th>
+                            <th>Cashback</th>
+                            <th>Avaliações</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            registrosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(reg => {
+                const vendedor = vendedores.find(v => v.id === reg.vendedorId);
+                if (vendedor) {
+                    const dataFormatada = new Date(reg.data + 'T00:00:00').toLocaleDateString('pt-BR');
+                    html += `
+                        <tr>
+                            <td>${dataFormatada}</td>
+                            <td style="color: ${vendedor.cor}; font-weight: 600;">
+                                <i class="fas ${vendedor.icone}"></i> ${vendedor.nome}
+                            </td>
+                            <td>${reg.cashback}</td>
+                            <td>${reg.avaliacoes}</td>
+                            <td>
+                                <div class="actions">
+                                    <button class="btn btn-secondary btn-small" onclick="editarRegistro(${reg.id})">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </button>
+                                    <button class="btn btn-danger btn-small" onclick="excluirRegistro(${reg.id})">
+                                        <i class="fas fa-trash"></i> Excluir
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function editarRegistro(id) {
+            const registro = registros.find(r => r.id === id);
+            if (!registro) return;
+            
+            document.getElementById('editarRegistroId').value = registro.id;
+            document.getElementById('editarData').value = registro.data;
+            document.getElementById('editarCashback').value = registro.cashback;
+            document.getElementById('editarAvaliacoes').value = registro.avaliacoes;
+            document.getElementById('editarRegistroModal').classList.add('active');
+        }
+
+        function salvarEdicaoRegistro(e) {
+            e.preventDefault();
+            
+            const id = parseInt(document.getElementById('editarRegistroId').value);
+            const registro = registros.find(r => r.id === id);
+            
+            if (registro) {
+                registro.data = document.getElementById('editarData').value;
+                registro.cashback = parseInt(document.getElementById('editarCashback').value);
+                registro.avaliacoes = parseInt(document.getElementById('editarAvaliacoes').value);
+                
+                salvarRegistros();
+                closeEditarRegistroModal();
+                renderGerenciarLista();
+                atualizarResumoHoje();
+                alert('Registro atualizado com sucesso!');
+            }
+        }
+
+        function excluirRegistro(id) {
+            if (confirm('Tem certeza que deseja excluir este registro?')) {
+                registros = registros.filter(r => r.id !== id);
+                salvarRegistros();
+                renderGerenciarLista();
+                atualizarResumoHoje();
+                alert('Registro excluído com sucesso!');
+            }
+        }
+
+        function renderVendedoresAdmin() {
+            const container = document.getElementById('vendedoresLista');
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ícone</th>
+                            <th>Nome</th>
+                            <th>Cor</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            vendedores.forEach(vendedor => {
+                html += `
+                    <tr>
+                        <td>
+                            <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor}; font-size: 2rem;"></i>
+                        </td>
+                        <td style="font-weight: 600;">${vendedor.nome}</td>
+                        <td>
+                            <div style="width: 40px; height: 40px; background: ${vendedor.cor}; border-radius: 5px;"></div>
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-secondary btn-small" onclick="editarVendedor(${vendedor.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-small" onclick="excluirVendedor(${vendedor.id})">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function editarVendedor(id) {
+            const vendedor = vendedores.find(v => v.id === id);
+            if (!vendedor) return;
+            
+            document.getElementById('vendedorModalTitle').textContent = 'Editar Vendedor';
+            document.getElementById('vendedorId').value = vendedor.id;
+            document.getElementById('vendedorNome').value = vendedor.nome;
+            document.getElementById('vendedorCor').value = vendedor.cor;
+            document.getElementById('vendedorIcone').value = vendedor.icone;
+            document.getElementById('vendedorModal').classList.add('active');
+        }
+
+        function salvarVendedor(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('vendedorId').value;
+            const nome = document.getElementById('vendedorNome').value;
+            const cor = document.getElementById('vendedorCor').value;
+            const icone = document.getElementById('vendedorIcone').value;
+            
+            if (id) {
+                // Editar
+                const vendedor = vendedores.find(v => v.id == id);
+                if (vendedor) {
+                    vendedor.nome = nome;
+                    vendedor.cor = cor;
+                    vendedor.icone = icone;
+                }
+            } else {
+                // Adicionar
+                const novoId = vendedores.length > 0 ? Math.max(...vendedores.map(v => v.id)) + 1 : 1;
+                vendedores.push({ id: novoId, nome, cor, icone });
+            }
+            
+            salvarVendedores();
+            closeVendedorModal();
+            renderVendedores();
+            renderVendedoresAdmin();
+            atualizarSelectsVendedores();
+            alert('Vendedor salvo com sucesso!');
+        }
+
+        function excluirVendedor(id) {
+            if (confirm('Tem certeza? Todos os registros deste vendedor serão mantidos.')) {
+                vendedores = vendedores.filter(v => v.id !== id);
+                salvarVendedores();
+                renderVendedores();
+                renderVendedoresAdmin();
+                atualizarSelectsVendedores();
+                alert('Vendedor excluído com sucesso!');
+            }
+        }
+
+        function gerarGraficos() {
+            const mes = document.getElementById('mesGrafico').value;
             if (!mes) {
                 alert('Por favor, selecione um mês!');
                 return;
             }
             
-            // Carregar datas disponíveis
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mes && (vendedor === 'todos' || r.vendedor === vendedor));
-            
-            const datas = [...new Set(registros.map(r => r.data))].sort().reverse();
-            const selectData = document.getElementById('dataRelatorio');
-            selectData.innerHTML = '<option value="todas">Todas as datas</option>';
-            datas.forEach(d => {
-                const dataFormatada = new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
-                selectData.innerHTML += `<option value="${d}">${dataFormatada}</option>`;
+            const [ano, mesNum] = mes.split('-');
+            const registrosMes = registros.filter(r => {
+                const [regAno, regMes] = r.data.split('-');
+                return regAno === ano && regMes === mesNum;
             });
             
-            document.getElementById('relatorioCarregado').classList.remove('hidden');
-            atualizarRelatorios();
-        }
-
-        function adicionarVendedor() {
-            const input = document.getElementById('novoVendedor');
-            if (!input) {
-                console.error('Elemento novoVendedor não encontrado');
-                return;
-            }
-            
-            const nome = input.value.trim();
-            const alertDiv = document.getElementById('gerenciarAlert');
-            
-            if (!nome) {
-                alertDiv.innerHTML = '<div class="alert alert-error">Digite um nome!</div>';
-                setTimeout(() => alertDiv.innerHTML = '', 3000);
-                return;
-            }
-            
-            let vendedores = JSON.parse(localStorage.getItem('vendedores') || '[]');
-            
-            if (vendedores.includes(nome)) {
-                alertDiv.innerHTML = '<div class="alert alert-error">Vendedor já existe!</div>';
-                setTimeout(() => alertDiv.innerHTML = '', 3000);
-                return;
-            }
-            
-            vendedores.push(nome);
-            localStorage.setItem('vendedores', JSON.stringify(vendedores));
-            
-            alertDiv.innerHTML = '<div class="alert alert-success">Vendedor adicionado com sucesso! ✓</div>';
-            setTimeout(() => alertDiv.innerHTML = '', 3000);
-            
-            input.value = '';
-            carregarVendedores();
-            listarVendedores();
-        }
-
-        function listarVendedores() {
-            const vendedores = JSON.parse(localStorage.getItem('vendedores'));
-            const container = document.getElementById('listaVendedores');
-            
-            container.innerHTML = '';
-            vendedores.forEach(v => {
-                const div = document.createElement('div');
-                div.className = 'registro-item';
-                div.innerHTML = `
-                    <span style="color: #e0e0e0; font-size: 16px;">${v}</span>
-                    <button class="btn btn-danger btn-small" onclick="removerVendedor('${v}')" style="float: right;">Remover</button>
+            if (registrosMes.length === 0) {
+                document.getElementById('graficosContainer').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Nenhum registro encontrado para este mês</p>
+                    </div>
                 `;
-                container.appendChild(div);
+                return;
+            }
+
+            // Calcular totais por vendedor
+            const totaisPorVendedor = {};
+            vendedores.forEach(v => {
+                totaisPorVendedor[v.id] = { cashback: 0, avaliacoes: 0 };
             });
-        }
+            
+            registrosMes.forEach(reg => {
+                if (totaisPorVendedor[reg.vendedorId]) {
+                    totaisPorVendedor[reg.vendedorId].cashback += reg.cashback;
+                    totaisPorVendedor[reg.vendedorId].avaliacoes += reg.avaliacoes;
+                }
+            });
 
-        function removerVendedor(nome) {
-            if (!confirm(`Deseja realmente remover ${nome}?`)) return;
-            
-            let vendedores = JSON.parse(localStorage.getItem('vendedores'));
-            vendedores = vendedores.filter(v => v !== nome);
-            localStorage.setItem('vendedores', JSON.stringify(vendedores));
-            
-            carregarVendedores();
-            listarVendedores();
-        }
-
-        function gerarOpcoesData() {
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const meses = [...new Set(registros.map(r => r.mes))].sort().reverse();
-            
-            const selectRel = document.getElementById('mesRelatorio');
-            const selectHist = document.getElementById('mesHistorico');
-            
-            const mesAtual = new Date().toISOString().substring(0, 7);
-            
-            if (!meses.includes(mesAtual)) {
-                meses.unshift(mesAtual);
-            }
-            
-            const opcoes = meses.map(m => {
-                const [ano, mes] = m.split('-');
-                const nomeMes = new Date(ano, mes - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-                return `<option value="${m}">${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}</option>`;
-            }).join('');
-            
-            if (selectRel) {
-                selectRel.innerHTML = '<option value="">Selecione o mês</option>' + opcoes;
-            }
-            if (selectHist) {
-                selectHist.innerHTML = '<option value="">Selecione o mês</option>' + opcoes;
-            }
-        }
-
-        function atualizarRelatorios() {
-            const mes = document.getElementById('mesRelatorio').value;
-            const vendedor = document.getElementById('vendedorRelatorio').value;
-            const data = document.getElementById('dataRelatorio').value;
-            
-            if (!mes) {
-                alert('Por favor, selecione um mês primeiro!');
-                return;
-            }
-            
-            let registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mes && (vendedor === 'todos' || r.vendedor === vendedor));
-            
-            // Filtrar por data se não for "todas"
-            if (data && data !== 'todas') {
-                registros = registros.filter(r => r.data === data);
-            }
-            
-            console.log('Registros filtrados:', registros);
-            
-            if (registros.length === 0) {
-                alert('Nenhum registro encontrado para este período!');
-                document.getElementById('relatorioCarregado').classList.add('hidden');
-                return;
-            }
-            
-            // Calcular estatísticas
-            const totalAfazeres = registros.reduce((sum, r) => sum + (r.afazeres ? r.afazeres.length : 0), 0);
-            const totalCashback = registros.reduce((sum, r) => sum + (r.cashback || 0), 0);
-            const totalAvaliacoes = registros.reduce((sum, r) => sum + (r.avaliacoes || 0), 0);
-            const totalDias = registros.length;
-            
-            // Calcular pontuação total
-            const totalPontos = registros.reduce((sum, r) => {
-                return sum + (r.afazeres || []).reduce((sumAf, af) => {
-                    return sumAf + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                }, 0);
-            }, 0);
-            
-            // Mostrar estatísticas
-            document.getElementById('statsContainer').innerHTML = `
-                <div class="stat-card">
-                    <h4>Total de Afazeres</h4>
-                    <div class="value">${totalAfazeres}</div>
+            const container = document.getElementById('graficosContainer');
+            container.innerHTML = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px; color: #fff;">
+                            <i class="fas fa-gift"></i> Cashback por Vendedor
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="chartCashback"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 15px; color: #fff;">
+                            <i class="fas fa-star"></i> Avaliações por Vendedor
+                        </h3>
+                        <div class="chart-container">
+                            <canvas id="chartAvaliacoes"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-card" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
-                    <h4>Pontuação Total</h4>
-                    <div class="value" style="color: #10b981;">${totalPontos.toFixed(1)}</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Total de Cashback</h4>
-                    <div class="value">${totalCashback}</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Total de Avaliações</h4>
-                    <div class="value">${totalAvaliacoes}</div>
-                </div>
-                <div class="stat-card">
-                    <h4>Dias Registrados</h4>
-                    <div class="value">${totalDias}</div>
+                <div class="card" style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #fff;">
+                        <i class="fas fa-trophy"></i> Progresso das Metas Mensais
+                    </h3>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="chartMetas"></canvas>
+                    </div>
                 </div>
             `;
-            
-            gerarGraficos(registros, vendedor);
-        }
 
-        let chartDesempenho, chartMetricas;
+            // Preparar dados
+            const labels = [];
+            const datasetCashback = [];
+            const datasetAvaliacoes = [];
+            const cores = [];
 
-        function gerarGraficos(registros, vendedorSelecionado) {
-            // Gráfico de Desempenho (Afazeres por Vendedor)
-            const ctx1 = document.getElementById('chartDesempenho');
-            
-            if (chartDesempenho) {
-                chartDesempenho.destroy();
-            }
-            
-            if (vendedorSelecionado === 'todos') {
-                const vendedores = [...new Set(registros.map(r => r.vendedor))];
-                const dados = vendedores.map(v => {
-                    return registros.filter(r => r.vendedor === v)
-                        .reduce((sum, r) => sum + r.afazeres.length, 0);
-                });
-                
-                chartDesempenho = new Chart(ctx1, {
-                    type: 'bar',
-                    data: {
-                        labels: vendedores,
-                        datasets: [{
-                            label: 'Quantidade de Afazeres',
-                            data: dados,
-                            backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#e0e0e0' }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Desempenho por Vendedor',
-                                color: '#e0e0e0',
-                                font: { size: 18, weight: 'bold' }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                            },
-                            x: {
-                                ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                            }
-                        }
-                    }
-                });
-            } else {
-                // Gráfico de linha para um vendedor específico
-                const dadosPorDia = {};
-                registros.forEach(r => {
-                    const dia = new Date(r.data).getDate();
-                    dadosPorDia[dia] = (dadosPorDia[dia] || 0) + r.afazeres.length;
-                });
-                
-                const dias = Object.keys(dadosPorDia).sort((a, b) => a - b);
-                const valores = dias.map(d => dadosPorDia[d]);
-                
-                chartDesempenho = new Chart(ctx1, {
-                    type: 'line',
-                    data: {
-                        labels: dias.map(d => `Dia ${d}`),
-                        datasets: [{
-                            label: 'Afazeres por Dia',
-                            data: valores,
-                            borderColor: 'rgba(59, 130, 246, 1)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-                            tension: 0.4,
-                            fill: true,
-                            borderWidth: 3,
-                            pointRadius: 5,
-                            pointBackgroundColor: '#3b82f6'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                labels: { color: '#e0e0e0' }
-                            },
-                            title: {
-                                display: true,
-                                text: 'Evolução Diária de Afazeres',
-                                color: '#e0e0e0',
-                                font: { size: 18, weight: 'bold' }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                            },
-                            x: {
-                                ticks: { color: '#9ca3af' },
-                                grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Gráfico de Métricas (Pizza)
-            const ctx2 = document.getElementById('chartMetricas');
-            
-            if (chartMetricas) {
-                chartMetricas.destroy();
-            }
-            
-            const totalAfazeres = registros.reduce((sum, r) => sum + r.afazeres.length, 0);
-            const totalCashback = registros.reduce((sum, r) => sum + r.cashback, 0);
-            const totalAvaliacoes = registros.reduce((sum, r) => sum + r.avaliacoes, 0);
-            
-            chartMetricas = new Chart(ctx2, {
-                type: 'doughnut',
+            vendedores.forEach(vendedor => {
+                if (totaisPorVendedor[vendedor.id].cashback > 0 || totaisPorVendedor[vendedor.id].avaliacoes > 0) {
+                    labels.push(vendedor.nome);
+                    datasetCashback.push(totaisPorVendedor[vendedor.id].cashback);
+                    datasetAvaliacoes.push(totaisPorVendedor[vendedor.id].avaliacoes);
+                    cores.push(vendedor.cor);
+                }
+            });
+
+            // Gráfico Cashback
+            new Chart(document.getElementById('chartCashback'), {
+                type: 'bar',
                 data: {
-                    labels: ['Afazeres', 'Cashback', 'Avaliações'],
+                    labels: labels,
                     datasets: [{
-                        data: [totalAfazeres, totalCashback, totalAvaliacoes],
-                        backgroundColor: [
-                            'rgba(59, 130, 246, 0.8)',
-                            'rgba(16, 185, 129, 0.8)',
-                            'rgba(245, 158, 11, 0.8)'
-                        ],
-                        borderColor: [
-                            'rgba(59, 130, 246, 1)',
-                            'rgba(16, 185, 129, 1)',
-                            'rgba(245, 158, 11, 1)'
-                        ],
-                        borderWidth: 2
+                        label: 'Cashback',
+                        data: datasetCashback,
+                        backgroundColor: cores,
+                        borderRadius: 8
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#e0e0e0', padding: 20, font: { size: 14 } }
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#b0b0b0' }
                         },
-                        title: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#b0b0b0' }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico Avaliações
+            new Chart(document.getElementById('chartAvaliacoes'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Avaliações',
+                        data: datasetAvaliacoes,
+                        backgroundColor: cores,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: { color: '#b0b0b0' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#b0b0b0' }
+                        }
+                    }
+                }
+            });
+
+            // Gráfico de Metas
+            const datasetMetasCashback = labels.map((_, i) => {
+                const progresso = (datasetCashback[i] / META_CASHBACK) * 100;
+                return Math.min(progresso, 100);
+            });
+            
+            const datasetMetasAvaliacoes = labels.map((_, i) => {
+                const progresso = (datasetAvaliacoes[i] / META_AVALIACOES) * 100;
+                return Math.min(progresso, 100);
+            });
+
+            new Chart(document.getElementById('chartMetas'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Progresso Cashback (%)',
+                            data: datasetMetasCashback,
+                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            borderRadius: 8
+                        },
+                        {
+                            label: 'Progresso Avaliações (%)',
+                            data: datasetMetasAvaliacoes,
+                            backgroundColor: 'rgba(255, 193, 7, 0.7)',
+                            borderRadius: 8
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
                             display: true,
-                            text: 'Distribuição de Métricas',
-                            color: '#e0e0e0',
-                            font: { size: 18, weight: 'bold' }
-                        }
-                    }
-                }
-            });
-        }
-
-        function carregarHistorico() {
-            const mes = document.getElementById('mesHistorico').value;
-            const vendedor = document.getElementById('vendedorHistorico').value;
-            
-            if (!mes) {
-                document.getElementById('historicoContainer').innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">Selecione um mês para visualizar o histórico.</p>';
-                return;
-            }
-            
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mes && (vendedor === 'todos' || r.vendedor === vendedor))
-                .sort((a, b) => new Date(b.data) - new Date(a.data));
-            
-            const container = document.getElementById('historicoContainer');
-            
-            if (registros.length === 0) {
-                container.innerHTML = '<p style="color: #9ca3af; text-align: center; padding: 40px;">Nenhum registro encontrado.</p>';
-                return;
-            }
-            
-            container.innerHTML = registros.map(r => {
-                const pontosDia = (r.afazeres || []).reduce((sum, af) => {
-                    return sum + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                }, 0);
-                
-                const afazeresLista = (r.afazeres || []).map(af => {
-                    const texto = typeof af === 'object' ? af.texto : af;
-                    const pontos = typeof af === 'object' ? af.pontos : undefined;
-                    
-                    let badge = '';
-                    if (pontos === 1) badge = ' <span style="color: #10b981;">✓ +1</span>';
-                    else if (pontos === 0.5) badge = ' <span style="color: #f59e0b;">◐ +0.5</span>';
-                    else if (pontos === -1) badge = ' <span style="color: #ef4444;">✗ -1</span>';
-                    
-                    return `<li>${texto}${badge}</li>`;
-                }).join('');
-                
-                const observacoesHtml = r.observacoes ? `
-                    <div class="observacoes-box">
-                        <strong style="color: #3b82f6; font-size: 13px;">📝 Observações:</strong>
-                        <p>${r.observacoes}</p>
-                    </div>
-                ` : '';
-                
-                return `
-                    <div class="registro-item">
-                        <h4>${r.vendedor} - ${new Date(r.data + 'T00:00:00').toLocaleDateString('pt-BR')}</h4>
-                        <p><strong>Cashback:</strong> ${r.cashback || 0}</p>
-                        <p><strong>Avaliações:</strong> ${r.avaliacoes || 0}</p>
-                        <p><strong>Pontuação:</strong> <span style="color: #3b82f6; font-weight: 700; font-size: 18px;">${pontosDia.toFixed(1)}</span> pontos</p>
-                        <p><strong>Afazeres:</strong></p>
-                        <ul class="afazer-list">
-                            ${afazeresLista}
-                        </ul>
-                        ${observacoesHtml}
-                        <div class="action-buttons">
-                            <button class="btn btn-small" onclick="abrirModalEdicao(${r.id})">✏️ Editar Completo</button>
-                            <button class="btn btn-danger btn-small" onclick="excluirRegistro(${r.id})">🗑️ Excluir</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function editarRegistro(id) {
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const registro = registros.find(r => r.id === id);
-            
-            if (!registro) {
-                alert('Registro não encontrado!');
-                return;
-            }
-            
-            const novosCashback = prompt('Nova quantidade de Cashback:', registro.cashback || 0);
-            const novasAvaliacoes = prompt('Nova quantidade de Avaliações:', registro.avaliacoes || 0);
-            
-            if (novosCashback !== null) {
-                registro.cashback = parseInt(novosCashback) || 0;
-            }
-            
-            if (novasAvaliacoes !== null) {
-                registro.avaliacoes = parseInt(novasAvaliacoes) || 0;
-            }
-            
-            const index = registros.findIndex(r => r.id === id);
-            registros[index] = registro;
-            
-            localStorage.setItem('registros', JSON.stringify(registros));
-            alert('Registro atualizado com sucesso!');
-            carregarHistorico();
-        }
-
-        let registroEmEdicao = null;
-
-        function abrirModalEdicao(id) {
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const registro = registros.find(r => r.id === id);
-            
-            if (!registro) {
-                alert('Registro não encontrado!');
-                return;
-            }
-            
-            registroEmEdicao = registro;
-            
-            const afazeresList = (registro.afazeres || []).map((af, index) => {
-                const texto = typeof af === 'object' ? af.texto : af;
-                const pontos = typeof af === 'object' ? af.pontos : undefined;
-                
-                return `
-                    <div class="modal-afazer-item">
-                        <label>Afazer ${index + 1}:</label>
-                        <input type="text" class="modal-afazer-input" value="${texto}" data-index="${index}">
-                        ${index > 0 ? '<button class="btn btn-danger btn-small" onclick="removerAfazerModal(this)" style="margin-top: 10px;">Remover</button>' : ''}
-                    </div>
-                `;
-            }).join('');
-            
-            document.getElementById('modalEdicaoConteudo').innerHTML = `
-                <div class="form-group">
-                    <label>Vendedor:</label>
-                    <input type="text" value="${registro.vendedor}" disabled style="opacity: 0.6; cursor: not-allowed;">
-                </div>
-                
-                <div class="form-group">
-                    <label>Data:</label>
-                    <input type="text" value="${new Date(registro.data + 'T00:00:00').toLocaleDateString('pt-BR')}" disabled style="opacity: 0.6; cursor: not-allowed;">
-                </div>
-                
-                <div class="form-group">
-                    <label>Afazeres:</label>
-                    <div id="modalAfazeresContainer">
-                        ${afazeresList}
-                    </div>
-                    <button class="btn btn-secondary btn-small" onclick="adicionarAfazerModal()" style="margin-top: 10px;">+ Adicionar Afazer</button>
-                </div>
-                
-                <div class="form-group">
-                    <label>Quantidade de Cashback:</label>
-                    <input type="number" id="modalCashback" value="${registro.cashback || 0}" min="0">
-                </div>
-                
-                <div class="form-group">
-                    <label>Quantidade de Avaliações:</label>
-                    <input type="number" id="modalAvaliacoes" value="${registro.avaliacoes || 0}" min="0">
-                </div>
-                
-                <div class="form-group">
-                    <label>Observações:</label>
-                    <textarea id="modalObservacoes" style="min-height: 100px;">${registro.observacoes || ''}</textarea>
-                </div>
-            `;
-            
-            document.getElementById('modalEdicao').classList.add('active');
-        }
-
-        function adicionarAfazerModal() {
-            const container = document.getElementById('modalAfazeresContainer');
-            const index = container.children.length;
-            
-            const div = document.createElement('div');
-            div.className = 'modal-afazer-item';
-            div.innerHTML = `
-                <label>Afazer ${index + 1}:</label>
-                <input type="text" class="modal-afazer-input" data-index="${index}">
-                <button class="btn btn-danger btn-small" onclick="removerAfazerModal(this)" style="margin-top: 10px;">Remover</button>
-            `;
-            
-            container.appendChild(div);
-        }
-
-        function removerAfazerModal(btn) {
-            btn.parentElement.remove();
-            
-            // Renumerar os afazeres
-            const container = document.getElementById('modalAfazeresContainer');
-            Array.from(container.children).forEach((item, index) => {
-                const label = item.querySelector('label');
-                if (label) label.textContent = `Afazer ${index + 1}:`;
-                const input = item.querySelector('input');
-                if (input) input.setAttribute('data-index', index);
-            });
-        }
-
-        function salvarEdicao() {
-            if (!registroEmEdicao) return;
-            
-            const afazeres = Array.from(document.querySelectorAll('.modal-afazer-input'))
-                .map(input => input.value.trim())
-                .filter(val => val !== '');
-            
-            if (afazeres.length === 0) {
-                alert('Adicione pelo menos um afazer!');
-                return;
-            }
-            
-            const cashback = parseInt(document.getElementById('modalCashback').value) || 0;
-            const avaliacoes = parseInt(document.getElementById('modalAvaliacoes').value) || 0;
-            const observacoes = document.getElementById('modalObservacoes').value.trim();
-            
-            // Preservar pontuações existentes se houver
-            const afazeresAtualizados = afazeres.map((texto, index) => {
-                const afazerOriginal = registroEmEdicao.afazeres[index];
-                if (typeof afazerOriginal === 'object' && afazerOriginal.pontos !== undefined) {
-                    return {
-                        texto: texto,
-                        pontos: afazerOriginal.pontos
-                    };
-                }
-                return texto;
-            });
-            
-            registroEmEdicao.afazeres = afazeresAtualizados;
-            registroEmEdicao.cashback = cashback;
-            registroEmEdicao.avaliacoes = avaliacoes;
-            registroEmEdicao.observacoes = observacoes;
-            
-            let registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const index = registros.findIndex(r => r.id === registroEmEdicao.id);
-            registros[index] = registroEmEdicao;
-            
-            localStorage.setItem('registros', JSON.stringify(registros));
-            
-            fecharModal();
-            alert('Registro atualizado com sucesso!');
-            carregarHistorico();
-        }
-
-        function fecharModal() {
-            document.getElementById('modalEdicao').classList.remove('active');
-            registroEmEdicao = null;
-        }
-
-        // Fechar modal ao clicar fora
-        document.addEventListener('click', function(e) {
-            const modalEdicao = document.getElementById('modalEdicao');
-            const modalWhatsApp = document.getElementById('modalWhatsApp');
-            
-            if (e.target === modalEdicao) {
-                fecharModal();
-            }
-            
-            if (e.target === modalWhatsApp) {
-                fecharModalWhatsApp();
-            }
-        });
-
-        function excluirRegistro(id) {
-            if (!confirm('Deseja realmente excluir este registro?')) return;
-            
-            let registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            registros = registros.filter(r => r.id !== id);
-            
-            localStorage.setItem('registros', JSON.stringify(registros));
-            alert('Registro excluído com sucesso!');
-            carregarHistorico();
-        }
-
-        function enviarWhatsApp() {
-            const mes = document.getElementById('mesRelatorio').value;
-            const vendedor = document.getElementById('vendedorRelatorio').value;
-            
-            if (!mes) {
-                alert('Por favor, selecione um mês e clique em "Carregar Relatório" primeiro!');
-                return;
-            }
-            
-            const relatorioCarregado = document.getElementById('relatorioCarregado');
-            if (relatorioCarregado.classList.contains('hidden')) {
-                alert('Por favor, clique em "Carregar Relatório" primeiro!');
-                return;
-            }
-            
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mes && (vendedor === 'todos' || r.vendedor === vendedor));
-            
-            if (registros.length === 0) {
-                alert('Nenhum registro encontrado para enviar!');
-                return;
-            }
-            
-            const totalAfazeres = registros.reduce((sum, r) => sum + (r.afazeres ? r.afazeres.length : 0), 0);
-            const totalCashback = registros.reduce((sum, r) => sum + (r.cashback || 0), 0);
-            const totalAvaliacoes = registros.reduce((sum, r) => sum + (r.avaliacoes || 0), 0);
-            
-            // Calcular pontuação total
-            const totalPontos = registros.reduce((sum, r) => {
-                return sum + (r.afazeres || []).reduce((sumAf, af) => {
-                    return sumAf + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                }, 0);
-            }, 0);
-            
-            const [ano, mesNum] = mes.split('-');
-            const nomeMes = new Date(ano, mesNum - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-            
-            let mensagem = `📊 *RELATÓRIO DE DESEMPENHO*\n`;
-            mensagem += `📅 Período: ${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}\n`;
-            mensagem += `👤 Vendedor: ${vendedor === 'todos' ? 'Todos' : vendedor}\n\n`;
-            mensagem += `📋 *RESUMO:*\n`;
-            mensagem += `• Total de Afazeres: ${totalAfazeres}\n`;
-            mensagem += `• Pontuação Total: ${totalPontos.toFixed(1)} pontos\n`;
-            mensagem += `• Total de Cashback: ${totalCashback}\n`;
-            mensagem += `• Total de Avaliações: ${totalAvaliacoes}\n`;
-            mensagem += `• Dias Registrados: ${registros.length}\n\n`;
-            
-            if (vendedor === 'todos') {
-                const vendedores = [...new Set(registros.map(r => r.vendedor))];
-                mensagem += `👥 *DESEMPENHO POR VENDEDOR:*\n`;
-                vendedores.forEach(v => {
-                    const regsVendedor = registros.filter(r => r.vendedor === v);
-                    const afazeres = regsVendedor.reduce((sum, r) => sum + (r.afazeres ? r.afazeres.length : 0), 0);
-                    const pontos = regsVendedor.reduce((sum, r) => {
-                        return sum + (r.afazeres || []).reduce((sumAf, af) => {
-                            return sumAf + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                        }, 0);
-                    }, 0);
-                    mensagem += `• ${v}: ${afazeres} afazeres (${pontos.toFixed(1)} pts)\n`;
-                });
-            }
-            
-            const url = `https://wa.me/5541999007053?text=${encodeURIComponent(mensagem)}`;
-            window.open(url, '_blank');
-        }
-        
-        function mostrarModalWhatsApp() {
-            const mes = document.getElementById('mesRelatorio').value;
-            
-            if (!mes) {
-                alert('Por favor, carregue um relatório primeiro!');
-                return;
-            }
-            
-            const relatorioCarregado = document.getElementById('relatorioCarregado');
-            if (relatorioCarregado.classList.contains('hidden')) {
-                alert('Por favor, clique em "Carregar Relatório" primeiro!');
-                return;
-            }
-            
-            document.getElementById('modalWhatsApp').classList.add('active');
-            document.getElementById('numeroWhatsApp').focus();
-        }
-        
-        function fecharModalWhatsApp() {
-            document.getElementById('modalWhatsApp').classList.remove('active');
-            document.getElementById('numeroWhatsApp').value = '';
-        }
-        
-        function confirmarEnvioWhatsApp() {
-            const numero = document.getElementById('numeroWhatsApp').value.replace(/\D/g, '');
-            
-            if (!numero || numero.length < 10) {
-                alert('Por favor, digite um número válido com DDD!\nExemplo: 41999007053');
-                return;
-            }
-            
-            const mes = document.getElementById('mesRelatorio').value;
-            const vendedor = document.getElementById('vendedorRelatorio').value;
-            const data = document.getElementById('dataRelatorio').value;
-            
-            let registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mes && (vendedor === 'todos' || r.vendedor === vendedor));
-            
-            // Filtrar por data se não for "todas"
-            if (data && data !== 'todas') {
-                registros = registros.filter(r => r.data === data);
-            }
-            
-            if (registros.length === 0) {
-                alert('Nenhum registro encontrado para enviar!');
-                return;
-            }
-            
-            // Novo formato de mensagem
-            let mensagem = '';
-            
-            if (vendedor === 'todos') {
-                // Agrupar por vendedor
-                const vendedores = [...new Set(registros.map(r => r.vendedor))];
-                
-                vendedores.forEach(v => {
-                    const regsVendedor = registros.filter(r => r.vendedor === v);
-                    
-                    regsVendedor.forEach(reg => {
-                        mensagem += `*Relatorio afazeres Colombo:*\n`;
-                        mensagem += `📆 Data: ${new Date(reg.data + 'T00:00:00').toLocaleDateString('pt-BR')}\n`;
-                        mensagem += `👤 ${reg.vendedor}\n\n`;
-                        
-                        reg.afazeres.forEach((af, index) => {
-                            const texto = typeof af === 'object' ? af.texto : af;
-                            mensagem += `${index + 1}- ${texto}\n`;
-                        });
-                        
-                        mensagem += `\nCashBack: ${reg.cashback || 0}\n`;
-                        mensagem += `Avaliação: ${reg.avaliacoes || 0}\n`;
-                        
-                        if (reg.observacoes) {
-                            mensagem += `Observação: ${reg.observacoes}\n`;
-                        }
-                        
-                        mensagem += `\n────────────────────\n\n`;
-                    });
-                });
-            } else {
-                // Um vendedor específico
-                registros.forEach(reg => {
-                    mensagem += `*Relatorio afazeres Colombo:*\n`;
-                    mensagem += `📆 Data: ${new Date(reg.data + 'T00:00:00').toLocaleDateString('pt-BR')}\n`;
-                    mensagem += `👤 ${reg.vendedor}\n\n`;
-                    
-                    reg.afazeres.forEach((af, index) => {
-                        const texto = typeof af === 'object' ? af.texto : af;
-                        mensagem += `${index + 1}- ${texto}\n`;
-                    });
-                    
-                    mensagem += `\nCashBack: ${reg.cashback || 0}\n`;
-                    mensagem += `Avaliação: ${reg.avaliacoes || 0}\n`;
-                    
-                    if (reg.observacoes) {
-                        mensagem += `Observação: ${reg.observacoes}\n`;
-                    }
-                    
-                    if (registros.length > 1) {
-                        mensagem += `\n────────────────────\n\n`;
-                    }
-                });
-            }
-            
-            const url = `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`;
-            window.open(url, '_blank');
-            
-            fecharModalWhatsApp();
-        }
-        
-        // Funções do Dashboard
-        function carregarDashboard() {
-            const mesAtual = new Date().toISOString().substring(0, 7);
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mesAtual);
-            const vendedores = JSON.parse(localStorage.getItem('vendedores') || '[]');
-            
-            // Estatísticas Gerais
-            const totalAfazeres = registros.reduce((sum, r) => sum + (r.afazeres ? r.afazeres.length : 0), 0);
-            const totalCashback = registros.reduce((sum, r) => sum + (r.cashback || 0), 0);
-            const totalAvaliacoes = registros.reduce((sum, r) => sum + (r.avaliacoes || 0), 0);
-            const totalPontos = registros.reduce((sum, r) => {
-                return sum + (r.afazeres || []).reduce((sumAf, af) => {
-                    return sumAf + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                }, 0);
-            }, 0);
-            
-            document.getElementById('dashboardStats').innerHTML = `
-                <div class="stat-card">
-                    <h4>👥 Vendedores</h4>
-                    <div class="value">${vendedores.length}</div>
-                </div>
-                <div class="stat-card">
-                    <h4>📋 Registros do Mês</h4>
-                    <div class="value">${registros.length}</div>
-                </div>
-                <div class="stat-card">
-                    <h4>✅ Total Afazeres</h4>
-                    <div class="value">${totalAfazeres}</div>
-                </div>
-                <div class="stat-card" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
-                    <h4>⭐ Pontuação Total</h4>
-                    <div class="value" style="color: #10b981;">${totalPontos.toFixed(1)}</div>
-                </div>
-            `;
-            
-            // Metas do Mês
-            carregarMetasMes(registros, vendedores);
-            
-            // Destaques
-            carregarDestaques(registros, vendedores);
-            
-            // Alertas
-            carregarAlertas(registros, vendedores);
-        }
-        
-        function carregarMetasMes(registros, vendedores) {
-            const container = document.getElementById('metasMes');
-            
-            let html = '';
-            
-            vendedores.forEach(vendedor => {
-                const regsVendedor = registros.filter(r => r.vendedor === vendedor);
-                const cashback = regsVendedor.reduce((sum, r) => sum + (r.cashback || 0), 0);
-                const avaliacoes = regsVendedor.reduce((sum, r) => sum + (r.avaliacoes || 0), 0);
-                
-                const progCashback = Math.min((cashback / METAS.cashback) * 100, 100);
-                const progAvaliacoes = Math.min((avaliacoes / METAS.avaliacoes) * 100, 100);
-                
-                const statusCashback = progCashback >= 100 ? 'atingida' : progCashback >= 70 ? 'em-andamento' : 'critica';
-                const statusAvaliacoes = progAvaliacoes >= 100 ? 'atingida' : progAvaliacoes >= 70 ? 'em-andamento' : 'critica';
-                
-                const classCashback = progCashback >= 100 ? '' : progCashback >= 70 ? 'warning' : 'danger';
-                const classAvaliacoes = progAvaliacoes >= 100 ? '' : progAvaliacoes >= 70 ? 'warning' : 'danger';
-                
-                html += `
-                    <div class="meta-item">
-                        <h5>${vendedor}</h5>
-                        
-                        <div class="meta-info">
-                            <span>💰 Cashback: ${cashback}/${METAS.cashback}</span>
-                            <span class="meta-status ${statusCashback}">${progCashback.toFixed(0)}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${classCashback}" style="width: ${progCashback}%"></div>
-                        </div>
-                        
-                        <div class="meta-info" style="margin-top: 12px;">
-                            <span>⭐ Avaliações: ${avaliacoes}/${METAS.avaliacoes}</span>
-                            <span class="meta-status ${statusAvaliacoes}">${progAvaliacoes.toFixed(0)}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill ${classAvaliacoes}" style="width: ${progAvaliacoes}%"></div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            if (html === '') {
-                html = '<p style="color: #9ca3af; text-align: center; padding: 20px;">Nenhum dado disponível</p>';
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        function carregarDestaques(registros, vendedores) {
-            const container = document.getElementById('destaquesVendedores');
-            
-            let ranking = vendedores.map(vendedor => {
-                const regsVendedor = registros.filter(r => r.vendedor === vendedor);
-                const pontos = regsVendedor.reduce((sum, r) => {
-                    return sum + (r.afazeres || []).reduce((sumAf, af) => {
-                        return sumAf + (typeof af === 'object' ? (af.pontos || 0) : 0);
-                    }, 0);
-                }, 0);
-                const cashback = regsVendedor.reduce((sum, r) => sum + (r.cashback || 0), 0);
-                const avaliacoes = regsVendedor.reduce((sum, r) => sum + (r.avaliacoes || 0), 0);
-                
-                return { vendedor, pontos, cashback, avaliacoes };
-            }).sort((a, b) => b.pontos - a.pontos);
-            
-            let html = '';
-            
-            if (ranking.length > 0 && ranking[0].pontos > 0) {
-                const top3 = ranking.slice(0, 3);
-                const medalhas = ['🥇', '🥈', '🥉'];
-                
-                top3.forEach((r, i) => {
-                    html += `
-                        <div class="alert-box success" style="margin-bottom: 10px;">
-                            <strong>${medalhas[i]} ${r.vendedor}</strong><br>
-                            <span style="color: #9ca3af; font-size: 13px;">
-                                ${r.pontos.toFixed(1)} pontos • ${r.cashback} cashback • ${r.avaliacoes} avaliações
-                            </span>
-                        </div>
-                    `;
-                });
-            } else {
-                html = '<p style="color: #9ca3af; text-align: center; padding: 20px;">Nenhum dado ainda este mês</p>';
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        function carregarAlertas(registros, vendedores) {
-            const container = document.getElementById('alertasDashboard');
-            const hoje = new Date();
-            const doisDiasAtras = new Date(hoje);
-            doisDiasAtras.setDate(hoje.getDate() - 2);
-            
-            let html = '';
-            let alertas = 0;
-            
-            vendedores.forEach(vendedor => {
-                const regsVendedor = registros.filter(r => r.vendedor === vendedor);
-                
-                if (regsVendedor.length === 0) {
-                    html += `
-                        <div class="alert-box">
-                            <strong>⚠️ ${vendedor}</strong><br>
-                            <span style="color: #9ca3af; font-size: 13px;">Nenhum registro este mês</span>
-                        </div>
-                    `;
-                    alertas++;
-                } else {
-                    const ultimoRegistro = regsVendedor.sort((a, b) => new Date(b.data) - new Date(a.data))[0];
-                    const dataUltimo = new Date(ultimoRegistro.data + 'T00:00:00');
-                    
-                    if (dataUltimo < doisDiasAtras) {
-                        const diasSem = Math.floor((hoje - dataUltimo) / (1000 * 60 * 60 * 24));
-                        html += `
-                            <div class="alert-box warning">
-                                <strong>⏰ ${vendedor}</strong><br>
-                                <span style="color: #9ca3af; font-size: 13px;">Sem registro há ${diasSem} dias</span>
-                            </div>
-                        `;
-                        alertas++;
-                    }
-                    
-                    const cashback = regsVendedor.reduce((sum, r) => sum + (r.cashback || 0), 0);
-                    const avaliacoes = regsVendedor.reduce((sum, r) => sum + (r.avaliacoes || 0), 0);
-                    const progCashback = (cashback / METAS.cashback) * 100;
-                    const progAvaliacoes = (avaliacoes / METAS.avaliacoes) * 100;
-                    
-                    const diasRestantes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate() - hoje.getDate();
-                    
-                    if (progCashback < 50 && diasRestantes < 10) {
-                        html += `
-                            <div class="alert-box warning">
-                                <strong>📉 ${vendedor}</strong><br>
-                                <span style="color: #9ca3af; font-size: 13px;">Meta de cashback em risco (${progCashback.toFixed(0)}%)</span>
-                            </div>
-                        `;
-                        alertas++;
-                    }
-                    
-                    if (progAvaliacoes < 50 && diasRestantes < 10) {
-                        html += `
-                            <div class="alert-box warning">
-                                <strong>📉 ${vendedor}</strong><br>
-                                <span style="color: #9ca3af; font-size: 13px;">Meta de avaliações em risco (${progAvaliacoes.toFixed(0)}%)</span>
-                            </div>
-                        `;
-                        alertas++;
-                    }
-                }
-            });
-            
-            if (alertas === 0) {
-                html = `
-                    <div class="alert-box success">
-                        <strong>✅ Tudo em ordem!</strong><br>
-                        <span style="color: #9ca3af; font-size: 13px;">Nenhum alerta no momento</span>
-                    </div>
-                `;
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        // Funções de Validação de Afazeres
-        function carregarOpcoesValidacao() {
-            const vendedores = JSON.parse(localStorage.getItem('vendedores'));
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            
-            // Carregar meses disponíveis
-            const meses = [...new Set(registros.map(r => r.mes))].sort().reverse();
-            const selectMes = document.getElementById('mesValidar');
-            
-            const mesAtual = new Date().toISOString().substring(0, 7);
-            if (!meses.includes(mesAtual)) {
-                meses.unshift(mesAtual);
-            }
-            
-            selectMes.innerHTML = '<option value="">Selecione o mês</option>';
-            meses.forEach(m => {
-                const [ano, mes] = m.split('-');
-                const nomeMes = new Date(ano, mes - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-                const selected = m === mesAtual ? 'selected' : '';
-                selectMes.innerHTML += `<option value="${m}" ${selected}>${nomeMes.charAt(0).toUpperCase() + nomeMes.slice(1)}</option>`;
-            });
-            
-            // Carregar vendedores
-            const selectVendedor = document.getElementById('vendedorValidar');
-            selectVendedor.innerHTML = '<option value="">Selecione o vendedor</option>';
-            selectVendedor.innerHTML += '<option value="todos">Todos os vendedores</option>';
-            vendedores.forEach(v => {
-                selectVendedor.innerHTML += `<option value="${v}">${v}</option>`;
-            });
-            
-            // Limpar container
-            document.getElementById('afazeresValidacaoContainer').innerHTML = '';
-            document.getElementById('dataValidar').innerHTML = '<option value="">Selecione a data</option>';
-            
-            // Se tiver mês atual selecionado, atualizar filtros
-            if (mesAtual) {
-                atualizarFiltrosValidacao();
-            }
-        }
-        
-        function atualizarFiltrosValidacao() {
-            const mes = document.getElementById('mesValidar').value;
-            const vendedores = JSON.parse(localStorage.getItem('vendedores'));
-            
-            if (!mes) {
-                document.getElementById('vendedorValidar').innerHTML = '<option value="">Selecione o vendedor</option>';
-                document.getElementById('dataValidar').innerHTML = '<option value="">Selecione a data</option>';
-                document.getElementById('afazeresValidacaoContainer').innerHTML = '';
-                return;
-            }
-            
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]')
-                .filter(r => r.mes === mes);
-            
-            // Atualizar select de vendedores com base no mês
-            const selectVendedor = document.getElementById('vendedorValidar');
-            selectVendedor.innerHTML = '<option value="">Selecione o vendedor</option>';
-            selectVendedor.innerHTML += '<option value="todos">Todos os vendedores</option>';
-            
-            const vendedoresComRegistro = [...new Set(registros.map(r => r.vendedor))];
-            vendedores.forEach(v => {
-                const disabled = !vendedoresComRegistro.includes(v) ? 'disabled' : '';
-                const label = !vendedoresComRegistro.includes(v) ? ' (sem registros)' : '';
-                selectVendedor.innerHTML += `<option value="${v}" ${disabled}>${v}${label}</option>`;
-            });
-            
-            // Limpar data e container
-            document.getElementById('dataValidar').innerHTML = '<option value="">Selecione a data</option>';
-            document.getElementById('afazeresValidacaoContainer').innerHTML = '';
-        }
-        
-        function carregarAfazeresValidacao() {
-            const mes = document.getElementById('mesValidar').value;
-            const vendedor = document.getElementById('vendedorValidar').value;
-            const data = document.getElementById('dataValidar').value;
-            
-            if (!mes) {
-                alert('Por favor, selecione um mês primeiro!');
-                return;
-            }
-            
-            if (!vendedor) {
-                document.getElementById('afazeresValidacaoContainer').innerHTML = '';
-                return;
-            }
-            
-            const registros = JSON.parse(localStorage.getItem('registros'))
-                .filter(r => r.mes === mes && (vendedor === 'todos' || r.vendedor === vendedor));
-            
-            // Atualizar datas disponíveis
-            if (!data) {
-                const datas = [...new Set(registros.map(r => r.data))].sort().reverse();
-                const selectData = document.getElementById('dataValidar');
-                selectData.innerHTML = '<option value="">Selecione a data</option>';
-                
-                if (vendedor === 'todos') {
-                    selectData.innerHTML += '<option value="todas">Todas as datas</option>';
-                }
-                
-                datas.forEach(d => {
-                    const dataFormatada = new Date(d + 'T00:00:00').toLocaleDateString('pt-BR');
-                    selectData.innerHTML += `<option value="${d}">${dataFormatada}</option>`;
-                });
-                document.getElementById('afazeresValidacaoContainer').innerHTML = '';
-                return;
-            }
-            
-            // Filtrar registros por data
-            let registrosFiltrados;
-            if (data === 'todas') {
-                registrosFiltrados = registros;
-            } else {
-                registrosFiltrados = registros.filter(r => r.data === data);
-            }
-            
-            if (registrosFiltrados.length === 0) {
-                document.getElementById('afazeresValidacaoContainer').innerHTML = 
-                    '<p style="color: #9ca3af; text-align: center; padding: 40px;">Nenhum registro encontrado.</p>';
-                return;
-            }
-            
-            const container = document.getElementById('afazeresValidacaoContainer');
-            let html = '';
-            
-            // Consolidar registros por vendedor+data
-            const registrosConsolidados = {};
-            
-            registrosFiltrados.forEach(registro => {
-                const chave = `${registro.vendedor}_${registro.data}`;
-                
-                if (!registrosConsolidados[chave]) {
-                    registrosConsolidados[chave] = {
-                        vendedor: registro.vendedor,
-                        data: registro.data,
-                        afazeres: [],
-                        cashback: 0,
-                        avaliacoes: 0,
-                        observacoes: [],
-                        ids: []
-                    };
-                }
-                
-                // Adicionar afazeres com referência ao registro original
-                registro.afazeres.forEach(af => {
-                    registrosConsolidados[chave].afazeres.push({
-                        conteudo: af,
-                        registroId: registro.id
-                    });
-                });
-                
-                registrosConsolidados[chave].cashback += (registro.cashback || 0);
-                registrosConsolidados[chave].avaliacoes += (registro.avaliacoes || 0);
-                
-                if (registro.observacoes) {
-                    registrosConsolidados[chave].observacoes.push(registro.observacoes);
-                }
-                
-                registrosConsolidados[chave].ids.push(registro.id);
-            });
-            
-            // Se for "todos os vendedores", agrupar por vendedor
-            if (vendedor === 'todos') {
-                const vendedoresUnicos = [...new Set(Object.values(registrosConsolidados).map(r => r.vendedor))];
-                
-                vendedoresUnicos.forEach(nomeVendedor => {
-                    const regsVendedor = Object.values(registrosConsolidados).filter(r => r.vendedor === nomeVendedor);
-                    
-                    html += `<div class="vendedor-box">`;
-                    html += `<h3>👤 ${nomeVendedor}</h3>`;
-                    
-                    regsVendedor.forEach(regConsolidado => {
-                        const pontosTotal = regConsolidado.afazeres.reduce((sum, af) => {
-                            const conteudo = af.conteudo;
-                            return sum + (typeof conteudo === 'object' ? (conteudo.pontos || 0) : 0);
-                        }, 0);
-                        
-                        const afazeresValidados = regConsolidado.afazeres.filter(af => {
-                            const conteudo = af.conteudo;
-                            return typeof conteudo === 'object' && conteudo.pontos !== undefined;
-                        }).length;
-                        
-                        html += `
-                            <div class="info-box" style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
-                                <h4 style="color: #3b82f6; margin-bottom: 10px; font-size: 18px;">
-                                    📆 ${new Date(regConsolidado.data + 'T00:00:00').toLocaleDateString('pt-BR')}
-                                </h4>
-                                <p style="color: #d1d5db; margin-bottom: 5px;">
-                                    <strong>Total de Afazeres:</strong> ${regConsolidado.afazeres.length}
-                                </p>
-                                <p style="color: #d1d5db; margin-bottom: 5px;">
-                                    <strong>Validados:</strong> ${afazeresValidados} / ${regConsolidado.afazeres.length}
-                                </p>
-                                <p style="color: #d1d5db; margin-bottom: 5px;">
-                                    <strong>Pontuação Total:</strong> <span style="color: #3b82f6; font-size: 20px; font-weight: 700;">${pontosTotal.toFixed(1)}</span> pontos
-                                </p>
-                                <p style="color: #d1d5db; margin-bottom: 5px;">
-                                    <strong>CashBack:</strong> ${regConsolidado.cashback}
-                                </p>
-                                <p style="color: #d1d5db;">
-                                    <strong>Avaliações:</strong> ${regConsolidado.avaliacoes}
-                                </p>
-                            </div>
-                        `;
-                        
-                        // Mostrar cada afazer
-                        regConsolidado.afazeres.forEach((af, indexGlobal) => {
-                            const conteudo = af.conteudo;
-                            const afazerTexto = typeof conteudo === 'object' ? conteudo.texto : conteudo;
-                            const pontos = typeof conteudo === 'object' ? conteudo.pontos : undefined;
-                            const registroId = af.registroId;
-                            
-                            // Encontrar o index real no registro original
-                            const registroOriginal = registrosFiltrados.find(r => r.id === registroId);
-                            const indexReal = registroOriginal.afazeres.findIndex(a => {
-                                const txt = typeof a === 'object' ? a.texto : a;
-                                return txt === afazerTexto;
-                            });
-                            
-                            let statusClass = '';
-                            let statusBadge = '';
-                            
-                            if (pontos === 1) {
-                                statusClass = 'validado-correto';
-                                statusBadge = '<span class="pontuacao-badge correto">✓ Correto (+1 ponto)</span>';
-                            } else if (pontos === 0.5) {
-                                statusClass = 'validado-metade';
-                                statusBadge = '<span class="pontuacao-badge metade">◐ Metade (+0.5 ponto)</span>';
-                            } else if (pontos === -1) {
-                                statusClass = 'validado-incorreto';
-                                statusBadge = '<span class="pontuacao-badge incorreto">✗ Incorreto (-1 ponto)</span>';
+                            labels: { color: '#fff', font: { size: 14 } }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                }
                             }
-                            
-                            html += `
-                                <div class="validacao-item ${statusClass}">
-                                    <h4>Afazer ${indexGlobal + 1}:</h4>
-                                    <p style="color: #d1d5db; margin-bottom: 15px; font-size: 15px;">${afazerTexto}</p>
-                                    ${statusBadge}
-                                    <div class="pontuacao-buttons" style="margin-top: 15px;">
-                                        <button class="btn btn-ponto-correto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 1)">
-                                            ✓ Correto (+1)
-                                        </button>
-                                        <button class="btn btn-ponto-metade btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 0.5)">
-                                            ◐ Metade (+0.5)
-                                        </button>
-                                        <button class="btn btn-ponto-incorreto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, -1)">
-                                            ✗ Incorreto (-1)
-                                        </button>
-                                        ${pontos !== undefined ? 
-                                            `<button class="btn btn-secondary btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, null)">
-                                                Resetar
-                                            </button>` : ''
-                                        }
-                                        <button class="btn btn-small" onclick="editarAfazerValidacao('${registroId}', ${indexReal})" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
-                                            ✏️ Editar Texto
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        
-                        // Campo de observações consolidado
-                        const obsConsolidada = regConsolidado.observacoes.join('\n---\n');
-                        const primeiroId = regConsolidado.ids[0];
-                        
-                        html += `
-                            <div style="margin-top: 20px; margin-bottom: 40px;">
-                                <div class="form-group">
-                                    <label>📝 Observações do Admin:</label>
-                                    <textarea id="obs_${primeiroId}" style="min-height: 100px;" placeholder="Adicione observações, feedback ou informações importantes sobre este registro...">${obsConsolidada}</textarea>
-                                </div>
-                                <button class="btn btn-success btn-small" onclick="salvarObservacaoConsolidada('${regConsolidado.ids.join(',')}', '${primeiroId}')">
-                                    💾 Salvar Observação
-                                </button>
-                            </div>
-                        `;
-                    });
-                    
-                    html += `</div>`; // Fecha vendedor-box
-                });
-            } else {
-                // Um vendedor específico
-                Object.values(registrosConsolidados).forEach(regConsolidado => {
-                    const pontosTotal = regConsolidado.afazeres.reduce((sum, af) => {
-                        const conteudo = af.conteudo;
-                        return sum + (typeof conteudo === 'object' ? (conteudo.pontos || 0) : 0);
-                    }, 0);
-                    
-                    const afazeresValidados = regConsolidado.afazeres.filter(af => {
-                        const conteudo = af.conteudo;
-                        return typeof conteudo === 'object' && conteudo.pontos !== undefined;
-                    }).length;
-                    
-                    html += `
-                        <div class="info-box" style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 10px; margin-bottom: 25px;">
-                            <h4 style="color: #3b82f6; margin-bottom: 10px; font-size: 18px;">
-                                ${regConsolidado.vendedor} - ${new Date(regConsolidado.data + 'T00:00:00').toLocaleDateString('pt-BR')}
-                            </h4>
-                            <p style="color: #d1d5db; margin-bottom: 5px;">
-                                <strong>Total de Afazeres:</strong> ${regConsolidado.afazeres.length}
-                            </p>
-                            <p style="color: #d1d5db; margin-bottom: 5px;">
-                                <strong>Validados:</strong> ${afazeresValidados} / ${regConsolidado.afazeres.length}
-                            </p>
-                            <p style="color: #d1d5db; margin-bottom: 5px;">
-                                <strong>Pontuação Total:</strong> <span style="color: #3b82f6; font-size: 20px; font-weight: 700;">${pontosTotal.toFixed(1)}</span> pontos
-                            </p>
-                            <p style="color: #d1d5db; margin-bottom: 5px;">
-                                <strong>CashBack:</strong> ${regConsolidado.cashback}
-                            </p>
-                            <p style="color: #d1d5db;">
-                                <strong>Avaliações:</strong> ${regConsolidado.avaliacoes}
-                            </p>
-                        </div>
-                    `;
-                    
-                    // Mostrar cada afazer
-                    regConsolidado.afazeres.forEach((af, indexGlobal) => {
-                        const conteudo = af.conteudo;
-                        const afazerTexto = typeof conteudo === 'object' ? conteudo.texto : conteudo;
-                        const pontos = typeof conteudo === 'object' ? conteudo.pontos : undefined;
-                        const registroId = af.registroId;
-                        
-                        // Encontrar o index real no registro original
-                        const registroOriginal = registrosFiltrados.find(r => r.id === registroId);
-                        const indexReal = registroOriginal.afazeres.findIndex(a => {
-                            const txt = typeof a === 'object' ? a.texto : a;
-                            return txt === afazerTexto;
-                        });
-                        
-                        let statusClass = '';
-                        let statusBadge = '';
-                        
-                        if (pontos === 1) {
-                            statusClass = 'validado-correto';
-                            statusBadge = '<span class="pontuacao-badge correto">✓ Correto (+1 ponto)</span>';
-                        } else if (pontos === 0.5) {
-                            statusClass = 'validado-metade';
-                            statusBadge = '<span class="pontuacao-badge metade">◐ Metade (+0.5 ponto)</span>';
-                        } else if (pontos === -1) {
-                            statusClass = 'validado-incorreto';
-                            statusBadge = '<span class="pontuacao-badge incorreto">✗ Incorreto (-1 ponto)</span>';
                         }
-                        
-                        html += `
-                            <div class="validacao-item ${statusClass}">
-                                <h4>Afazer ${indexGlobal + 1}:</h4>
-                                <p style="color: #d1d5db; margin-bottom: 15px; font-size: 15px;">${afazerTexto}</p>
-                                ${statusBadge}
-                                <div class="pontuacao-buttons" style="margin-top: 15px;">
-                                    <button class="btn btn-ponto-correto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 1)">
-                                        ✓ Correto (+1)
-                                    </button>
-                                    <button class="btn btn-ponto-metade btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, 0.5)">
-                                        ◐ Metade (+0.5)
-                                    </button>
-                                    <button class="btn btn-ponto-incorreto btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, -1)">
-                                        ✗ Incorreto (-1)
-                                    </button>
-                                    ${pontos !== undefined ? 
-                                        `<button class="btn btn-secondary btn-small" onclick="atribuirPontos('${registroId}', ${indexReal}, null)">
-                                            Resetar
-                                        </button>` : ''
-                                    }
-                                    <button class="btn btn-small" onclick="editarAfazerValidacao('${registroId}', ${indexReal})" style="background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);">
-                                        ✏️ Editar Texto
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    
-                    // Campo de observações consolidado
-                    const obsConsolidada = regConsolidado.observacoes.join('\n---\n');
-                    const primeiroId = regConsolidado.ids[0];
-                    
-                    html += `
-                        <div style="margin-top: 20px; margin-bottom: 40px;">
-                            <div class="form-group">
-                                <label>📝 Observações do Admin:</label>
-                                <textarea id="obs_${primeiroId}" style="min-height: 100px;" placeholder="Adicione observações, feedback ou informações importantes sobre este registro...">${obsConsolidada}</textarea>
-                            </div>
-                            <button class="btn btn-success btn-small" onclick="salvarObservacaoConsolidada('${regConsolidado.ids.join(',')}', '${primeiroId}')">
-                                💾 Salvar Observação
-                            </button>
-                        </div>
-                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
-                    `;
-                });
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        function atribuirPontos(registroId, afazerIndex, pontos) {
-            const registros = JSON.parse(localStorage.getItem('registros'));
-            const registro = registros.find(r => r.id == registroId);
-            
-            if (!registro) return;
-            
-            // Converter afazer para objeto se for string
-            if (typeof registro.afazeres[afazerIndex] === 'string') {
-                registro.afazeres[afazerIndex] = {
-                    texto: registro.afazeres[afazerIndex],
-                    pontos: pontos
-                };
-            } else if (pontos === null) {
-                // Resetar para string original
-                registro.afazeres[afazerIndex] = registro.afazeres[afazerIndex].texto;
-            } else {
-                registro.afazeres[afazerIndex].pontos = pontos;
-            }
-            
-            // Salvar
-            const index = registros.findIndex(r => r.id == registroId);
-            registros[index] = registro;
-            localStorage.setItem('registros', JSON.stringify(registros));
-            
-            // Mostrar mensagem
-            const alertDiv = document.getElementById('validarAlert');
-            let mensagem = '';
-            if (pontos === 1) mensagem = 'Afazer marcado como CORRETO (+1 ponto)';
-            else if (pontos === 0.5) mensagem = 'Afazer marcado como METADE (+0.5 ponto)';
-            else if (pontos === -1) mensagem = 'Afazer marcado como INCORRETO (-1 ponto)';
-            else mensagem = 'Pontuação resetada';
-            
-            alertDiv.innerHTML = `<div class="alert alert-success">${mensagem} ✓</div>`;
-            setTimeout(() => alertDiv.innerHTML = '', 2000);
-            
-            // Recarregar
-            carregarAfazeresValidacao();
-        }
-        
-        function salvarObservacao(registroId) {
-            const observacoes = document.getElementById(`obs_${registroId}`).value.trim();
-            
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const registro = registros.find(r => r.id == registroId);
-            
-            if (!registro) {
-                alert('Registro não encontrado!');
-                return;
-            }
-            
-            registro.observacoes = observacoes;
-            
-            const index = registros.findIndex(r => r.id == registroId);
-            registros[index] = registro;
-            localStorage.setItem('registros', JSON.stringify(registros));
-            
-            const alertDiv = document.getElementById('validarAlert');
-            alertDiv.innerHTML = '<div class="alert alert-success">✓ Observação salva com sucesso!</div>';
-            setTimeout(() => alertDiv.innerHTML = '', 2000);
-        }
-        
-        function salvarObservacaoConsolidada(idsString, primeiroId) {
-            const observacoes = document.getElementById(`obs_${primeiroId}`).value.trim();
-            const ids = idsString.split(',');
-            
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            
-            // Salvar a mesma observação em todos os registros do dia
-            ids.forEach(id => {
-                const registro = registros.find(r => r.id == id);
-                if (registro) {
-                    registro.observacoes = observacoes;
-                    const index = registros.findIndex(r => r.id == id);
-                    registros[index] = registro;
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            ticks: {
+                                color: '#b0b0b0',
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#b0b0b0' }
+                        }
+                    }
                 }
             });
-            
-            localStorage.setItem('registros', JSON.stringify(registros));
-            
-            const alertDiv = document.getElementById('validarAlert');
-            alertDiv.innerHTML = '<div class="alert alert-success">✓ Observação salva em todos os registros do dia!</div>';
-            setTimeout(() => alertDiv.innerHTML = '', 2000);
         }
-        
-        function editarAfazerValidacao(registroId, afazerIndex) {
-            const registros = JSON.parse(localStorage.getItem('registros') || '[]');
-            const registro = registros.find(r => r.id == registroId);
-            
-            if (!registro) {
-                alert('Registro não encontrado!');
-                return;
-            }
-            
-            const afazer = registro.afazeres[afazerIndex];
-            const textoAtual = typeof afazer === 'object' ? afazer.texto : afazer;
-            
-            const novoTexto = prompt('Editar afazer:', textoAtual);
-            
-            if (novoTexto === null || novoTexto.trim() === '') {
-                return;
-            }
-            
-            // Preservar pontuação se existir
-            if (typeof afazer === 'object') {
-                registro.afazeres[afazerIndex].texto = novoTexto.trim();
+
+        // Funções de modal
+        function closeAdminModal() {
+            document.getElementById('adminLoginModal').classList.remove('active');
+        }
+
+        function closeVendedorModal() {
+            document.getElementById('vendedorModal').classList.remove('active');
+        }
+
+        function closeEditarRegistroModal() {
+            document.getElementById('editarRegistroModal').classList.remove('active');
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('adminPassword');
+            const icon = document.querySelector('.toggle-password i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
-                registro.afazeres[afazerIndex] = novoTexto.trim();
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
-            
-            const index = registros.findIndex(r => r.id == registroId);
-            registros[index] = registro;
-            localStorage.setItem('registros', JSON.stringify(registros));
-            
-            const alertDiv = document.getElementById('validarAlert');
-            alertDiv.innerHTML = '<div class="alert alert-success">✓ Afazer editado com sucesso!</div>';
-            setTimeout(() => alertDiv.innerHTML = '', 2000);
-            
-            carregarAfazeresValidacao();
         }
+
+        // Inicializar
+        init();
     </script>
 </body>
 </html>
