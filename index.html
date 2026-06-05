@@ -7,40 +7,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #f6f7fb;
+            --bg-elev: #ffffff;
+            --border: #e5e7eb;
+            --border-soft: #eef0f4;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --text-soft: #9ca3af;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-soft: #eef2ff;
+            --success: #10b981;
+            --success-soft: #ecfdf5;
+            --warning: #f59e0b;
+            --warning-soft: #fffbeb;
+            --danger: #ef4444;
+            --danger-soft: #fef2f2;
+            --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04);
+            --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.06);
+            --radius: 12px;
+            --radius-sm: 8px;
         }
 
-            body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #000000;
-            color: #e4e4e4;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1280px; margin: 0 auto; }
 
         header {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
         }
 
         h1 {
-            font-size: 2rem;
-            color: #fff;
-            margin-bottom: 15px;
-            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 18px;
+            letter-spacing: -0.02em;
         }
 
         .header-info {
@@ -48,474 +66,388 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 12px;
         }
 
-        .metas-info {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
+        .metas-info { display: flex; gap: 10px; flex-wrap: wrap; }
 
         .meta-item {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 14px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-soft);
         }
-
-        .meta-item i {
-            font-size: 1.5rem;
-            color: #4CAF50;
-        }
-
-        .meta-item span {
-            font-size: 0.9rem;
-            color: #b0b0b0;
-        }
-
-        .meta-item strong {
-            color: #fff;
-            font-size: 1.1rem;
-        }
+        .meta-item i { font-size: 1rem; color: var(--primary); }
+        .meta-item span { font-size: 0.78rem; color: var(--text-muted); display: block; }
+        .meta-item strong { color: var(--text); font-size: 0.95rem; font-weight: 600; }
 
         .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
+            padding: 10px 18px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-family: inherit;
         }
+        .btn:active { opacity: 0.85; }
 
-        .btn-admin {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-admin:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-logout {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-logout:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-            color: white;
-        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
 
         .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--bg-elev);
+            color: var(--text);
+            border-color: var(--border);
         }
+        .btn-secondary:hover { background: var(--bg); }
 
-        .user-mode {
-            text-align: center;
-            padding: 10px;
-            background: rgba(76, 175, 80, 0.2);
-            border-radius: 8px;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            color: #4CAF50;
-            font-weight: 600;
-        }
+        .btn-admin { background: var(--text); color: white; }
+        .btn-admin:hover { opacity: 0.9; }
 
-        .admin-mode {
-            background: rgba(102, 126, 234, 0.2);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            color: #667eea;
+        .btn-danger {
+            background: var(--bg-elev);
+            color: var(--danger);
+            border-color: var(--border);
         }
+        .btn-danger:hover { background: var(--danger-soft); border-color: var(--danger); }
+
+        .btn-logout { background: var(--bg-elev); color: var(--text); border-color: var(--border); }
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
         }
 
         .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #fff;
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            color: var(--text);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            letter-spacing: -0.01em;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .form-group { margin-bottom: 16px; }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #b0b0b0;
+            margin-bottom: 6px;
+            color: var(--text);
             font-weight: 500;
+            font-size: 0.85rem;
         }
 
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            background: #111111;
-            color: #ffffff;
-            font-size: 1rem;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-elev);
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
-
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
         }
+        .form-group input::placeholder { color: var(--text-soft); }
 
         .vendedores-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 10px;
+            margin-bottom: 12px;
         }
 
         .vendedor-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 15px;
+            background: var(--bg);
+            border: 2px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 16px 10px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: border-color 0.15s ease, background 0.15s ease;
         }
-
-        .vendedor-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-
+        .vendedor-card:hover { background: var(--primary-soft); border-color: var(--primary); }
         .vendedor-card.selected {
-            border-color: currentColor;
-            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            background: var(--primary-soft);
         }
+        .vendedor-icon { font-size: 1.9rem; margin-bottom: 6px; }
+        .vendedor-name { font-weight: 600; font-size: 0.85rem; color: var(--text); }
 
-        .vendedor-icon {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .vendedor-name {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .admin-panel {
-            display: none;
-        }
-
-        .admin-panel.active {
-            display: block;
-        }
+        .admin-panel { display: none; }
+        .admin-panel.active { display: block; }
 
         .tabs {
             display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 4px;
+            margin-bottom: 22px;
+            border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
         }
-
         .tab {
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            padding: 10px 14px;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.3s ease;
-            color: #b0b0b0;
+            transition: color 0.15s ease, border-color 0.15s ease;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 0;
+            margin-bottom: -1px;
         }
-
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
+        .tab:hover { color: var(--text); }
         .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: transparent;
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: transparent;
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 12px;
+            font-size: 0.9rem;
         }
-
-        table th,
-        table td {
-            padding: 12px;
+        table th, table td {
+            padding: 11px 12px;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-soft);
         }
-
         table th {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            font-weight: 600;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-weight: 500;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
+        table tr:hover td { background: var(--bg); }
 
-        table tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-
-        .actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
+        .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-small { padding: 5px 10px; font-size: 0.8rem; }
 
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
-
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
-            background: #000000;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 500px;
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            max-width: 460px;
             width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 16px 48px rgba(15, 23, 42, 0.18);
         }
-
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
-
-        .modal-header h3 {
-            color: #fff;
-            font-size: 1.5rem;
-        }
-
+        .modal-header h3 { color: var(--text); font-size: 1.1rem; font-weight: 600; }
         .close-modal {
-            background: none;
+            background: transparent;
             border: none;
-            color: #fff;
-            font-size: 1.5rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
             cursor: pointer;
             padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 8px;
+            transition: background 0.15s ease;
         }
+        .close-modal:hover { background: var(--bg); }
 
-        .close-modal:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-top: 20px;
-        }
+        .chart-container { position: relative; height: 300px; margin-top: 16px; }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
         }
-
         .stat-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
+            background: var(--bg);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: left;
+        }
+        .stat-card i { font-size: 1.2rem; margin-bottom: 6px; opacity: 0.9; }
+        .stat-card .value { font-size: 1.6rem; font-weight: 700; margin: 2px 0; color: var(--text); letter-spacing: -0.02em; }
+        .stat-card .label { color: var(--text-muted); font-size: 0.78rem; font-weight: 500; }
+
+        .full-width { grid-column: 1 / -1; }
+
+        .empty-state { text-align: center; padding: 36px 20px; color: var(--text-muted); }
+        .empty-state i { font-size: 2.2rem; margin-bottom: 10px; opacity: 0.4; }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+        .status-pendente { background: var(--warning-soft); color: var(--warning); border: 1px solid #fde68a; }
+        .status-concluido { background: var(--success-soft); color: var(--success); border: 1px solid #a7f3d0; }
+
+        .dashboard-card {
+            background: var(--bg);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+        .dashboard-card h4 {
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 12px;
+            font-size: 1rem; font-weight: 600;
         }
 
-        .stat-card i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .stat-card .value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .stat-card .label {
-            color: #b0b0b0;
+        .tarefa-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 12px;
+            background: var(--bg-elev);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            margin-bottom: 6px;
             font-size: 0.9rem;
         }
+        .tarefa-item.concluida { opacity: 0.6; text-decoration: line-through; }
 
-        .full-width {
-            grid-column: 1 / -1;
+        .totais-row { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .totais-row span {
+            background: var(--bg-elev);
+            border: 1px solid var(--border-soft);
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
+        .totais-row strong { color: var(--text); font-weight: 600; }
+
+        /* Override Chart.js dark colors for light theme */
+        canvas { color: var(--text) !important; }
 
         @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            .header-info {
-                flex-direction: column;
-            }
-
-            .vendedores-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .main-content { grid-template-columns: 1fr; }
+            h1 { font-size: 1.25rem; }
+            .header-info { flex-direction: column; align-items: stretch; }
+            .vendedores-grid { grid-template-columns: repeat(2, 1fr); }
+            body { padding: 14px; }
+            .card { padding: 18px; }
         }
 
-        .password-input {
-            position: relative;
+        /* Toast notifications */
+        #toastContainer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
         }
-
-        .password-input input {
-            padding-right: 45px;
+        .toast {
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            color: var(--text);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+            min-width: 240px;
+            max-width: 360px;
+            font-size: 0.9rem;
+            pointer-events: auto;
+            animation: toastIn 0.2s ease;
         }
-
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #b0b0b0;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #b0b0b0;
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            opacity: 0.5;
+        .toast.success { border-left-color: var(--success); }
+        .toast.error   { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--warning); }
+        @keyframes toastIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to   { transform: translateX(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-chart-line"></i> Sistema de Registro de Metas e Resultados</h1>
+            <h1>📊 Sistema de Registro de Metas e Resultados</h1>
             <div class="header-info">
                 <div class="metas-info">
                     <div class="meta-item">
+                        <i class="fas fa-store"></i>
+                        <div>
+                            <span>🏪 Loja:</span>
+                            <strong id="lojaNomeHeader">Minha Loja</strong>
+                        </div>
+                    </div>
+                    <div class="meta-item">
                         <i class="fas fa-gift"></i>
                         <div>
-                            <span>Meta Mensal Cashback:</span>
+                            <span>🎁 Meta Cashback:</span>
                             <strong>100</strong>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-star"></i>
                         <div>
-                            <span>Meta Mensal Avaliações:</span>
+                            <span>⭐ Meta Avaliações:</span>
                             <strong>15</strong>
                         </div>
                     </div>
                 </div>
                 <div>
-                    <div id="userModeIndicator" class="user-mode">
-                        <i class="fas fa-user"></i> Modo: Usuário Padrão
-                    </div>
-                </div>
-                <div>
-                    <button id="adminToggle" class="btn btn-admin">
-                        <i class="fas fa-user-shield"></i>
-                        Entrar como Administrador
-                    </button>
-                    <button id="logoutBtn" class="btn btn-logout" style="display: none;">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Sair do Admin
+                    <button id="abrirConfig" class="btn btn-secondary">
+                        <i class="fas fa-cog"></i> ⚙️ Configurar Loja
                     </button>
                 </div>
             </div>
@@ -523,61 +455,130 @@
 
         <div class="main-content">
             <div class="card">
-                <h2><i class="fas fa-plus-circle"></i> Registrar Dados Diários</h2>
+                <h2>📝 Registrar Dados do Dia</h2>
                 <form id="registroForm">
                     <div class="form-group">
-                        <label for="dataRegistro">Data</label>
+                        <label for="dataRegistro">📅 Data</label>
                         <input type="date" id="dataRegistro" required>
                     </div>
-                    
+
                     <div class="form-group">
-                        <label>Selecione o Vendedor</label>
+                        <label>👤 Passo 1 — Selecione o Funcionário</label>
                         <div id="vendedoresGrid" class="vendedores-grid"></div>
                         <input type="hidden" id="vendedorSelecionado" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="cashback">Quantidade de Cashback</label>
-                        <input type="number" id="cashback" min="0" required placeholder="0">
-                    </div>
+                    <div id="passo2" style="display:none;">
+                        <hr style="border:none; border-top:1px solid #eef0f4; margin: 20px 0;">
+                        <h3 style="color:#1f2937; margin-bottom:15px;">✅ Passo 2 — Afazeres realizados</h3>
 
-                    <div class="form-group">
-                        <label for="avaliacoes">Quantidade de Avaliações</label>
-                        <input type="number" id="avaliacoes" min="0" required placeholder="0">
-                    </div>
+                        <div class="form-group">
+                            <label>📋 Selecione dos cadastrados</label>
+                            <div id="afazeresCheckboxes" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; padding:10px; background:#f6f7fb; border:1px solid #eef0f4; border-radius:8px;"></div>
+                        </div>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">
-                        <i class="fas fa-save"></i>
-                        Salvar Dados do Dia
-                    </button>
+                        <div class="form-group">
+                            <label for="tarefaAvulsa">➕ Adicionar tarefa avulsa</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="tarefaAvulsa" placeholder="Digite uma tarefa extra...">
+                                <button type="button" id="btnAddAvulsa" class="btn btn-secondary">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <div id="avulsasList" style="margin-top:10px; display:flex; flex-direction:column; gap:6px;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cashback">🎁 Quantidade de Cashback</label>
+                            <input type="number" id="cashback" min="0" required placeholder="0" value="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="avaliacoes">⭐ Quantidade de Avaliações</label>
+                            <input type="number" id="avaliacoes" min="0" required placeholder="0" value="0">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            💾 Salvar Dados do Dia
+                        </button>
+                    </div>
                 </form>
             </div>
 
             <div class="card">
-                <h2><i class="fas fa-calendar-day"></i> Resumo de Hoje</h2>
+                <h2>📅 Resumo de Hoje</h2>
                 <div id="resumoHoje"></div>
             </div>
         </div>
 
-        <div id="adminPanel" class="admin-panel card full-width">
-            <h2><i class="fas fa-user-shield"></i> Painel Administrativo</h2>
-            
+        <div id="adminPanel" class="admin-panel card full-width active">
+            <h2>🛠️ Painel de Gestão</h2>
+
             <div class="tabs">
-                <div class="tab active" data-tab="relatorios">
-                    <i class="fas fa-chart-bar"></i> Relatórios
+                <div class="tab active" data-tab="dashboardEnc">
+                    📋 Dashboard Encarregado
+                </div>
+                <div class="tab" data-tab="cadastroAfazeres">
+                    ➕ Cadastrar Afazeres
+                </div>
+                <div class="tab" data-tab="tarefas">
+                    ✅ Tarefas Lançadas
+                </div>
+                <div class="tab" data-tab="relatorios">
+                    📊 Relatórios
                 </div>
                 <div class="tab" data-tab="gerenciar">
-                    <i class="fas fa-edit"></i> Gerenciar Dados
-                </div>
-                <div class="tab" data-tab="vendedores">
-                    <i class="fas fa-users"></i> Gerenciar Vendedores
+                    ✏️ Gerenciar Dados
                 </div>
                 <div class="tab" data-tab="graficos">
-                    <i class="fas fa-chart-pie"></i> Gráficos de Desempenho
+                    📈 Gráficos
                 </div>
             </div>
 
-            <div id="relatorios" class="tab-content active">
+            <div id="cadastroAfazeres" class="tab-content">
+                <button id="adicionarAfazerCadastro" class="btn btn-primary" style="margin-bottom: 20px;">
+                    ➕ Adicionar Afazer
+                </button>
+                <p style="color:#6b7280; margin-bottom:15px;">📌 Afazeres recorrentes ficam disponíveis no formulário diário do funcionário.</p>
+                <div id="afazeresCadastroLista"></div>
+            </div>
+
+            <div id="dashboardEnc" class="tab-content active">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label for="dashboardData">Data do Relatório</label>
+                        <input type="date" id="dashboardData">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="opacity: 0;">.</label>
+                        <button id="atualizarDashboard" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-sync-alt"></i>
+                            Atualizar Dashboard
+                        </button>
+                    </div>
+                </div>
+                <div id="dashboardEncResultado"></div>
+            </div>
+
+            <div id="tarefas" class="tab-content">
+                <button id="adicionarTarefa" class="btn btn-primary" style="margin-bottom: 20px;">
+                    <i class="fas fa-plus"></i>
+                    Adicionar Nova Tarefa
+                </button>
+                <div class="form-group">
+                    <label for="filtroTarefaVendedor">Filtrar por Funcionário</label>
+                    <select id="filtroTarefaVendedor">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="filtroTarefaData">Filtrar por Data</label>
+                    <input type="date" id="filtroTarefaData">
+                </div>
+                <div id="tarefasLista"></div>
+            </div>
+
+            <div id="relatorios" class="tab-content">
                 <div class="form-group">
                     <label for="vendedorRelatorio">Vendedor (opcional para relatório individual)</label>
                     <select id="vendedorRelatorio">
@@ -614,14 +615,6 @@
                 <div id="gerenciarLista"></div>
             </div>
 
-            <div id="vendedores" class="tab-content">
-                <button id="adicionarVendedor" class="btn btn-primary" style="margin-bottom: 20px;">
-                    <i class="fas fa-user-plus"></i>
-                    Adicionar Novo Vendedor
-                </button>
-                <div id="vendedoresLista"></div>
-            </div>
-
             <div id="graficos" class="tab-content">
                 <div class="form-group">
                     <label for="mesGrafico">Selecione o Mês</label>
@@ -636,61 +629,89 @@
         </div>
     </div>
 
-    <!-- Modal Login Admin -->
-    <div id="adminLoginModal" class="modal">
+    <!-- Modal Configurações da Loja -->
+    <div id="configModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Login de Administrador</h3>
-                <button class="close-modal" onclick="closeAdminModal()">
+                <h3>⚙️ Configurações da Loja</h3>
+                <button class="close-modal" onclick="closeConfigModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="adminLoginForm">
-                <div class="form-group password-input">
-                    <label for="adminPassword">Senha de Administrador</label>
-                    <input type="password" id="adminPassword" required placeholder="Digite a senha">
-                    <button type="button" class="toggle-password" onclick="togglePassword()">
-                        <i class="fas fa-eye"></i>
-                    </button>
+            <form id="configForm">
+                <div class="form-group">
+                    <label for="lojaNome">🏪 Nome da Loja</label>
+                    <input type="text" id="lojaNome" required placeholder="Ex: Loja Centro">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Entrar
+                    💾 Salvar
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Modal Adicionar/Editar Vendedor -->
-    <div id="vendedorModal" class="modal">
+    <!-- Modal Cadastrar Afazer (template) -->
+    <div id="afazerCadastroModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="vendedorModalTitle">Adicionar Vendedor</h3>
-                <button class="close-modal" onclick="closeVendedorModal()">
+                <h3 id="afazerCadastroModalTitle">➕ Cadastrar Afazer</h3>
+                <button class="close-modal" onclick="closeAfazerCadastroModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <form id="vendedorForm">
-                <input type="hidden" id="vendedorId">
+            <form id="afazerCadastroForm">
+                <input type="hidden" id="afazerCadastroId">
                 <div class="form-group">
-                    <label for="vendedorNome">Nome do Vendedor</label>
-                    <input type="text" id="vendedorNome" required placeholder="Digite o nome">
+                    <label for="afazerCadastroDescricao">📝 Descrição</label>
+                    <input type="text" id="afazerCadastroDescricao" required placeholder="Ex: Organizar prateleira A1">
                 </div>
                 <div class="form-group">
-                    <label for="vendedorCor">Cor</label>
-                    <input type="color" id="vendedorCor" required>
+                    <label for="afazerCadastroRecorrencia">🔁 Recorrência</label>
+                    <select id="afazerCadastroRecorrencia" required>
+                        <option value="diaria">📅 Diária (todo dia)</option>
+                        <option value="semanal">🗓️ Semanal (escolher dias)</option>
+                        <option value="avulsa">🔹 Avulsa (sem recorrência)</option>
+                    </select>
+                </div>
+                <div class="form-group" id="afazerDiasSemanaGroup" style="display:none;">
+                    <label>📌 Dias da semana</label>
+                    <div id="diasSemanaChecks" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    💾 Salvar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar/Editar Tarefa -->
+    <div id="tarefaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tarefaModalTitle">Adicionar Tarefa</h3>
+                <button class="close-modal" onclick="closeTarefaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="tarefaForm">
+                <input type="hidden" id="tarefaId">
+                <div class="form-group">
+                    <label for="tarefaVendedor">Funcionário</label>
+                    <select id="tarefaVendedor" required></select>
                 </div>
                 <div class="form-group">
-                    <label for="vendedorIcone">Ícone (FontAwesome class)</label>
-                    <select id="vendedorIcone" required>
-                        <option value="fa-user-tie">👔 Gravata</option>
-                        <option value="fa-user-ninja">🥷 Ninja</option>
-                        <option value="fa-user-astronaut">🚀 Astronauta</option>
-                        <option value="fa-user-secret">🕵️ Secreto</option>
-                        <option value="fa-user-graduate">🎓 Graduado</option>
-                        <option value="fa-crown">👑 Coroa</option>
-                        <option value="fa-trophy">🏆 Troféu</option>
-                        <option value="fa-star">⭐ Estrela</option>
+                    <label for="tarefaData">Data</label>
+                    <input type="date" id="tarefaData" required>
+                </div>
+                <div class="form-group">
+                    <label for="tarefaDescricao">Descrição do Afazer</label>
+                    <input type="text" id="tarefaDescricao" required placeholder="Ex: Organizar prateleira A1">
+                </div>
+                <div class="form-group">
+                    <label for="tarefaStatus">Status</label>
+                    <select id="tarefaStatus" required>
+                        <option value="pendente">Pendente</option>
+                        <option value="concluido">Concluído</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -732,23 +753,83 @@
         </div>
     </div>
 
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <!-- Modal de confirmação -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="confirmTitle">Confirmar</h3>
+                <button class="close-modal" onclick="closeConfirm(false)">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p id="confirmMessage" style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem;"></p>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeConfirm(false)">Cancelar</button>
+                <button class="btn btn-danger" id="confirmOkBtn" onclick="closeConfirm(true)">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configurações e dados iniciais
-        const ADMIN_PASSWORD = '19021998';
         const META_CASHBACK = 100;
         const META_AVALIACOES = 15;
-        
-        let isAdmin = false;
+        const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
         let vendedores = [];
         let registros = [];
+        let tarefas = [];
+        let afazeresCadastrados = [];
+        let lojaNome = 'Minha Loja';
+        let avulsasTemp = [];
+
+        // ============================
+        // UI helpers (toast + confirm)
+        // ============================
+        function showToast(msg, type = 'success') {
+            const c = document.getElementById('toastContainer');
+            if (!c) return;
+            const t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => {
+                t.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                t.style.opacity = '0';
+                t.style.transform = 'translateX(20px)';
+                setTimeout(() => t.remove(), 300);
+            }, 2600);
+        }
+
+        let _confirmResolve = null;
+        function customConfirm(message, title = 'Confirmar') {
+            return new Promise((resolve) => {
+                _confirmResolve = resolve;
+                document.getElementById('confirmTitle').textContent = title;
+                document.getElementById('confirmMessage').textContent = message;
+                document.getElementById('confirmModal').classList.add('active');
+            });
+        }
+        function closeConfirm(result) {
+            document.getElementById('confirmModal').classList.remove('active');
+            if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
+        }
 
         // Inicialização
         function init() {
             carregarDados();
             setupEventListeners();
             setDataHoje();
+            document.getElementById('lojaNomeHeader').textContent = lojaNome;
             renderVendedores();
             atualizarResumoHoje();
+            atualizarSelectsVendedores();
+            renderDiasSemanaChecks();
+            // A aba ativa por padrão é dashboardEnc — só ela é renderizada
+            renderDashboardEncarregado();
         }
 
         function carregarDados() {
@@ -771,6 +852,34 @@
             if (registrosStorage) {
                 registros = JSON.parse(registrosStorage);
             }
+
+            const tarefasStorage = localStorage.getItem('tarefas');
+            if (tarefasStorage) {
+                tarefas = JSON.parse(tarefasStorage);
+            }
+
+            const afazeresCadStorage = localStorage.getItem('afazeresCadastrados');
+            if (afazeresCadStorage) {
+                afazeresCadastrados = JSON.parse(afazeresCadStorage);
+            }
+
+            const lojaStorage = localStorage.getItem('lojaNome');
+            if (lojaStorage) {
+                lojaNome = lojaStorage;
+            }
+        }
+
+        function salvarAfazeresCadastrados() {
+            localStorage.setItem('afazeresCadastrados', JSON.stringify(afazeresCadastrados));
+        }
+
+        function salvarLojaNome() {
+            localStorage.setItem('lojaNome', lojaNome);
+            document.getElementById('lojaNomeHeader').textContent = lojaNome;
+        }
+
+        function salvarTarefas() {
+            localStorage.setItem('tarefas', JSON.stringify(tarefas));
         }
 
         function salvarVendedores() {
@@ -782,97 +891,96 @@
         }
 
         function setupEventListeners() {
-            document.getElementById('adminToggle').addEventListener('click', () => {
-                document.getElementById('adminLoginModal').classList.add('active');
+            // Config loja
+            document.getElementById('abrirConfig').addEventListener('click', () => {
+                document.getElementById('lojaNome').value = lojaNome;
+                document.getElementById('configModal').classList.add('active');
             });
-
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                isAdmin = false;
-                atualizarModoUsuario();
-            });
-
-            document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            document.getElementById('configForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const senha = document.getElementById('adminPassword').value;
-                if (senha === ADMIN_PASSWORD) {
-                    isAdmin = true;
-                    atualizarModoUsuario();
-                    closeAdminModal();
-                    document.getElementById('adminPassword').value = '';
-                } else {
-                    alert('Senha incorreta!');
-                }
+                lojaNome = document.getElementById('lojaNome').value.trim() || 'Minha Loja';
+                salvarLojaNome();
+                closeConfigModal();
+                showToast('🏪 Loja atualizada!', 'success');
             });
 
             document.getElementById('registroForm').addEventListener('submit', salvarRegistro);
-            
-            // Tabs
+
+            // Tarefa avulsa no form principal
+            document.getElementById('btnAddAvulsa').addEventListener('click', adicionarAvulsa);
+            document.getElementById('tarefaAvulsa').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); adicionarAvulsa(); }
+            });
+
+            // Tabs (lazy render)
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                     tab.classList.add('active');
-                    document.getElementById(tab.dataset.tab).classList.add('active');
+                    const target = tab.dataset.tab;
+                    document.getElementById(target).classList.add('active');
+                    if (target === 'dashboardEnc') renderDashboardEncarregado();
+                    else if (target === 'tarefas') renderTarefasLista();
+                    else if (target === 'gerenciar') renderGerenciarLista();
+                    else if (target === 'cadastroAfazeres') renderAfazeresCadastroLista();
                 });
             });
 
             // Relatórios
             document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
-            
+
             // Gráficos
             document.getElementById('gerarGraficos').addEventListener('click', gerarGraficos);
-            
-            // Vendedores
-            document.getElementById('adicionarVendedor').addEventListener('click', () => {
-                document.getElementById('vendedorModalTitle').textContent = 'Adicionar Vendedor';
-                document.getElementById('vendedorId').value = '';
-                document.getElementById('vendedorNome').value = '';
-                document.getElementById('vendedorCor').value = '#3498db';
-                document.getElementById('vendedorIcone').value = 'fa-user-tie';
-                document.getElementById('vendedorModal').classList.add('active');
-            });
 
-            document.getElementById('vendedorForm').addEventListener('submit', salvarVendedor);
             document.getElementById('editarRegistroForm').addEventListener('submit', salvarEdicaoRegistro);
 
             // Filtro de vendedor em gerenciar
             document.getElementById('filtroVendedor').addEventListener('change', renderGerenciarLista);
+
+            // Tarefas
+            document.getElementById('adicionarTarefa').addEventListener('click', () => {
+                document.getElementById('tarefaModalTitle').textContent = '➕ Adicionar Tarefa';
+                document.getElementById('tarefaId').value = '';
+                document.getElementById('tarefaDescricao').value = '';
+                document.getElementById('tarefaStatus').value = 'pendente';
+                document.getElementById('tarefaData').value = new Date().toISOString().split('T')[0];
+                preencherSelectTarefaVendedor();
+                document.getElementById('tarefaModal').classList.add('active');
+            });
+            document.getElementById('tarefaForm').addEventListener('submit', salvarTarefa);
+            document.getElementById('filtroTarefaVendedor').addEventListener('change', renderTarefasLista);
+            document.getElementById('filtroTarefaData').addEventListener('change', renderTarefasLista);
+
+            // Dashboard Encarregado
+            document.getElementById('atualizarDashboard').addEventListener('click', renderDashboardEncarregado);
+
+            // Cadastro de Afazeres (templates)
+            document.getElementById('adicionarAfazerCadastro').addEventListener('click', () => abrirAfazerCadastroModal());
+            document.getElementById('afazerCadastroForm').addEventListener('submit', salvarAfazerCadastro);
+            document.getElementById('afazerCadastroRecorrencia').addEventListener('change', (e) => {
+                document.getElementById('afazerDiasSemanaGroup').style.display =
+                    e.target.value === 'semanal' ? 'block' : 'none';
+            });
         }
 
         function setDataHoje() {
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('dataRegistro').value = hoje;
-            
+            document.getElementById('dashboardData').value = hoje;
+
             // Set current month for charts
             const mesAtual = new Date().toISOString().slice(0, 7);
             document.getElementById('mesGrafico').value = mesAtual;
+
+            document.getElementById('dataRegistro').addEventListener('change', () => {
+                if (document.getElementById('vendedorSelecionado').value) {
+                    renderAfazeresCheckboxes();
+                }
+            });
         }
 
-        function atualizarModoUsuario() {
-            const indicator = document.getElementById('userModeIndicator');
-            const adminPanel = document.getElementById('adminPanel');
-            const adminToggle = document.getElementById('adminToggle');
-            const logoutBtn = document.getElementById('logoutBtn');
-
-            if (isAdmin) {
-                indicator.innerHTML = '<i class="fas fa-user-shield"></i> Modo: Administrador';
-                indicator.classList.remove('user-mode');
-                indicator.classList.add('admin-mode');
-                adminPanel.classList.add('active');
-                adminToggle.style.display = 'none';
-                logoutBtn.style.display = 'inline-flex';
-                atualizarSelectsVendedores();
-                renderGerenciarLista();
-                renderVendedoresAdmin();
-            } else {
-                indicator.innerHTML = '<i class="fas fa-user"></i> Modo: Usuário Padrão';
-                indicator.classList.remove('admin-mode');
-                indicator.classList.add('user-mode');
-                adminPanel.classList.remove('active');
-                adminToggle.style.display = 'inline-flex';
-                logoutBtn.style.display = 'none';
-            }
-        }
+        function atualizarModoUsuario() { /* removido — sem mais modo admin */ }
 
         function renderVendedores() {
             const grid = document.getElementById('vendedoresGrid');
@@ -897,20 +1005,84 @@
             document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             document.getElementById('vendedorSelecionado').value = id;
+            document.getElementById('passo2').style.display = 'block';
+            avulsasTemp = [];
+            renderAvulsasList();
+            renderAfazeresCheckboxes();
+        }
+
+        // Renderiza os checkboxes do passo 2 baseados nos afazeres cadastrados
+        // e na data + dia da semana (filtrando recorrência)
+        function renderAfazeresCheckboxes() {
+            const container = document.getElementById('afazeresCheckboxes');
+            const data = document.getElementById('dataRegistro').value;
+            const diaSemana = data ? new Date(data + 'T00:00:00').getDay() : null;
+
+            const relevantes = afazeresCadastrados.filter(a => {
+                if (a.recorrencia === 'diaria') return true;
+                if (a.recorrencia === 'avulsa') return true;
+                if (a.recorrencia === 'semanal') return a.diasSemana && a.diasSemana.includes(diaSemana);
+                return false;
+            });
+
+            if (relevantes.length === 0) {
+                container.innerHTML = '<p style="color:#9ca3af; font-style:italic;">📭 Nenhum afazer cadastrado. Cadastre na aba "Cadastrar Afazeres".</p>';
+                return;
+            }
+
+            container.innerHTML = relevantes.map(a => {
+                const emoji = a.recorrencia === 'diaria' ? '📅' : (a.recorrencia === 'semanal' ? '🗓️' : '🔹');
+                return `
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px; border-radius:6px;">
+                        <input type="checkbox" class="afazerCheck" value="${a.descricao.replace(/"/g,'&quot;')}">
+                        <span>${emoji} ${a.descricao}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function adicionarAvulsa() {
+            const input = document.getElementById('tarefaAvulsa');
+            const v = input.value.trim();
+            if (!v) return;
+            avulsasTemp.push(v);
+            input.value = '';
+            renderAvulsasList();
+        }
+
+        function renderAvulsasList() {
+            const c = document.getElementById('avulsasList');
+            if (avulsasTemp.length === 0) { c.innerHTML = ''; return; }
+            c.innerHTML = avulsasTemp.map((t, i) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid #eef0f4; padding:8px 12px; border-radius:6px;">
+                    <span>➕ ${t}</span>
+                    <button type="button" class="btn btn-danger btn-small" onclick="removerAvulsa(${i})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removerAvulsa(i) {
+            avulsasTemp.splice(i, 1);
+            renderAvulsasList();
         }
 
         function salvarRegistro(e) {
             e.preventDefault();
-            
+
             const data = document.getElementById('dataRegistro').value;
             const vendedorId = parseInt(document.getElementById('vendedorSelecionado').value);
-            const cashback = parseInt(document.getElementById('cashback').value);
-            const avaliacoes = parseInt(document.getElementById('avaliacoes').value);
+            const cashback = parseInt(document.getElementById('cashback').value) || 0;
+            const avaliacoes = parseInt(document.getElementById('avaliacoes').value) || 0;
 
             if (!vendedorId) {
-                alert('Por favor, selecione um vendedor!');
+                showToast('⚠️ Por favor, selecione um funcionário!', 'warning');
                 return;
             }
+
+            const checadas = Array.from(document.querySelectorAll('.afazerCheck:checked')).map(c => c.value);
+            const tarefasFeitas = [...checadas, ...avulsasTemp];
 
             const registro = {
                 id: Date.now(),
@@ -918,6 +1090,7 @@
                 vendedorId,
                 cashback,
                 avaliacoes,
+                tarefas: tarefasFeitas,
                 timestamp: new Date().toISOString()
             };
 
@@ -925,17 +1098,18 @@
             salvarRegistros();
 
             // Limpar formulário
-            document.getElementById('cashback').value = '';
-            document.getElementById('avaliacoes').value = '';
+            document.getElementById('cashback').value = '0';
+            document.getElementById('avaliacoes').value = '0';
             document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('vendedorSelecionado').value = '';
+            document.getElementById('passo2').style.display = 'none';
+            avulsasTemp = [];
 
-            alert('Dados salvos com sucesso!');
+            showToast('✅ Dados salvos com sucesso!', 'success');
             atualizarResumoHoje();
-            
-            if (isAdmin) {
-                renderGerenciarLista();
-            }
+            // Re-renders pesados acontecem só quando a aba estiver ativa
+            if (document.getElementById('gerenciar').classList.contains('active')) renderGerenciarLista();
+            if (document.getElementById('dashboardEnc').classList.contains('active')) renderDashboardEncarregado();
         }
 
         function atualizarResumoHoje() {
@@ -980,7 +1154,7 @@
         }
 
         function atualizarSelectsVendedores() {
-            const selects = ['vendedorRelatorio', 'filtroVendedor'];
+            const selects = ['vendedorRelatorio', 'filtroVendedor', 'filtroTarefaVendedor'];
             selects.forEach(selectId => {
                 const select = document.getElementById(selectId);
                 const valorAtual = select.value;
@@ -1007,106 +1181,131 @@
             const vendedorId = document.getElementById('vendedorRelatorio').value;
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
-            
+
             let registrosFiltrados = [...registros];
-            
+
             if (vendedorId) {
                 registrosFiltrados = registrosFiltrados.filter(r => r.vendedorId == vendedorId);
             }
-            
             if (dataInicio) {
                 registrosFiltrados = registrosFiltrados.filter(r => r.data >= dataInicio);
             }
-            
             if (dataFim) {
                 registrosFiltrados = registrosFiltrados.filter(r => r.data <= dataFim);
             }
-            
+
             const container = document.getElementById('relatorioResultado');
-            
+
             if (registrosFiltrados.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-inbox"></i>
+                        📭
                         <p>Nenhum registro encontrado para os filtros selecionados</p>
                     </div>
                 `;
                 return;
             }
 
-            // Calcular totais por vendedor
-            const totaisPorVendedor = {};
-            registrosFiltrados.forEach(reg => {
-                if (!totaisPorVendedor[reg.vendedorId]) {
-                    totaisPorVendedor[reg.vendedorId] = { cashback: 0, avaliacoes: 0 };
+            // Agrupa por data, depois por funcionário
+            const porData = {};
+            registrosFiltrados.forEach(r => {
+                if (!porData[r.data]) porData[r.data] = {};
+                if (!porData[r.data][r.vendedorId]) {
+                    porData[r.data][r.vendedorId] = { cashback: 0, avaliacoes: 0, tarefas: [] };
                 }
-                totaisPorVendedor[reg.vendedorId].cashback += reg.cashback;
-                totaisPorVendedor[reg.vendedorId].avaliacoes += reg.avaliacoes;
+                porData[r.data][r.vendedorId].cashback += r.cashback;
+                porData[r.data][r.vendedorId].avaliacoes += r.avaliacoes;
+                if (Array.isArray(r.tarefas)) {
+                    porData[r.data][r.vendedorId].tarefas.push(...r.tarefas);
+                }
             });
 
-            let html = '<div class="stats-grid">';
-            
-            Object.keys(totaisPorVendedor).forEach(vendedorId => {
-                const vendedor = vendedores.find(v => v.id == vendedorId);
-                if (vendedor) {
-                    const totais = totaisPorVendedor[vendedorId];
-                    const progressoCashback = ((totais.cashback / META_CASHBACK) * 100).toFixed(1);
-                    const progressoAvaliacoes = ((totais.avaliacoes / META_AVALIACOES) * 100).toFixed(1);
-                    
+            // Também agrega tarefas avulsas da coleção "tarefas" (afazeres lançados separadamente)
+            const datasOrdenadas = Object.keys(porData).sort((a, b) => new Date(b) - new Date(a));
+
+            let html = '';
+            let textoCopia = '';
+
+            datasOrdenadas.forEach(data => {
+                const dataF = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+                const tituloRel = `📋 Relatório ${lojaNome} — ${dataF}`;
+
+                html += `
+                    <div class="dashboard-card" style="background: #eef2ff; border-color: #c7d2fe;">
+                        <h3 style="color:#1f2937; margin-bottom:18px; font-size:1.25rem; font-weight:600;">${tituloRel}</h3>
+                `;
+                textoCopia += `\n${tituloRel}\n${'─'.repeat(40)}\n`;
+
+                const vendedoresNaData = porData[data];
+                Object.keys(vendedoresNaData).forEach(vid => {
+                    const v = vendedores.find(x => x.id == vid);
+                    if (!v) return;
+                    const dadosV = vendedoresNaData[vid];
+
+                    // Inclui também tarefas avulsas lançadas pela aba "Tarefas Lançadas"
+                    const tarefasExtra = tarefas
+                        .filter(t => t.data === data && t.vendedorId == vid)
+                        .map(t => `${t.status === 'concluido' ? '✅' : '⏳'} ${t.descricao}`);
+
+                    const listaTarefas = [
+                        ...dadosV.tarefas.map(t => `✅ ${t}`),
+                        ...tarefasExtra
+                    ];
+
                     html += `
-                        <div class="stat-card" style="border-top: 3px solid ${vendedor.cor};">
-                            <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor}; font-size: 2.5rem;"></i>
-                            <h3 style="margin: 10px 0; color: ${vendedor.cor};">${vendedor.nome}</h3>
-                            <div style="margin: 15px 0;">
-                                <div class="label">Cashback Total</div>
-                                <div class="value" style="color: ${vendedor.cor};">${totais.cashback}</div>
-                                <div class="label">${progressoCashback}% da meta</div>
+                        <div style="margin: 15px 0; padding: 12px; background: #ffffff; border: 1px solid #eef0f4; border-radius: 8px; border-left: 4px solid ${v.cor};">
+                            <h4 style="color:${v.cor}; margin-bottom:10px; font-size:1.1rem;">
+                                <i class="fas ${v.icone}"></i> 👤 ${v.nome}
+                            </h4>
+                            <div style="margin-left:10px;">
+                                ${listaTarefas.length === 0
+                                    ? '<p style="color:#9ca3af; font-style:italic;">— nenhuma tarefa registrada —</p>'
+                                    : listaTarefas.map(t => `<div>• ${t}</div>`).join('')
+                                }
                             </div>
-                            <div style="margin: 15px 0;">
-                                <div class="label">Avaliações Total</div>
-                                <div class="value" style="color: ${vendedor.cor};">${totais.avaliacoes}</div>
-                                <div class="label">${progressoAvaliacoes}% da meta</div>
+                            <div class="totais-row" style="margin-top:12px;">
+                                <span>🎁 Cashback do dia: <strong>${dadosV.cashback}</strong></span>
+                                <span>⭐ Avaliações do dia: <strong>${dadosV.avaliacoes}</strong></span>
                             </div>
                         </div>
                     `;
-                }
+
+                    textoCopia += `\n👤 ${v.nome}\n`;
+                    if (listaTarefas.length === 0) {
+                        textoCopia += `  — nenhuma tarefa registrada —\n`;
+                    } else {
+                        listaTarefas.forEach(t => { textoCopia += `  • ${t}\n`; });
+                    }
+                    textoCopia += `  🎁 Cashback do dia: ${dadosV.cashback}\n`;
+                    textoCopia += `  ⭐ Avaliações do dia: ${dadosV.avaliacoes}\n`;
+                });
+
+                html += `</div>`;
             });
-            
-            html += '</div>';
-            
-            // Tabela detalhada
-            html += `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Vendedor</th>
-                            <th>Cashback</th>
-                            <th>Avaliações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            registrosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(reg => {
-                const vendedor = vendedores.find(v => v.id === reg.vendedorId);
-                if (vendedor) {
-                    const dataFormatada = new Date(reg.data + 'T00:00:00').toLocaleDateString('pt-BR');
-                    html += `
-                        <tr>
-                            <td>${dataFormatada}</td>
-                            <td style="color: ${vendedor.cor}; font-weight: 600;">
-                                <i class="fas ${vendedor.icone}"></i> ${vendedor.nome}
-                            </td>
-                            <td>${reg.cashback}</td>
-                            <td>${reg.avaliacoes}</td>
-                        </tr>
-                    `;
-                }
-            });
-            
-            html += '</tbody></table>';
+
+            // Botão copiar
+            html = `
+                <div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+                    <button class="btn btn-secondary" onclick="copiarRelatorio()">📋 Copiar relatório (texto)</button>
+                </div>
+                <textarea id="relatorioTextoCopia" style="position:absolute; left:-9999px;">${textoCopia.trim()}</textarea>
+            ` + html;
+
             container.innerHTML = html;
+        }
+
+        function copiarRelatorio() {
+            const ta = document.getElementById('relatorioTextoCopia');
+            ta.style.position = 'static';
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast('📋 Relatório copiado para a área de transferência!', 'success');
+            } catch (err) {
+                showToast('Erro ao copiar.', 'error');
+            }
+            ta.style.position = 'absolute';
+            ta.style.left = '-9999px';
         }
 
         function renderGerenciarLista() {
@@ -1199,121 +1398,27 @@
                 closeEditarRegistroModal();
                 renderGerenciarLista();
                 atualizarResumoHoje();
-                alert('Registro atualizado com sucesso!');
+                showToast('Registro atualizado com sucesso!', 'success');
             }
         }
 
         function excluirRegistro(id) {
-            if (confirm('Tem certeza que deseja excluir este registro?')) {
+            customConfirm('Tem certeza que deseja excluir este registro?', '🗑️ Excluir registro').then(ok => {
+                if (!ok) return;
                 registros = registros.filter(r => r.id !== id);
                 salvarRegistros();
                 renderGerenciarLista();
                 atualizarResumoHoje();
-                alert('Registro excluído com sucesso!');
-            }
-        }
-
-        function renderVendedoresAdmin() {
-            const container = document.getElementById('vendedoresLista');
-            
-            let html = `
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Ícone</th>
-                            <th>Nome</th>
-                            <th>Cor</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-            
-            vendedores.forEach(vendedor => {
-                html += `
-                    <tr>
-                        <td>
-                            <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor}; font-size: 2rem;"></i>
-                        </td>
-                        <td style="font-weight: 600;">${vendedor.nome}</td>
-                        <td>
-                            <div style="width: 40px; height: 40px; background: ${vendedor.cor}; border-radius: 5px;"></div>
-                        </td>
-                        <td>
-                            <div class="actions">
-                                <button class="btn btn-secondary btn-small" onclick="editarVendedor(${vendedor.id})">
-                                    <i class="fas fa-edit"></i> Editar
-                                </button>
-                                <button class="btn btn-danger btn-small" onclick="excluirVendedor(${vendedor.id})">
-                                    <i class="fas fa-trash"></i> Excluir
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                showToast('Registro excluído!', 'success');
             });
-            
-            html += '</tbody></table>';
-            container.innerHTML = html;
         }
 
-        function editarVendedor(id) {
-            const vendedor = vendedores.find(v => v.id === id);
-            if (!vendedor) return;
-            
-            document.getElementById('vendedorModalTitle').textContent = 'Editar Vendedor';
-            document.getElementById('vendedorId').value = vendedor.id;
-            document.getElementById('vendedorNome').value = vendedor.nome;
-            document.getElementById('vendedorCor').value = vendedor.cor;
-            document.getElementById('vendedorIcone').value = vendedor.icone;
-            document.getElementById('vendedorModal').classList.add('active');
-        }
-
-        function salvarVendedor(e) {
-            e.preventDefault();
-            
-            const id = document.getElementById('vendedorId').value;
-            const nome = document.getElementById('vendedorNome').value;
-            const cor = document.getElementById('vendedorCor').value;
-            const icone = document.getElementById('vendedorIcone').value;
-            
-            if (id) {
-                // Editar
-                const vendedor = vendedores.find(v => v.id == id);
-                if (vendedor) {
-                    vendedor.nome = nome;
-                    vendedor.cor = cor;
-                    vendedor.icone = icone;
-                }
-            } else {
-                // Adicionar
-                const novoId = vendedores.length > 0 ? Math.max(...vendedores.map(v => v.id)) + 1 : 1;
-                vendedores.push({ id: novoId, nome, cor, icone });
-            }
-            
-            salvarVendedores();
-            closeVendedorModal();
-            renderVendedores();
-            renderVendedoresAdmin();
-            atualizarSelectsVendedores();
-            alert('Vendedor salvo com sucesso!');
-        }
-
-        function excluirVendedor(id) {
-            if (confirm('Tem certeza? Todos os registros deste vendedor serão mantidos.')) {
-                vendedores = vendedores.filter(v => v.id !== id);
-                salvarVendedores();
-                renderVendedores();
-                renderVendedoresAdmin();
-                atualizarSelectsVendedores();
-                alert('Vendedor excluído com sucesso!');
-            }
-        }
+        // Funções de gerenciamento de vendedores foram removidas — funcionários são fixos.
 
         function gerarGraficos() {
             const mes = document.getElementById('mesGrafico').value;
             if (!mes) {
-                alert('Por favor, selecione um mês!');
+                showToast('Por favor, selecione um mês!', 'warning');
                 return;
             }
             
@@ -1350,7 +1455,7 @@
             container.innerHTML = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
                     <div class="card">
-                        <h3 style="margin-bottom: 15px; color: #fff;">
+                        <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
                             <i class="fas fa-gift"></i> Cashback por Vendedor
                         </h3>
                         <div class="chart-container">
@@ -1358,7 +1463,7 @@
                         </div>
                     </div>
                     <div class="card">
-                        <h3 style="margin-bottom: 15px; color: #fff;">
+                        <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
                             <i class="fas fa-star"></i> Avaliações por Vendedor
                         </h3>
                         <div class="chart-container">
@@ -1367,7 +1472,7 @@
                     </div>
                 </div>
                 <div class="card" style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 15px; color: #fff;">
+                    <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
                         <i class="fas fa-trophy"></i> Progresso das Metas Mensais
                     </h3>
                     <div class="chart-container" style="height: 400px;">
@@ -1418,12 +1523,12 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            ticks: { color: '#b0b0b0' }
+                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
+                            ticks: { color: '#6b7280' }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#b0b0b0' }
+                            ticks: { color: '#6b7280' }
                         }
                     }
                 }
@@ -1456,12 +1561,12 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                            ticks: { color: '#b0b0b0' }
+                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
+                            ticks: { color: '#6b7280' }
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#b0b0b0' }
+                            ticks: { color: '#6b7280' }
                         }
                     }
                 }
@@ -1503,7 +1608,7 @@
                     plugins: {
                         legend: {
                             display: true,
-                            labels: { color: '#fff', font: { size: 14 } }
+                            labels: { color: '#1f2937', font: { size: 13 } }
                         },
                         tooltip: {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -1521,9 +1626,9 @@
                         y: {
                             beginAtZero: true,
                             max: 100,
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
                             ticks: {
-                                color: '#b0b0b0',
+                                color: '#6b7280',
                                 callback: function(value) {
                                     return value + '%';
                                 }
@@ -1531,39 +1636,419 @@
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#b0b0b0' }
+                            ticks: { color: '#6b7280' }
                         }
                     }
                 }
             });
         }
 
-        // Funções de modal
-        function closeAdminModal() {
-            document.getElementById('adminLoginModal').classList.remove('active');
+        // ============================
+        // TAREFAS (afazeres)
+        // ============================
+        function preencherSelectTarefaVendedor() {
+            const select = document.getElementById('tarefaVendedor');
+            select.innerHTML = '';
+            vendedores.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.id;
+                opt.textContent = v.nome;
+                select.appendChild(opt);
+            });
         }
 
-        function closeVendedorModal() {
-            document.getElementById('vendedorModal').classList.remove('active');
+        function salvarTarefa(e) {
+            e.preventDefault();
+            const id = document.getElementById('tarefaId').value;
+            const vendedorId = parseInt(document.getElementById('tarefaVendedor').value);
+            const data = document.getElementById('tarefaData').value;
+            const descricao = document.getElementById('tarefaDescricao').value.trim();
+            const status = document.getElementById('tarefaStatus').value;
+
+            if (id) {
+                const t = tarefas.find(x => x.id == id);
+                if (t) {
+                    t.vendedorId = vendedorId;
+                    t.data = data;
+                    t.descricao = descricao;
+                    t.status = status;
+                }
+            } else {
+                tarefas.push({
+                    id: Date.now(),
+                    vendedorId,
+                    data,
+                    descricao,
+                    status,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            salvarTarefas();
+            closeTarefaModal();
+            renderTarefasLista();
+            renderDashboardEncarregado();
+            showToast('Tarefa salva com sucesso!', 'success');
+        }
+
+        function editarTarefa(id) {
+            const t = tarefas.find(x => x.id === id);
+            if (!t) return;
+            document.getElementById('tarefaModalTitle').textContent = 'Editar Tarefa';
+            preencherSelectTarefaVendedor();
+            document.getElementById('tarefaId').value = t.id;
+            document.getElementById('tarefaVendedor').value = t.vendedorId;
+            document.getElementById('tarefaData').value = t.data;
+            document.getElementById('tarefaDescricao').value = t.descricao;
+            document.getElementById('tarefaStatus').value = t.status;
+            document.getElementById('tarefaModal').classList.add('active');
+        }
+
+        function excluirTarefa(id) {
+            customConfirm('Excluir esta tarefa?', '🗑️ Excluir tarefa').then(ok => {
+                if (!ok) return;
+                tarefas = tarefas.filter(t => t.id !== id);
+                salvarTarefas();
+                renderTarefasLista();
+                renderDashboardEncarregado();
+                showToast('Tarefa excluída!', 'success');
+            });
+        }
+
+        function alternarStatusTarefa(id) {
+            const t = tarefas.find(x => x.id === id);
+            if (!t) return;
+            t.status = t.status === 'concluido' ? 'pendente' : 'concluido';
+            salvarTarefas();
+            renderTarefasLista();
+            renderDashboardEncarregado();
+        }
+
+        function renderTarefasLista() {
+            const container = document.getElementById('tarefasLista');
+            const fv = document.getElementById('filtroTarefaVendedor').value;
+            const fd = document.getElementById('filtroTarefaData').value;
+
+            let lista = [...tarefas];
+            if (fv) lista = lista.filter(t => t.vendedorId == fv);
+            if (fd) lista = lista.filter(t => t.data === fd);
+
+            if (lista.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <p>Nenhuma tarefa cadastrada</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Funcionário</th>
+                            <th>Descrição</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            lista.sort((a, b) => new Date(b.data) - new Date(a.data)).forEach(t => {
+                const v = vendedores.find(x => x.id === t.vendedorId);
+                if (!v) return;
+                const dataF = new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR');
+                const badge = t.status === 'concluido'
+                    ? '<span class="status-badge status-concluido"><i class="fas fa-check"></i> Concluído</span>'
+                    : '<span class="status-badge status-pendente"><i class="fas fa-clock"></i> Pendente</span>';
+
+                html += `
+                    <tr>
+                        <td>${dataF}</td>
+                        <td style="color:${v.cor}; font-weight:600;">
+                            <i class="fas ${v.icone}"></i> ${v.nome}
+                        </td>
+                        <td>${t.descricao}</td>
+                        <td>${badge}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-secondary btn-small" onclick="alternarStatusTarefa(${t.id})">
+                                    <i class="fas fa-exchange-alt"></i> Alternar
+                                </button>
+                                <button class="btn btn-secondary btn-small" onclick="editarTarefa(${t.id})">
+                                    <i class="fas fa-edit"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-small" onclick="excluirTarefa(${t.id})">
+                                    <i class="fas fa-trash"></i> Excluir
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // ============================
+        // DASHBOARD DO ENCARREGADO
+        // ============================
+        function renderDashboardEncarregado() {
+            const container = document.getElementById('dashboardEncResultado');
+            if (!container) return;
+
+            const dataSelecionada = document.getElementById('dashboardData').value
+                || new Date().toISOString().split('T')[0];
+            const mesSelecionado = dataSelecionada.slice(0, 7);
+
+            const regsDia = registros.filter(r => r.data === dataSelecionada);
+            const regsMes = registros.filter(r => r.data.startsWith(mesSelecionado));
+            const tarefasDia = tarefas.filter(t => t.data === dataSelecionada);
+
+            const totalCashDia = regsDia.reduce((s, r) => s + r.cashback, 0);
+            const totalAvalDia = regsDia.reduce((s, r) => s + r.avaliacoes, 0);
+            const totalCashMes = regsMes.reduce((s, r) => s + r.cashback, 0);
+            const totalAvalMes = regsMes.reduce((s, r) => s + r.avaliacoes, 0);
+            const totalTarefas = tarefasDia.length;
+            const tarefasConcluidas = tarefasDia.filter(t => t.status === 'concluido').length;
+            const pctConcluidas = totalTarefas > 0 ? ((tarefasConcluidas / totalTarefas) * 100).toFixed(0) : 0;
+
+            const dataF = new Date(dataSelecionada + 'T00:00:00').toLocaleDateString('pt-BR');
+
+            let html = `
+                <div class="dashboard-card" style="background: #eef2ff; border-color: #c7d2fe;">
+                    <h4><i class="fas fa-calendar-day"></i> Relatório do dia ${dataF}</h4>
+                    <div class="stats-grid">
+                        <div class="stat-card" style="border-top: 3px solid #4CAF50;">
+                            <i class="fas fa-gift" style="color:#4CAF50;"></i>
+                            <div class="value" style="color:#4CAF50;">${totalCashDia}</div>
+                            <div class="label">Cashback do dia</div>
+                        </div>
+                        <div class="stat-card" style="border-top: 3px solid #FFC107;">
+                            <i class="fas fa-star" style="color:#FFC107;"></i>
+                            <div class="value" style="color:#FFC107;">${totalAvalDia}</div>
+                            <div class="label">Avaliações do dia</div>
+                        </div>
+                        <div class="stat-card" style="border-top: 3px solid #667eea;">
+                            <i class="fas fa-gift" style="color:#667eea;"></i>
+                            <div class="value" style="color:#667eea;">${totalCashMes}</div>
+                            <div class="label">Cashback do mês (${META_CASHBACK} meta)</div>
+                        </div>
+                        <div class="stat-card" style="border-top: 3px solid #e74c3c;">
+                            <i class="fas fa-star" style="color:#e74c3c;"></i>
+                            <div class="value" style="color:#e74c3c;">${totalAvalMes}</div>
+                            <div class="label">Avaliações do mês (${META_AVALIACOES} meta)</div>
+                        </div>
+                        <div class="stat-card" style="border-top: 3px solid #2ecc71;">
+                            <i class="fas fa-tasks" style="color:#2ecc71;"></i>
+                            <div class="value" style="color:#2ecc71;">${tarefasConcluidas}/${totalTarefas}</div>
+                            <div class="label">Tarefas concluídas (${pctConcluidas}%)</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            html += '<h3 style="color:#1f2937; margin: 24px 0 14px; font-size:1rem; font-weight:600;"><i class="fas fa-user-clock"></i> Por funcionário</h3>';
+
+            if (vendedores.length === 0) {
+                html += '<div class="empty-state"><i class="fas fa-users-slash"></i><p>Nenhum funcionário cadastrado</p></div>';
+                container.innerHTML = html;
+                return;
+            }
+
+            vendedores.forEach(v => {
+                const regsV = regsDia.filter(r => r.vendedorId === v.id);
+                const tarefasV = tarefasDia.filter(t => t.vendedorId === v.id);
+                const cashV = regsV.reduce((s, r) => s + r.cashback, 0);
+                const avalV = regsV.reduce((s, r) => s + r.avaliacoes, 0);
+                const concV = tarefasV.filter(t => t.status === 'concluido').length;
+
+                html += `
+                    <div class="dashboard-card" style="border-left: 4px solid ${v.cor};">
+                        <h4 style="color:${v.cor};">
+                            <i class="fas ${v.icone}"></i> ${v.nome}
+                        </h4>
+                        <div class="totais-row">
+                            <span><i class="fas fa-gift"></i> Cashback: <strong>${cashV}</strong></span>
+                            <span><i class="fas fa-star"></i> Avaliações: <strong>${avalV}</strong></span>
+                            <span><i class="fas fa-tasks"></i> Tarefas: <strong>${concV}/${tarefasV.length}</strong></span>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            ${tarefasV.length === 0
+                                ? '<p style="color:#9ca3af; font-style:italic;">Sem tarefas para este dia</p>'
+                                : tarefasV.map(t => `
+                                    <div class="tarefa-item ${t.status === 'concluido' ? 'concluida' : ''}">
+                                        <div>
+                                            <i class="fas ${t.status === 'concluido' ? 'fa-check-circle' : 'fa-circle'}"
+                                               style="color:${t.status === 'concluido' ? '#4CAF50' : '#ffc107'}; margin-right:8px;"></i>
+                                            ${t.descricao}
+                                        </div>
+                                        <span class="status-badge status-${t.status}">
+                                            ${t.status === 'concluido' ? 'Concluído' : 'Pendente'}
+                                        </span>
+                                    </div>
+                                `).join('')
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function closeTarefaModal() {
+            document.getElementById('tarefaModal').classList.remove('active');
+        }
+
+        // ============================
+        // CADASTRO DE AFAZERES (templates)
+        // ============================
+        function renderDiasSemanaChecks() {
+            const c = document.getElementById('diasSemanaChecks');
+            if (!c) return;
+            c.innerHTML = DIAS_SEMANA.map((d, i) => `
+                <label style="display:flex; align-items:center; gap:5px; cursor:pointer;">
+                    <input type="checkbox" class="diaSemanaCheck" value="${i}">
+                    <span>${d}</span>
+                </label>
+            `).join('');
+        }
+
+        function abrirAfazerCadastroModal(afazer = null) {
+            const titulo = document.getElementById('afazerCadastroModalTitle');
+            renderDiasSemanaChecks();
+            if (afazer) {
+                titulo.textContent = '✏️ Editar Afazer';
+                document.getElementById('afazerCadastroId').value = afazer.id;
+                document.getElementById('afazerCadastroDescricao').value = afazer.descricao;
+                document.getElementById('afazerCadastroRecorrencia').value = afazer.recorrencia;
+                if (afazer.recorrencia === 'semanal' && afazer.diasSemana) {
+                    document.querySelectorAll('.diaSemanaCheck').forEach(ch => {
+                        ch.checked = afazer.diasSemana.includes(parseInt(ch.value));
+                    });
+                }
+            } else {
+                titulo.textContent = '➕ Cadastrar Afazer';
+                document.getElementById('afazerCadastroId').value = '';
+                document.getElementById('afazerCadastroDescricao').value = '';
+                document.getElementById('afazerCadastroRecorrencia').value = 'diaria';
+            }
+            document.getElementById('afazerDiasSemanaGroup').style.display =
+                document.getElementById('afazerCadastroRecorrencia').value === 'semanal' ? 'block' : 'none';
+            document.getElementById('afazerCadastroModal').classList.add('active');
+        }
+
+        function salvarAfazerCadastro(e) {
+            e.preventDefault();
+            const id = document.getElementById('afazerCadastroId').value;
+            const descricao = document.getElementById('afazerCadastroDescricao').value.trim();
+            const recorrencia = document.getElementById('afazerCadastroRecorrencia').value;
+            let diasSemana = [];
+            if (recorrencia === 'semanal') {
+                diasSemana = Array.from(document.querySelectorAll('.diaSemanaCheck:checked')).map(c => parseInt(c.value));
+                if (diasSemana.length === 0) {
+                    showToast('⚠️ Selecione ao menos um dia da semana!', 'warning');
+                    return;
+                }
+            }
+            if (id) {
+                const a = afazeresCadastrados.find(x => x.id == id);
+                if (a) { a.descricao = descricao; a.recorrencia = recorrencia; a.diasSemana = diasSemana; }
+            } else {
+                afazeresCadastrados.push({
+                    id: Date.now(),
+                    descricao,
+                    recorrencia,
+                    diasSemana
+                });
+            }
+            salvarAfazeresCadastrados();
+            closeAfazerCadastroModal();
+            renderAfazeresCadastroLista();
+            renderAfazeresCheckboxes();
+            showToast('✅ Afazer salvo!', 'success');
+        }
+
+        function editarAfazerCadastro(id) {
+            const a = afazeresCadastrados.find(x => x.id === id);
+            if (a) abrirAfazerCadastroModal(a);
+        }
+
+        function excluirAfazerCadastro(id) {
+            customConfirm('Excluir este afazer cadastrado?', '🗑️ Excluir afazer').then(ok => {
+                if (!ok) return;
+                afazeresCadastrados = afazeresCadastrados.filter(a => a.id !== id);
+                salvarAfazeresCadastrados();
+                renderAfazeresCadastroLista();
+                renderAfazeresCheckboxes();
+                showToast('Afazer excluído!', 'success');
+            });
+        }
+
+        function renderAfazeresCadastroLista() {
+            const c = document.getElementById('afazeresCadastroLista');
+            if (!c) return;
+            if (afazeresCadastrados.length === 0) {
+                c.innerHTML = '<div class="empty-state">📭<p>Nenhum afazer cadastrado</p></div>';
+                return;
+            }
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>📝 Descrição</th>
+                            <th>🔁 Recorrência</th>
+                            <th>📌 Dias</th>
+                            <th>⚙️ Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            afazeresCadastrados.forEach(a => {
+                let recLabel = '';
+                if (a.recorrencia === 'diaria') recLabel = '📅 Diária';
+                else if (a.recorrencia === 'semanal') recLabel = '🗓️ Semanal';
+                else recLabel = '🔹 Avulsa';
+                const dias = a.recorrencia === 'semanal' && a.diasSemana
+                    ? a.diasSemana.map(d => DIAS_SEMANA[d]).join(', ')
+                    : '—';
+                html += `
+                    <tr>
+                        <td>${a.descricao}</td>
+                        <td>${recLabel}</td>
+                        <td>${dias}</td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-secondary btn-small" onclick="editarAfazerCadastro(${a.id})">✏️ Editar</button>
+                                <button class="btn btn-danger btn-small" onclick="excluirAfazerCadastro(${a.id})">🗑️ Excluir</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += '</tbody></table>';
+            c.innerHTML = html;
+        }
+
+        function closeAfazerCadastroModal() {
+            document.getElementById('afazerCadastroModal').classList.remove('active');
+        }
+
+        // Funções de modal
+        function closeConfigModal() {
+            document.getElementById('configModal').classList.remove('active');
         }
 
         function closeEditarRegistroModal() {
             document.getElementById('editarRegistroModal').classList.remove('active');
         }
 
-        function togglePassword() {
-            const input = document.getElementById('adminPassword');
-            const icon = document.querySelector('.toggle-password i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
+        function togglePassword() { /* removido */ }
 
         // Inicializar
         init();
