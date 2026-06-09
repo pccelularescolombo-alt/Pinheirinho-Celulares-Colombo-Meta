@@ -498,6 +498,34 @@
             align-items: center;
         }
         .afazeres-summary .count { font-weight: 600; color: var(--primary); }
+
+        /* ====== EDIÇÃO DE FUNCIONÁRIO ====== */
+        .vendedor-card { position: relative; }
+        .vendedor-edit-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-elev);
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity .15s ease, background .15s ease, color .15s ease;
+        }
+        .vendedor-card:hover .vendedor-edit-btn,
+        .vendedor-card.selected .vendedor-edit-btn { opacity: 1; }
+        .vendedor-edit-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -733,6 +761,37 @@
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     💾 Salvar
                 </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Funcionário -->
+    <div id="editarVendedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Editar Funcionário</h3>
+                <button class="close-modal" onclick="closeEditarVendedorModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="editarVendedorForm">
+                <input type="hidden" id="editarVendedorId">
+                <div class="form-group">
+                    <label for="editarVendedorNome">👤 Nome</label>
+                    <input type="text" id="editarVendedorNome" required placeholder="Nome do funcionário" maxlength="40">
+                </div>
+                <div class="form-group">
+                    <label for="editarVendedorCor">🎨 Cor</label>
+                    <input type="color" id="editarVendedorCor" style="width:60px; height:40px; padding:2px; cursor:pointer;">
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">
+                        💾 Salvar
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditarVendedorModal()">
+                        Cancelar
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -1072,18 +1131,25 @@
         function renderVendedores() {
             const grid = document.getElementById('vendedoresGrid');
             grid.innerHTML = '';
-            
+
             vendedores.forEach(vendedor => {
                 const card = document.createElement('div');
                 card.className = 'vendedor-card';
                 card.style.color = vendedor.cor;
                 card.innerHTML = `
+                    <button type="button" class="vendedor-edit-btn" title="Editar nome">
+                        <i class="fas fa-pen"></i>
+                    </button>
                     <div class="vendedor-icon">
                         <i class="fas ${vendedor.icone}"></i>
                     </div>
                     <div class="vendedor-name">${vendedor.nome}</div>
                 `;
                 card.addEventListener('click', () => selecionarVendedor(vendedor.id, card));
+                card.querySelector('.vendedor-edit-btn').addEventListener('click', e => {
+                    e.stopPropagation();
+                    abrirEditarVendedorModal(vendedor.id);
+                });
                 grid.appendChild(card);
             });
         }
@@ -1097,6 +1163,50 @@
             renderAvulsasList();
             renderAfazeresCheckboxes();
         }
+
+        // ===== Edição de funcionário =====
+        function abrirEditarVendedorModal(id) {
+            const v = vendedores.find(x => x.id === id);
+            if (!v) return;
+            document.getElementById('editarVendedorId').value = v.id;
+            document.getElementById('editarVendedorNome').value = v.nome;
+            document.getElementById('editarVendedorCor').value = v.cor || '#3498db';
+            document.getElementById('editarVendedorModal').classList.add('active');
+            setTimeout(() => document.getElementById('editarVendedorNome').focus(), 50);
+        }
+        function closeEditarVendedorModal() {
+            document.getElementById('editarVendedorModal').classList.remove('active');
+        }
+        function salvarEdicaoVendedor(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editarVendedorId').value);
+            const nome = document.getElementById('editarVendedorNome').value.trim();
+            const cor = document.getElementById('editarVendedorCor').value;
+            if (!nome) {
+                if (typeof showToast === 'function') showToast('⚠️ Nome obrigatório', 'warning');
+                return;
+            }
+            const v = vendedores.find(x => x.id === id);
+            if (!v) return;
+            v.nome = nome;
+            v.cor = cor;
+            salvarVendedores();
+            renderVendedores();
+            atualizarSelectsVendedores();
+            if (typeof renderRelatorio === 'function') {
+                try { renderRelatorio(); } catch (_) {}
+            }
+            closeEditarVendedorModal();
+            if (typeof showToast === 'function') showToast('✅ Funcionário atualizado!', 'success');
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const f = document.getElementById('editarVendedorForm');
+            if (f) f.addEventListener('submit', salvarEdicaoVendedor);
+            const modal = document.getElementById('editarVendedorModal');
+            if (modal) modal.addEventListener('click', e => {
+                if (e.target === modal) closeEditarVendedorModal();
+            });
+        });
 
         // Renderiza os checkboxes do passo 2 baseados nos afazeres cadastrados
         // e na data + dia da semana (filtrando recorrência)
