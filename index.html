@@ -851,7 +851,9 @@
                 </div>
                 <div class="form-group">
                     <label for="tarefaDescricao">Descrição do Afazer</label>
-                    <input type="text" id="tarefaDescricao" required placeholder="Ex: Organizar prateleira A1">
+                    <select id="tarefaDescricao" required>
+                        <option value="">Selecione um afazer...</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="tarefaStatus">Status</label>
@@ -1090,8 +1092,9 @@
                 document.getElementById('tarefaId').value = '';
                 document.getElementById('tarefaDescricao').value = '';
                 document.getElementById('tarefaStatus').value = 'pendente';
-                document.getElementById('tarefaData').value = new Date().toISOString().split('T')[0];
+                document.getElementById('tarefaData').value = obterDataLocal();
                 preencherSelectTarefaVendedor();
+                preencherSelectTarefaDescricao();
                 document.getElementById('tarefaModal').classList.add('active');
             });
             document.getElementById('tarefaForm').addEventListener('submit', salvarTarefa);
@@ -1110,13 +1113,22 @@
             });
         }
 
+        // Função para obter a data local correta do navegador (evita problemas de fuso horário UTC)
+        function obterDataLocal() {
+            const agora = new Date();
+            const ano = agora.getFullYear();
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const dia = String(agora.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
         function setDataHoje() {
-            const hoje = new Date().toISOString().split('T')[0];
+            const hoje = obterDataLocal();
             document.getElementById('dataRegistro').value = hoje;
             document.getElementById('dashboardData').value = hoje;
 
             // Set current month for charts
-            const mesAtual = new Date().toISOString().slice(0, 7);
+            const mesAtual = hoje.slice(0, 7);
             document.getElementById('mesGrafico').value = mesAtual;
 
             document.getElementById('dataRegistro').addEventListener('change', () => {
@@ -1330,7 +1342,7 @@
         }
 
         function atualizarResumoHoje() {
-            const hoje = new Date().toISOString().split('T')[0];
+            const hoje = obterDataLocal();
             const registrosHoje = registros.filter(r => r.data === hoje);
             
             const container = document.getElementById('resumoHoje');
@@ -1396,8 +1408,18 @@
 
         function gerarRelatorio() {
             const vendedorId = document.getElementById('vendedorRelatorio').value;
-            const dataInicio = document.getElementById('dataInicio').value;
-            const dataFim = document.getElementById('dataFim').value;
+            let dataInicio = document.getElementById('dataInicio').value;
+            let dataFim = document.getElementById('dataFim').value;
+
+            // Carregar automático do dia se não estiver preenchido
+            if (!dataInicio) {
+                dataInicio = obterDataLocal();
+                document.getElementById('dataInicio').value = dataInicio;
+            }
+            if (!dataFim) {
+                dataFim = obterDataLocal();
+                document.getElementById('dataFim').value = dataFim;
+            }
 
             let registrosFiltrados = [...registros];
 
@@ -1874,6 +1896,17 @@
             });
         }
 
+        function preencherSelectTarefaDescricao() {
+            const select = document.getElementById('tarefaDescricao');
+            select.innerHTML = '<option value="">Selecione um afazer...</option>';
+            afazeresCadastrados.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a.descricao;
+                opt.textContent = a.descricao;
+                select.appendChild(opt);
+            });
+        }
+
         function salvarTarefa(e) {
             e.preventDefault();
             const id = document.getElementById('tarefaId').value;
@@ -1913,6 +1946,7 @@
             if (!t) return;
             document.getElementById('tarefaModalTitle').textContent = 'Editar Tarefa';
             preencherSelectTarefaVendedor();
+            preencherSelectTarefaDescricao();
             document.getElementById('tarefaId').value = t.id;
             document.getElementById('tarefaVendedor').value = t.vendedorId;
             document.getElementById('tarefaData').value = t.data;
@@ -2019,7 +2053,7 @@
             if (!container) return;
 
             const dataSelecionada = document.getElementById('dashboardData').value
-                || new Date().toISOString().split('T')[0];
+                || obterDataLocal();
             const mesSelecionado = dataSelecionada.slice(0, 7);
 
             const regsDia = registros.filter(r => r.data === dataSelecionada);
@@ -2270,5 +2304,6 @@
         // Inicializar
         init();
     </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
