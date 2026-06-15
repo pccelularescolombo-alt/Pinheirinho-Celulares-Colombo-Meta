@@ -69,20 +69,28 @@
             gap: 12px;
         }
 
-        .metas-info { display: flex; gap: 10px; flex-wrap: wrap; }
+        .metas-info { 
+            display: flex; 
+            gap: 16px; 
+            flex-wrap: nowrap; 
+            align-items: stretch;
+        }
 
         .meta-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 14px;
+            gap: 12px;
+            padding: 10px 16px;
             background: var(--bg);
             border-radius: var(--radius-sm);
             border: 1px solid var(--border-soft);
+            flex: 1;
+            min-width: 0;
         }
-        .meta-item i { font-size: 1rem; color: var(--primary); }
-        .meta-item span { font-size: 0.78rem; color: var(--text-muted); display: block; }
-        .meta-item strong { color: var(--text); font-size: 0.95rem; font-weight: 600; }
+        .meta-item i { font-size: 1.3rem; color: var(--primary); flex-shrink: 0; width: 24px; text-align: center; }
+        .meta-item > div { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .meta-item span { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 600; }
+        .meta-item strong { color: var(--text); font-size: 1.05rem; font-weight: 700; white-space: nowrap; }
 
         .btn {
             padding: 10px 18px;
@@ -332,7 +340,10 @@
             font-weight: 500;
         }
         .status-pendente { background: var(--warning-soft); color: var(--warning); border: 1px solid #fde68a; }
+        .status-em_andamento { background: #eff6ff; color: #3b82f6; border: 1px solid #bfdbfe; }
         .status-concluido { background: var(--success-soft); color: var(--success); border: 1px solid #a7f3d0; }
+        .status-nao_realizado { background: var(--danger-soft); color: var(--danger); border: 1px solid #fecaca; }
+        .status-bloqueado { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
 
         .dashboard-card {
             background: var(--bg);
@@ -537,28 +548,34 @@
                     <div class="meta-item">
                         <i class="fas fa-store"></i>
                         <div>
-                            <span>🏪 Loja:</span>
+                            <span>Loja</span>
                             <strong id="lojaNomeHeader">Minha Loja</strong>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-gift"></i>
                         <div>
-                            <span>🎁 Meta Cashback:</span>
-                            <strong>100</strong>
+                            <span>Meta Cashback</span>
+                            <div style="display: flex; align-items: baseline; gap: 6px;">
+                                <strong id="metaCashbackHeader">100</strong>
+                                <span id="metaCashbackPctHeader" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">(0%)</span>
+                            </div>
                         </div>
                     </div>
                     <div class="meta-item">
                         <i class="fas fa-star"></i>
                         <div>
-                            <span>⭐ Meta Avaliações:</span>
-                            <strong>15</strong>
+                            <span>Meta Avaliações</span>
+                            <div style="display: flex; align-items: baseline; gap: 6px;">
+                                <strong id="metaAvaliacoesHeader">15</strong>
+                                <span id="metaAvaliacoesPctHeader" style="font-size: 0.8rem; color: var(--primary); font-weight: 600;">(0%)</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div>
                     <button id="abrirConfig" class="btn btn-secondary">
-                        <i class="fas fa-cog"></i> ⚙️ Configurar Loja
+                        <i class="fas fa-cog"></i> Configurar Loja
                     </button>
                 </div>
             </div>
@@ -758,6 +775,14 @@
                     <label for="lojaNome">🏪 Nome da Loja</label>
                     <input type="text" id="lojaNome" required placeholder="Ex: Loja Centro">
                 </div>
+                <div class="form-group">
+                    <label for="metaCashback">🎁 Meta Mensal Total de Cashback</label>
+                    <input type="number" id="metaCashback" min="1" required placeholder="Ex: 100">
+                </div>
+                <div class="form-group">
+                    <label for="metaAvaliacoes">⭐ Meta Mensal Total de Avaliações</label>
+                    <input type="number" id="metaAvaliacoes" min="1" required placeholder="Ex: 15">
+                </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     💾 Salvar
                 </button>
@@ -859,7 +884,9 @@
                     <label for="tarefaStatus">Status</label>
                     <select id="tarefaStatus" required>
                         <option value="pendente">Pendente</option>
+                        <option value="em_andamento">Em andamento</option>
                         <option value="concluido">Concluído</option>
+                        <option value="nao_realizado">Não realizado</option>
                     </select>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
@@ -921,18 +948,41 @@
         </div>
     </div>
 
+    <!-- Modal Senha de Acesso -->
+    <div id="senhaAbaModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>🔒 Acesso Restrito</h3>
+                <button class="close-modal" onclick="closeSenhaAbaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="form-group">
+                <label for="senhaAbaInput">Digite a senha de administrador</label>
+                <input type="password" id="senhaAbaInput" placeholder="Senha" style="width: 100%;">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="closeSenhaAbaModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="verificarSenhaAba()">Acessar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Configurações e dados iniciais
-        const META_CASHBACK = 100;
-        const META_AVALIACOES = 15;
         const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+        const SENHA_SISTEMA = "admin123"; // Senha para confirmar afazeres e acessar Gerenciar Dados
 
+        let metaCashback = 100;
+        let metaAvaliacoes = 15;
         let vendedores = [];
         let registros = [];
         let tarefas = [];
         let afazeresCadastrados = [];
         let lojaNome = 'Minha Loja';
         let avulsasTemp = [];
+        let gerenciarDesbloqueado = false;
+        let tarefasDesbloqueado = false;
 
         // ============================
         // UI helpers (toast + confirm)
@@ -972,6 +1022,7 @@
             setupEventListeners();
             setDataHoje();
             document.getElementById('lojaNomeHeader').textContent = lojaNome;
+            atualizarMetasHeader();
             renderVendedores();
             atualizarResumoHoje();
             atualizarSelectsVendedores();
@@ -1015,6 +1066,16 @@
             if (lojaStorage) {
                 lojaNome = lojaStorage;
             }
+
+            const metaCashbackStorage = localStorage.getItem('metaCashback');
+            if (metaCashbackStorage) {
+                metaCashback = parseInt(metaCashbackStorage);
+            }
+
+            const metaAvaliacoesStorage = localStorage.getItem('metaAvaliacoes');
+            if (metaAvaliacoesStorage) {
+                metaAvaliacoes = parseInt(metaAvaliacoesStorage);
+            }
         }
 
         function salvarAfazeresCadastrados() {
@@ -1042,14 +1103,26 @@
             // Config loja
             document.getElementById('abrirConfig').addEventListener('click', () => {
                 document.getElementById('lojaNome').value = lojaNome;
+                document.getElementById('metaCashback').value = metaCashback;
+                document.getElementById('metaAvaliacoes').value = metaAvaliacoes;
                 document.getElementById('configModal').classList.add('active');
             });
             document.getElementById('configForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 lojaNome = document.getElementById('lojaNome').value.trim() || 'Minha Loja';
-                salvarLojaNome();
+                metaCashback = parseInt(document.getElementById('metaCashback').value) || 100;
+                metaAvaliacoes = parseInt(document.getElementById('metaAvaliacoes').value) || 15;
+                
+                localStorage.setItem('lojaNome', lojaNome);
+                localStorage.setItem('metaCashback', metaCashback);
+                localStorage.setItem('metaAvaliacoes', metaAvaliacoes);
+                
+                document.getElementById('lojaNomeHeader').textContent = lojaNome;
+                
                 closeConfigModal();
-                showToast('🏪 Loja atualizada!', 'success');
+                showToast('⚙️ Configurações salvas com sucesso!', 'success');
+                atualizarMetasHeader(); // Atualiza o cabeçalho com as novas metas e porcentagens
+                renderDashboardEncarregado(); // Atualiza dashboard com novas metas
             });
 
             document.getElementById('registroForm').addEventListener('submit', salvarRegistro);
@@ -1063,10 +1136,18 @@
             // Tabs (lazy render)
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+                    if ((target === 'gerenciar' && !gerenciarDesbloqueado) || (target === 'tarefas' && !tarefasDesbloqueado)) {
+                        requestedTab = target;
+                        document.getElementById('senhaAbaInput').value = '';
+                        document.getElementById('senhaAbaModal').classList.add('active');
+                        setTimeout(() => document.getElementById('senhaAbaInput').focus(), 50);
+                        return; // Don't switch tab yet
+                    }
+                    
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                     tab.classList.add('active');
-                    const target = tab.dataset.tab;
                     document.getElementById(target).classList.add('active');
                     if (target === 'dashboardEnc') renderDashboardEncarregado();
                     else if (target === 'tarefas') renderTarefasLista();
@@ -1297,6 +1378,12 @@
             renderAvulsasList();
         }
 
+        function isTaskLocked(task) {
+            if (!task.timestamp) return false;
+            const ageMs = Date.now() - new Date(task.timestamp).getTime();
+            return ageMs > 42 * 60 * 60 * 1000; // 42 horas em milissegundos
+        }
+
         function salvarRegistro(e) {
             e.preventDefault();
 
@@ -1313,8 +1400,22 @@
             const checadas = Array.from(document.querySelectorAll('.afazerCheck:checked')).map(c => c.value);
             const tarefasFeitas = [...checadas, ...avulsasTemp];
 
+            // Adicionar tarefas ao array de tarefas com status pendente
+            const now = Date.now();
+            tarefasFeitas.forEach((desc, i) => {
+                tarefas.push({
+                    id: now + i,
+                    vendedorId,
+                    data,
+                    descricao: desc,
+                    status: 'pendente',
+                    timestamp: new Date().toISOString()
+                });
+            });
+            salvarTarefas();
+
             const registro = {
-                id: Date.now(),
+                id: Date.now() + 9999,
                 data,
                 vendedorId,
                 cashback,
@@ -1334,11 +1435,30 @@
             document.getElementById('passo2').style.display = 'none';
             avulsasTemp = [];
 
-            showToast('✅ Dados salvos com sucesso!', 'success');
+            showToast('✅ Dados e tarefas salvos como pendentes!', 'success');
             atualizarResumoHoje();
+            atualizarMetasHeader();
             // Re-renders pesados acontecem só quando a aba estiver ativa
             if (document.getElementById('gerenciar').classList.contains('active')) renderGerenciarLista();
             if (document.getElementById('dashboardEnc').classList.contains('active')) renderDashboardEncarregado();
+        }
+
+        function atualizarMetasHeader() {
+            const hoje = obterDataLocal();
+            const mesAtual = hoje.slice(0, 7);
+            const registrosMes = registros.filter(r => r.data.startsWith(mesAtual));
+            
+            const totalCashMes = registrosMes.reduce((sum, r) => sum + r.cashback, 0);
+            const totalAvalMes = registrosMes.reduce((sum, r) => sum + r.avaliacoes, 0);
+            
+            const pctCashMes = metaCashback > 0 ? ((totalCashMes / metaCashback) * 100).toFixed(1) : 0;
+            const pctAvalMes = metaAvaliacoes > 0 ? ((totalAvalMes / metaAvaliacoes) * 100).toFixed(1) : 0;
+            
+            document.getElementById('metaCashbackHeader').textContent = metaCashback;
+            document.getElementById('metaCashbackPctHeader').textContent = `(${totalCashMes} - ${pctCashMes}%)`;
+            
+            document.getElementById('metaAvaliacoesHeader').textContent = metaAvaliacoes;
+            document.getElementById('metaAvaliacoesPctHeader').textContent = `(${totalAvalMes} - ${pctAvalMes}%)`;
         }
 
         function atualizarResumoHoje() {
@@ -1481,15 +1601,17 @@
                     if (!v) return;
                     const dadosV = vendedoresNaData[vid];
 
-                    // Inclui também tarefas avulsas lançadas pela aba "Tarefas Lançadas"
-                    const tarefasExtra = tarefas
-                        .filter(t => t.data === data && t.vendedorId == vid)
-                        .map(t => `${t.status === 'concluido' ? '✅' : '⏳'} ${t.descricao}`);
-
-                    const listaTarefas = [
-                        ...dadosV.tarefas.map(t => `✅ ${t}`),
-                        ...tarefasExtra
-                    ];
+                    const listaTarefas = dadosV.tarefas.map(tDesc => {
+                        const tObj = tarefas.find(t => t.data === data && t.vendedorId == vid && t.descricao === tDesc);
+                        let icon = '⏳';
+                        let statusText = 'Pendente';
+                        if (tObj) {
+                            if (tObj.status === 'concluido') { icon = '✅'; statusText = 'Concluído'; }
+                            else if (tObj.status === 'em_andamento') { icon = '🔄'; statusText = 'Em andamento'; }
+                            else if (tObj.status === 'nao_realizado') { icon = '❌'; statusText = 'Não realizado'; }
+                        }
+                        return `${icon} ${tDesc} [${statusText}]`;
+                    });
 
                     html += `
                         <div style="margin: 15px 0; padding: 12px; background: #ffffff; border: 1px solid #eef0f4; border-radius: 8px; border-left: 4px solid ${v.cor};">
@@ -1811,14 +1933,18 @@
                 }
             });
 
-            // Gráfico de Metas
+            // Gráfico de Metas (Meta total dividida pelo número de funcionários para o progresso individual)
+            const numVendedores = vendedores.length || 1;
+            const metaPorVendedorCash = metaCashback / numVendedores;
+            const metaPorVendedorAval = metaAvaliacoes / numVendedores;
+
             const datasetMetasCashback = labels.map((_, i) => {
-                const progresso = (datasetCashback[i] / META_CASHBACK) * 100;
+                const progresso = (datasetCashback[i] / metaPorVendedorCash) * 100;
                 return Math.min(progresso, 100);
             });
             
             const datasetMetasAvaliacoes = labels.map((_, i) => {
-                const progresso = (datasetAvaliacoes[i] / META_AVALIACOES) * 100;
+                const progresso = (datasetAvaliacoes[i] / metaPorVendedorAval) * 100;
                 return Math.min(progresso, 100);
             });
 
@@ -1944,6 +2070,10 @@
         function editarTarefa(id) {
             const t = tarefas.find(x => x.id === id);
             if (!t) return;
+            if (isTaskLocked(t)) {
+                showToast('⚠️ Tarefa bloqueada: prazo de 42h expirado!', 'warning');
+                return;
+            }
             document.getElementById('tarefaModalTitle').textContent = 'Editar Tarefa';
             preencherSelectTarefaVendedor();
             preencherSelectTarefaDescricao();
@@ -1956,6 +2086,11 @@
         }
 
         function excluirTarefa(id) {
+            const t = tarefas.find(x => x.id === id);
+            if (t && isTaskLocked(t)) {
+                showToast('⚠️ Tarefa bloqueada: prazo de 42h expirado!', 'warning');
+                return;
+            }
             customConfirm('Excluir esta tarefa?', '🗑️ Excluir tarefa').then(ok => {
                 if (!ok) return;
                 tarefas = tarefas.filter(t => t.id !== id);
@@ -1969,10 +2104,17 @@
         function alternarStatusTarefa(id) {
             const t = tarefas.find(x => x.id === id);
             if (!t) return;
-            t.status = t.status === 'concluido' ? 'pendente' : 'concluido';
+            if (isTaskLocked(t)) {
+                showToast('⚠️ Tarefa bloqueada: prazo de 42h para alteração expirado!', 'warning');
+                return;
+            }
+            const statuses = ['pendente', 'em_andamento', 'concluido', 'nao_realizado'];
+            const currentIndex = statuses.indexOf(t.status);
+            t.status = statuses[(currentIndex + 1) % statuses.length];
             salvarTarefas();
             renderTarefasLista();
             renderDashboardEncarregado();
+            showToast('Status atualizado!', 'success');
         }
 
         function renderTarefasLista() {
@@ -2012,9 +2154,30 @@
                 const v = vendedores.find(x => x.id === t.vendedorId);
                 if (!v) return;
                 const dataF = new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR');
-                const badge = t.status === 'concluido'
-                    ? '<span class="status-badge status-concluido"><i class="fas fa-check"></i> Concluído</span>'
-                    : '<span class="status-badge status-pendente"><i class="fas fa-clock"></i> Pendente</span>';
+                
+                let badgeClass = 'status-pendente';
+                let badgeText = 'Pendente';
+                let icon = 'fa-clock';
+                
+                if (t.status === 'concluido') { badgeClass = 'status-concluido'; badgeText = 'Concluído'; icon = 'fa-check'; }
+                else if (t.status === 'em_andamento') { badgeClass = 'status-em_andamento'; badgeText = 'Em andamento'; icon = 'fa-spinner'; }
+                else if (t.status === 'nao_realizado') { badgeClass = 'status-nao_realizado'; badgeText = 'Não realizado'; icon = 'fa-times'; }
+
+                const locked = isTaskLocked(t);
+                const lockedBadge = locked ? '<span class="status-badge status-bloqueado" style="margin-left:6px;"><i class="fas fa-lock"></i> Bloqueado</span>' : '';
+                const badge = `<span class="status-badge ${badgeClass}"><i class="fas ${icon}"></i> ${badgeText}</span>${lockedBadge}`;
+
+                const editBtn = locked 
+                    ? `<button class="btn btn-secondary btn-small" disabled title="Prazo de 42h expirado"><i class="fas fa-lock"></i> Bloqueado</button>`
+                    : `<button class="btn btn-secondary btn-small" onclick="editarTarefa(${t.id})"><i class="fas fa-edit"></i> Editar</button>`;
+                    
+                const deleteBtn = locked
+                    ? ``
+                    : `<button class="btn btn-danger btn-small" onclick="excluirTarefa(${t.id})"><i class="fas fa-trash"></i> Excluir</button>`;
+
+                const toggleBtn = locked
+                    ? `<button class="btn btn-secondary btn-small" disabled title="Prazo de 42h expirado"><i class="fas fa-lock"></i></button>`
+                    : `<button class="btn btn-secondary btn-small" onclick="alternarStatusTarefa(${t.id})" title="Alternar status"><i class="fas fa-exchange-alt"></i> Alternar</button>`;
 
                 html += `
                     <tr>
@@ -2026,15 +2189,9 @@
                         <td>${badge}</td>
                         <td>
                             <div class="actions">
-                                <button class="btn btn-secondary btn-small" onclick="alternarStatusTarefa(${t.id})">
-                                    <i class="fas fa-exchange-alt"></i> Alternar
-                                </button>
-                                <button class="btn btn-secondary btn-small" onclick="editarTarefa(${t.id})">
-                                    <i class="fas fa-edit"></i> Editar
-                                </button>
-                                <button class="btn btn-danger btn-small" onclick="excluirTarefa(${t.id})">
-                                    <i class="fas fa-trash"></i> Excluir
-                                </button>
+                                ${toggleBtn}
+                                ${editBtn}
+                                ${deleteBtn}
                             </div>
                         </td>
                     </tr>
@@ -2067,6 +2224,9 @@
             const totalTarefas = tarefasDia.length;
             const tarefasConcluidas = tarefasDia.filter(t => t.status === 'concluido').length;
             const pctConcluidas = totalTarefas > 0 ? ((tarefasConcluidas / totalTarefas) * 100).toFixed(0) : 0;
+            
+            const pctCashMes = metaCashback > 0 ? ((totalCashMes / metaCashback) * 100).toFixed(1) : 0;
+            const pctAvalMes = metaAvaliacoes > 0 ? ((totalAvalMes / metaAvaliacoes) * 100).toFixed(1) : 0;
 
             const dataF = new Date(dataSelecionada + 'T00:00:00').toLocaleDateString('pt-BR');
 
@@ -2087,12 +2247,12 @@
                         <div class="stat-card" style="border-top: 3px solid #667eea;">
                             <i class="fas fa-gift" style="color:#667eea;"></i>
                             <div class="value" style="color:#667eea;">${totalCashMes}</div>
-                            <div class="label">Cashback do mês (${META_CASHBACK} meta)</div>
+                            <div class="label">Cashback do mês (Meta: ${metaCashback} | ${pctCashMes}%)</div>
                         </div>
                         <div class="stat-card" style="border-top: 3px solid #e74c3c;">
                             <i class="fas fa-star" style="color:#e74c3c;"></i>
                             <div class="value" style="color:#e74c3c;">${totalAvalMes}</div>
-                            <div class="label">Avaliações do mês (${META_AVALIACOES} meta)</div>
+                            <div class="label">Avaliações do mês (Meta: ${metaAvaliacoes} | ${pctAvalMes}%)</div>
                         </div>
                         <div class="stat-card" style="border-top: 3px solid #2ecc71;">
                             <i class="fas fa-tasks" style="color:#2ecc71;"></i>
@@ -2131,18 +2291,32 @@
                         <div style="margin-top: 15px;">
                             ${tarefasV.length === 0
                                 ? '<p style="color:#9ca3af; font-style:italic;">Sem tarefas para este dia</p>'
-                                : tarefasV.map(t => `
-                                    <div class="tarefa-item ${t.status === 'concluido' ? 'concluida' : ''}">
+                                : tarefasV.map(t => {
+                                    let statusIcon = 'fa-circle';
+                                    let statusColor = '#ffc107';
+                                    let statusLabel = 'Pendente';
+                                    let isConcluida = '';
+                                    
+                                    if (t.status === 'concluido') {
+                                        statusIcon = 'fa-check-circle'; statusColor = '#4CAF50'; statusLabel = 'Concluído'; isConcluida = 'concluida';
+                                    } else if (t.status === 'em_andamento') {
+                                        statusIcon = 'fa-spinner'; statusColor = '#3b82f6'; statusLabel = 'Em andamento';
+                                    } else if (t.status === 'nao_realizado') {
+                                        statusIcon = 'fa-times-circle'; statusColor = '#ef4444'; statusLabel = 'Não realizado';
+                                    }
+                                    
+                                    return `
+                                    <div class="tarefa-item ${isConcluida}">
                                         <div>
-                                            <i class="fas ${t.status === 'concluido' ? 'fa-check-circle' : 'fa-circle'}"
-                                               style="color:${t.status === 'concluido' ? '#4CAF50' : '#ffc107'}; margin-right:8px;"></i>
+                                            <i class="fas ${statusIcon}" style="color:${statusColor}; margin-right:8px;"></i>
                                             ${t.descricao}
                                         </div>
                                         <span class="status-badge status-${t.status}">
-                                            ${t.status === 'concluido' ? 'Concluído' : 'Pendente'}
+                                            ${statusLabel}
                                         </span>
                                     </div>
-                                `).join('')
+                                    `;
+                                }).join('')
                             }
                         </div>
                     </div>
@@ -2299,11 +2473,44 @@
             document.getElementById('editarRegistroModal').classList.remove('active');
         }
 
+        function verificarSenhaAba() {
+            const senha = document.getElementById('senhaAbaInput').value;
+            if (senha === SENHA_SISTEMA) {
+                closeSenhaAbaModal();
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                
+                // Determine which tab was requested (we can check which tab triggered it, but since we blocked it, we can just default to tarefas or gerenciar based on a flag, or simpler: just unlock both or check the last clicked tab. 
+                // Actually, a simpler way: we can store the requested tab in a variable.
+                if (requestedTab === 'tarefas') {
+                    tarefasDesbloqueado = true;
+                    document.querySelector('.tab[data-tab="tarefas"]').classList.add('active');
+                    document.getElementById('tarefas').classList.add('active');
+                    renderTarefasLista();
+                } else if (requestedTab === 'gerenciar') {
+                    gerenciarDesbloqueado = true;
+                    document.querySelector('.tab[data-tab="gerenciar"]').classList.add('active');
+                    document.getElementById('gerenciar').classList.add('active');
+                    renderGerenciarLista();
+                }
+                showToast('✅ Acesso concedido!', 'success');
+            } else {
+                showToast('⚠️ Senha incorreta!', 'error');
+            }
+        }
+
+        let requestedTab = '';
+
+        function closeSenhaAbaModal() {
+            document.getElementById('senhaAbaModal').classList.remove('active');
+        }
+
         function togglePassword() { /* removido */ }
 
         // Inicializar
         init();
     </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
