@@ -1153,6 +1153,7 @@
                     else if (target === 'tarefas') renderTarefasLista();
                     else if (target === 'gerenciar') renderGerenciarLista();
                     else if (target === 'cadastroAfazeres') renderAfazeresCadastroLista();
+                    else if (target === 'relatorios') gerarRelatorio(); // Atualiza relatório ao abrir a aba
                 });
             });
 
@@ -1601,7 +1602,16 @@
                     if (!v) return;
                     const dadosV = vendedoresNaData[vid];
 
-                    const listaTarefas = dadosV.tarefas.map(tDesc => {
+                    // Combinar tarefas do registro diário e tarefas da aba "Tarefas Lançadas"
+                    const tarefasDoRegistro = dadosV.tarefas || [];
+                    const tarefasDaAba = tarefas
+                        .filter(t => t.data === data && t.vendedorId == vid)
+                        .map(t => t.descricao);
+                    
+                    // Unir e remover duplicatas
+                    const todasTarefas = [...new Set([...tarefasDoRegistro, ...tarefasDaAba])];
+
+                    const listaTarefas = todasTarefas.map(tDesc => {
                         const tObj = tarefas.find(t => t.data === data && t.vendedorId == vid && t.descricao === tDesc);
                         let icon = '⏳';
                         let statusText = 'Pendente';
@@ -2033,6 +2043,12 @@
             });
         }
 
+        function atualizarRelatorioSeAtivo() {
+            if (document.getElementById('relatorios').classList.contains('active')) {
+                gerarRelatorio();
+            }
+        }
+
         function salvarTarefa(e) {
             e.preventDefault();
             const id = document.getElementById('tarefaId').value;
@@ -2044,10 +2060,25 @@
             if (id) {
                 const t = tarefas.find(x => x.id == id);
                 if (t) {
+                    const oldDesc = t.descricao;
                     t.vendedorId = vendedorId;
                     t.data = data;
                     t.descricao = descricao;
                     t.status = status;
+                    
+                    // Atualizar também no array de registros para manter a consistência no relatório
+                    let registroAtualizado = false;
+                    registros.forEach(r => {
+                        if (r.data === data && r.vendedorId === vendedorId && Array.isArray(r.tarefas)) {
+                            if (r.tarefas.includes(oldDesc)) {
+                                r.tarefas = r.tarefas.map(tDesc => tDesc === oldDesc ? descricao : tDesc);
+                                registroAtualizado = true;
+                            }
+                        }
+                    });
+                    if (registroAtualizado) {
+                        salvarRegistros();
+                    }
                 }
             } else {
                 tarefas.push({
@@ -2064,6 +2095,7 @@
             closeTarefaModal();
             renderTarefasLista();
             renderDashboardEncarregado();
+            atualizarRelatorioSeAtivo();
             showToast('Tarefa salva com sucesso!', 'success');
         }
 
@@ -2093,10 +2125,22 @@
             }
             customConfirm('Excluir esta tarefa?', '🗑️ Excluir tarefa').then(ok => {
                 if (!ok) return;
-                tarefas = tarefas.filter(t => t.id !== id);
+                
+                // Remover também do array de registros para manter a consistência no relatório
+                if (t) {
+                    registros.forEach(r => {
+                        if (r.data === t.data && r.vendedorId === t.vendedorId && Array.isArray(r.tarefas)) {
+                            r.tarefas = r.tarefas.filter(tDesc => tDesc !== t.descricao);
+                        }
+                    });
+                    salvarRegistros();
+                }
+                
+                tarefas = tarefas.filter(task => task.id !== id);
                 salvarTarefas();
                 renderTarefasLista();
                 renderDashboardEncarregado();
+                atualizarRelatorioSeAtivo();
                 showToast('Tarefa excluída!', 'success');
             });
         }
@@ -2114,6 +2158,7 @@
             salvarTarefas();
             renderTarefasLista();
             renderDashboardEncarregado();
+            atualizarRelatorioSeAtivo();
             showToast('Status atualizado!', 'success');
         }
 
