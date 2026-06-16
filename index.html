@@ -537,6 +537,20 @@
             color: #fff;
             border-color: var(--primary);
         }
+
+        /* ====== ANIMAÇÃO DE SUCESSO ====== */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -590,15 +604,23 @@
                         <input type="date" id="dataRegistro" required>
                     </div>
 
-                    <div class="form-group">
-                        <label>👤 Passo 1 — Selecione o Funcionário</label>
-                        <div id="vendedoresGrid" class="vendedores-grid"></div>
-                        <input type="hidden" id="vendedorSelecionado" required>
+                    <!-- Passo 1 -->
+                    <div id="passo1">
+                        <div class="form-group">
+                            <label>👤 Passo 1 — Selecione o Funcionário</label>
+                            <div id="vendedoresGrid" class="vendedores-grid"></div>
+                            <input type="hidden" id="vendedorSelecionado" required>
+                        </div>
                     </div>
 
+                    <!-- Passo 2 -->
                     <div id="passo2" style="display:none;">
-                        <hr style="border:none; border-top:1px solid #eef0f4; margin: 20px 0;">
-                        <h3 style="color:#1f2937; margin-bottom:15px;">✅ Passo 2 — Afazeres realizados</h3>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                            <h3 style="color:#1f2937; margin:0; font-size:1.05rem;">✅ Passo 2 — Afazeres e Resultados</h3>
+                            <button type="button" id="btnVoltarPasso1" class="btn btn-secondary btn-small">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </button>
+                        </div>
 
                         <div class="form-group">
                             <label>📋 Selecione dos cadastrados</label>
@@ -633,6 +655,15 @@
                         <button type="submit" class="btn btn-primary" style="width: 100%;">
                             💾 Salvar Dados do Dia
                         </button>
+                    </div>
+
+                    <!-- Tela de Sucesso -->
+                    <div id="telaSucesso" style="display:none; text-align:center; padding: 40px 20px;">
+                        <div style="font-size: 4rem; color: var(--success); margin-bottom: 15px; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 style="color: var(--text); margin-bottom: 8px;">Registrado com Sucesso!</h3>
+                        <p style="color: var(--text-muted);">Os dados foram salvos e as tarefas estão pendentes de aprovação.</p>
                     </div>
                 </form>
             </div>
@@ -1126,6 +1157,19 @@
             });
 
             document.getElementById('registroForm').addEventListener('submit', salvarRegistro);
+            
+            // Botão Voltar para o Passo 1
+            document.getElementById('btnVoltarPasso1').addEventListener('click', () => {
+                document.getElementById('passo2').style.display = 'none';
+                const passo1 = document.getElementById('passo1');
+                passo1.style.display = 'block';
+                passo1.classList.add('fade-in');
+                
+                // Limpar seleção
+                document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
+                document.getElementById('vendedorSelecionado').value = '';
+                avulsasTemp = [];
+            });
 
             // Tarefa avulsa no form principal
             document.getElementById('btnAddAvulsa').addEventListener('click', adicionarAvulsa);
@@ -1252,7 +1296,15 @@
             document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             document.getElementById('vendedorSelecionado').value = id;
-            document.getElementById('passo2').style.display = 'block';
+            
+            // Transição suave para o Passo 2
+            const passo1 = document.getElementById('passo1');
+            const passo2 = document.getElementById('passo2');
+            
+            passo1.style.display = 'none';
+            passo2.style.display = 'block';
+            passo2.classList.add('fade-in');
+            
             avulsasTemp = [];
             renderAvulsasList();
             renderAfazeresCheckboxes();
@@ -1428,20 +1480,32 @@
             registros.push(registro);
             salvarRegistros();
 
-            // Limpar formulário
-            document.getElementById('cashback').value = '0';
-            document.getElementById('avaliacoes').value = '0';
-            document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
-            document.getElementById('vendedorSelecionado').value = '';
+            // Mostrar tela de sucesso
             document.getElementById('passo2').style.display = 'none';
-            avulsasTemp = [];
+            const telaSucesso = document.getElementById('telaSucesso');
+            telaSucesso.style.display = 'block';
+            telaSucesso.classList.add('fade-in');
 
-            showToast('✅ Dados e tarefas salvos como pendentes!', 'success');
             atualizarResumoHoje();
             atualizarMetasHeader();
             // Re-renders pesados acontecem só quando a aba estiver ativa
             if (document.getElementById('gerenciar').classList.contains('active')) renderGerenciarLista();
             if (document.getElementById('dashboardEnc').classList.contains('active')) renderDashboardEncarregado();
+
+            // Retornar ao Passo 1 após 2.5 segundos
+            setTimeout(() => {
+                telaSucesso.style.display = 'none';
+                const passo1 = document.getElementById('passo1');
+                passo1.style.display = 'block';
+                passo1.classList.add('fade-in');
+                
+                // Limpar formulário completamente
+                document.getElementById('cashback').value = '0';
+                document.getElementById('avaliacoes').value = '0';
+                document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
+                document.getElementById('vendedorSelecionado').value = '';
+                avulsasTemp = [];
+            }, 2500);
         }
 
         function atualizarMetasHeader() {
