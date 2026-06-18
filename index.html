@@ -389,13 +389,247 @@
         /* Override Chart.js dark colors for light theme */
         canvas { color: var(--text) !important; }
 
-        @media (max-width: 768px) {
+        /* ====== RESPONSIVIDADE MOBILE ====== */
+        @media (max-width: 1024px) {
             .main-content { grid-template-columns: 1fr; }
-            h1 { font-size: 1.25rem; }
-            .header-info { flex-direction: column; align-items: stretch; }
-            .vendedores-grid { grid-template-columns: repeat(2, 1fr); }
-            body { padding: 14px; }
-            .card { padding: 18px; }
+            .metas-info { flex-wrap: wrap; }
+            .meta-item { flex: 1 1 calc(50% - 8px); min-width: 140px; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            
+            /* Header */
+            header { padding: 16px; margin-bottom: 16px; }
+            h1 { font-size: 1.15rem; margin-bottom: 12px; }
+            .header-info { flex-direction: column; align-items: stretch; gap: 10px; }
+            
+            /* Metas no header */
+            .metas-info { 
+                flex-wrap: wrap; 
+                gap: 8px;
+            }
+            .meta-item { 
+                flex: 1 1 100%; 
+                min-width: 0;
+                padding: 8px 12px;
+                gap: 10px;
+            }
+            .meta-item i { font-size: 1.1rem; width: 20px; }
+            .meta-item span { font-size: 0.7rem; }
+            .meta-item strong { font-size: 0.95rem; }
+            
+            /* Conteúdo principal */
+            .main-content { 
+                grid-template-columns: 1fr; 
+                gap: 16px;
+            }
+            .card { padding: 16px; }
+            .card h2 { font-size: 0.95rem; margin-bottom: 14px; }
+            
+            /* Vendedores grid */
+            .vendedores-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 8px;
+            }
+            .vendedor-card { padding: 12px 8px; }
+            .vendedor-icon { font-size: 1.5rem; margin-bottom: 4px; }
+            .vendedor-name { font-size: 0.8rem; }
+            
+            /* Tabs */
+            .tabs { 
+                gap: 2px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                flex-wrap: nowrap;
+                padding-bottom: 4px;
+            }
+            .tabs::-webkit-scrollbar { display: none; }
+            .tab { 
+                padding: 8px 12px; 
+                font-size: 0.82rem;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            
+            /* Tabelas responsivas */
+            table { font-size: 0.82rem; }
+            table th, table td { padding: 8px 6px; }
+            table th { font-size: 0.7rem; }
+            
+            /* Wrapper para scroll horizontal em tabelas */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -16px;
+                padding: 0 16px;
+            }
+            
+            /* Ações em tabelas */
+            .actions { 
+                gap: 4px;
+                flex-wrap: wrap;
+            }
+            .btn-small { 
+                padding: 4px 8px; 
+                font-size: 0.75rem; 
+            }
+            
+            /* Stats grid */
+            .stats-grid { 
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 10px;
+            }
+            .stat-card { padding: 12px; }
+            .stat-card .value { font-size: 1.3rem; }
+            .stat-card .label { font-size: 0.72rem; }
+            
+            /* Gráficos */
+            .chart-container { height: 250px; }
+            
+            /* Modais */
+            .modal-content { 
+                padding: 18px;
+                width: 95%;
+                max-width: 95%;
+            }
+            .modal-header h3 { font-size: 1rem; }
+            
+            /* Formulários */
+            .form-group { margin-bottom: 12px; }
+            .form-group label { font-size: 0.82rem; }
+            .form-group input,
+            .form-group select,
+            .form-group textarea { 
+                padding: 9px 10px;
+                font-size: 0.9rem;
+            }
+            
+            /* Botões */
+            .btn { 
+                padding: 9px 14px;
+                font-size: 0.85rem;
+            }
+            
+            /* Dashboard cards */
+            .dashboard-card { padding: 14px; margin-bottom: 10px; }
+            .dashboard-card h4 { font-size: 0.9rem; }
+            
+            /* Totais row */
+            .totais-row { 
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .totais-row span { 
+                font-size: 0.78rem;
+                padding: 4px 8px;
+            }
+            
+            /* Tarefa item */
+            .tarefa-item { 
+                padding: 8px 10px;
+                font-size: 0.85rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            
+            /* Status badge */
+            .status-badge { font-size: 0.72rem; padding: 2px 8px; }
+            
+            /* Afazeres checkboxes */
+            #afazeresCheckboxes { max-height: 240px; }
+            .afazer-item { padding: 9px 10px; gap: 8px; }
+            .afazer-item .afazer-text { font-size: 0.85rem; }
+            .afazer-item .afazer-badge { font-size: 0.62rem; padding: 2px 6px; }
+            
+            /* Toast */
+            #toastContainer {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+            .toast { 
+                min-width: 0;
+                max-width: 100%;
+                font-size: 0.85rem;
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 8px; }
+            
+            header { padding: 12px; }
+            h1 { font-size: 1rem; }
+            
+            .meta-item { 
+                padding: 6px 10px;
+                gap: 8px;
+            }
+            .meta-item i { font-size: 1rem; }
+            .meta-item strong { font-size: 0.88rem; }
+            
+            .card { padding: 12px; }
+            .card h2 { font-size: 0.9rem; }
+            
+            .vendedores-grid { 
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .vendedor-card { padding: 10px 6px; }
+            .vendedor-icon { font-size: 1.3rem; }
+            .vendedor-name { font-size: 0.75rem; }
+            
+            .tab { 
+                padding: 6px 10px; 
+                font-size: 0.78rem;
+            }
+            
+            table { font-size: 0.78rem; }
+            table th, table td { padding: 6px 4px; }
+            
+            .stats-grid { 
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .stat-card { padding: 10px; }
+            .stat-card .value { font-size: 1.1rem; }
+            .stat-card i { font-size: 1rem; }
+            
+            .chart-container { height: 220px; }
+            
+            .btn { 
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            .btn-small { 
+                padding: 3px 6px; 
+                font-size: 0.72rem; 
+            }
+            
+            .modal-content { padding: 14px; }
+            
+            .form-group input,
+            .form-group select { 
+                padding: 8px;
+                font-size: 0.85rem;
+            }
+            
+            .tarefa-item { 
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+            
+            .afazer-item { padding: 8px; }
+            .afazer-item .afazer-text { font-size: 0.8rem; }
+        }
+
+        /* Melhorias para telas muito grandes */
+        @media (min-width: 1400px) {
+            .container { max-width: 1400px; }
+            .main-content { grid-template-columns: 1.2fr 1fr; }
         }
 
         /* Toast notifications */
@@ -2047,6 +2281,7 @@
             }
             
             let html = `
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -2087,7 +2322,7 @@
                 }
             });
             
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
 
@@ -2461,6 +2696,7 @@
             }
 
             let html = `
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -2522,7 +2758,7 @@
                 `;
             });
 
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             container.innerHTML = html;
         }
 
@@ -2747,6 +2983,7 @@
                 return;
             }
             let html = `
+                <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
@@ -2780,7 +3017,7 @@
                     </tr>
                 `;
             });
-            html += '</tbody></table>';
+            html += '</tbody></table></div>';
             c.innerHTML = html;
         }
 
