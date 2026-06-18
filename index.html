@@ -1903,19 +1903,19 @@
                 <div style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 20px;">
                     <div class="card">
                         <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
+                            <i class="fas fa-gift"></i> Cashback por Vendedor
+                        </h3>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="chartMetas"></canvas>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
                             <i class="fas fa-tasks"></i> Afazeres por Vendedor
                         </h3>
                         <div class="chart-container">
                             <canvas id="chartAfazeres"></canvas>
                         </div>
-                    </div>
-                </div>
-                <div class="card" style="margin-top: 30px;">
-                    <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
-                        <i class="fas fa-trophy"></i> Progresso das Metas Mensais (Total e %)
-                    </h3>
-                    <div class="chart-container" style="height: 400px;">
-                        <canvas id="chartMetas"></canvas>
                     </div>
                 </div>
             `;
@@ -1927,7 +1927,7 @@
             const cores = [];
 
             vendedores.forEach(vendedor => {
-                if (totaisPorVendedor[vendedor.id].cashback > 0 || totaisPorVendedor[vendedor.id].afazeres > 0) {
+                if (totaisPorVendedor[vendedor.id].cashback > 0 || totaisPorVendedor[vendedor.id].avaliacoes > 0 || totaisPorVendedor[vendedor.id].afazeres > 0) {
                     labels.push(vendedor.nome);
                     datasetCashback.push(totaisPorVendedor[vendedor.id].cashback);
                     datasetAfazeres.push(totaisPorVendedor[vendedor.id].afazeres);
@@ -1973,54 +1973,28 @@
                 }
             });
 
-            // Gráfico consolidado de Metas (Total e %)
-            const totalCashMes = datasetCashback.reduce((a, b) => a + b, 0);
-            const pctCashMes = metaCashback > 0 ? ((totalCashMes / metaCashback) * 100).toFixed(1) : 0;
-
+            // Gráfico de Cashback por Vendedor
             new Chart(document.getElementById('chartMetas'), {
                 type: 'bar',
                 data: {
-                    labels: ['Cashback'],
-                    datasets: [
-                        {
-                            label: 'Total Alcançado',
-                            data: [totalCashMes],
-                            backgroundColor: ['rgba(76, 175, 80, 0.7)'],
-                            borderRadius: 8
-                        },
-                        {
-                            label: 'Meta Mensal',
-                            data: [metaCashback],
-                            backgroundColor: ['rgba(76, 175, 80, 0.2)'],
-                            borderRadius: 8,
-                            borderColor: ['rgba(76, 175, 80, 1)'],
-                            borderWidth: 2
-                        }
-                    ]
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cashback',
+                        data: datasetCashback,
+                        backgroundColor: cores,
+                        borderRadius: 8
+                    }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: true,
-                            labels: { color: '#1f2937', font: { size: 13 } }
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(0, 0, 0, 0.8)',
                             padding: 12,
                             titleColor: '#fff',
-                            bodyColor: '#fff',
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.dataset.label;
-                                    const value = context.parsed.y;
-                                    if (label === 'Total Alcançado') {
-                                        return `${label}: ${value} (${pctCashMes}% da meta)`;
-                                    }
-                                    return `${label}: ${value}`;
-                                }
-                            }
+                            bodyColor: '#fff'
                         }
                     },
                     scales: {
