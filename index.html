@@ -6,6 +6,10 @@
     <title>Sistema de Registro de Metas e Resultados</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --bg: #f6f7fb;
@@ -551,9 +555,49 @@
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        /* ====== LOADING OVERLAY ====== */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        #loadingOverlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            margin-top: 16px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Carregando dados...</div>
+    </div>
     <div class="container">
         <header>
             <h1>📊 Sistema de Registro de Metas e Resultados</h1>
@@ -1000,9 +1044,26 @@
     </div>
 
     <script>
+        // ============================
+        // CONFIGURAÇÃO FIREBASE
+        // ============================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAgjh18yMgxVc5UOKIqrx1-298VJjW_MIY",
+            authDomain: "relatorios-diarios-8f7ff.firebaseapp.com",
+            projectId: "relatorios-diarios-8f7ff",
+            storageBucket: "relatorios-diarios-8f7ff.firebasestorage.app",
+            messagingSenderId: "277237222622",
+            appId: "1:277237222622:web:38d56f92ae3e3d69f8464f"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // Configurações e dados iniciais
         const DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-        const SENHA_SISTEMA = "admin123"; // Senha para confirmar afazeres e acessar Gerenciar Dados
+        const SENHA_SISTEMA = "admin123";
+        const DIAS_LIMPEZA_AUTOMATICA = 180;
 
         let metaCashback = 100;
         let metaAvaliacoes = 15;
@@ -1014,6 +1075,7 @@
         let avulsasTemp = [];
         let gerenciarDesbloqueado = false;
         let tarefasDesbloqueado = false;
+        let dadosCarregados = false;
 
         // ============================
         // UI helpers (toast + confirm)
@@ -1047,87 +1109,306 @@
             if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
         }
 
-        // Inicialização
-        function init() {
-            carregarDados();
-            setupEventListeners();
-            setDataHoje();
-            document.getElementById('lojaNomeHeader').textContent = lojaNome;
-            atualizarMetasHeader();
-            renderVendedores();
-            atualizarResumoHoje();
-            atualizarSelectsVendedores();
-            renderDiasSemanaChecks();
-            // A aba ativa por padrão é dashboardEnc — só ela é renderizada
-            renderDashboardEncarregado();
+        // ============================
+        // FUNÇÕES FIRESTORE
+        // ============================
+        
+        // Carregar todos os dados do Firestore
+        async function carregarDados() {
+            try {
+                // Carregar configurações (loja, metas)
+                const configDoc = await db.collection('configuracoes').doc('sistema').get();
+                if (configDoc.exists) {
+                    const config = configDoc.data();
+                    lojaNome = config.lojaNome || 'Minha Loja';
+                    metaCashback = config.metaCashback || 100;
+                    metaAvaliacoes = config.metaAvaliacoes || 15;
+                }
+
+                // Carregar vendedores
+                const vendedoresSnapshot = await db.collection('vendedores').get();
+                if (vendedoresSnapshot.empty) {
+                    // Criar vendedores iniciais
+                    vendedores = [
+                        { id: 1, nome: 'Mattheus', cor: '#3498db', icone: 'fa-user-tie' },
+                        { id: 2, nome: 'Kelly', cor: '#e74c3c', icone: 'fa-user-ninja' },
+                        { id: 3, nome: 'Miguel', cor: '#2ecc71', icone: 'fa-user-astronaut' },
+                        { id: 4, nome: 'Allyson', cor: '#f39c12', icone: 'fa-user-secret' }
+                    ];
+                    await salvarVendedores();
+                } else {
+                    vendedores = vendedoresSnapshot.docs.map(doc => ({
+                        id: doc.data().id,
+                        nome: doc.data().nome,
+                        cor: doc.data().cor,
+                        icone: doc.data().icone
+                    }));
+                }
+
+                // Carregar registros
+                const registrosSnapshot = await db.collection('registros').get();
+                registros = registrosSnapshot.docs.map(doc => ({
+                    id: doc.data().id,
+                    data: doc.data().data,
+                    vendedorId: doc.data().vendedorId,
+                    cashback: doc.data().cashback,
+                    avaliacoes: doc.data().avaliacoes,
+                    tarefas: doc.data().tarefas || [],
+                    timestamp: doc.data().timestamp,
+                    criadoEm: doc.data().criadoEm
+                }));
+
+                // Carregar tarefas
+                const tarefasSnapshot = await db.collection('tarefas').get();
+                tarefas = tarefasSnapshot.docs.map(doc => ({
+                    id: doc.data().id,
+                    vendedorId: doc.data().vendedorId,
+                    data: doc.data().data,
+                    descricao: doc.data().descricao,
+                    status: doc.data().status,
+                    timestamp: doc.data().timestamp,
+                    criadoEm: doc.data().criadoEm
+                }));
+
+                // Carregar afazeres cadastrados
+                const afazeresSnapshot = await db.collection('afazeresCadastrados').get();
+                afazeresCadastrados = afazeresSnapshot.docs.map(doc => ({
+                    id: doc.data().id,
+                    descricao: doc.data().descricao,
+                    recorrencia: doc.data().recorrencia,
+                    diasSemana: doc.data().diasSemana || []
+                }));
+
+                dadosCarregados = true;
+                
+                // Executar limpeza automática ao carregar
+                await limparDadosAntigos();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados do Firestore:', error);
+                showToast('⚠️ Erro ao carregar dados. Verifique sua conexão.', 'error');
+            }
         }
 
-        function carregarDados() {
-            const vendedoresStorage = localStorage.getItem('vendedores');
-            const registrosStorage = localStorage.getItem('registros');
-            
-            if (vendedoresStorage) {
-                vendedores = JSON.parse(vendedoresStorage);
-            } else {
-                // Vendedores iniciais
-                vendedores = [
-                    { id: 1, nome: 'Mattheus', cor: '#3498db', icone: 'fa-user-tie' },
-                    { id: 2, nome: 'Kelly', cor: '#e74c3c', icone: 'fa-user-ninja' },
-                    { id: 3, nome: 'Miguel', cor: '#2ecc71', icone: 'fa-user-astronaut' },
-                    { id: 4, nome: 'Allyson', cor: '#f39c12', icone: 'fa-user-secret' }
-                ];
-                salvarVendedores();
-            }
-            
-            if (registrosStorage) {
-                registros = JSON.parse(registrosStorage);
-            }
-
-            const tarefasStorage = localStorage.getItem('tarefas');
-            if (tarefasStorage) {
-                tarefas = JSON.parse(tarefasStorage);
-            }
-
-            const afazeresCadStorage = localStorage.getItem('afazeresCadastrados');
-            if (afazeresCadStorage) {
-                afazeresCadastrados = JSON.parse(afazeresCadStorage);
-            }
-
-            const lojaStorage = localStorage.getItem('lojaNome');
-            if (lojaStorage) {
-                lojaNome = lojaStorage;
-            }
-
-            const metaCashbackStorage = localStorage.getItem('metaCashback');
-            if (metaCashbackStorage) {
-                metaCashback = parseInt(metaCashbackStorage);
-            }
-
-            const metaAvaliacoesStorage = localStorage.getItem('metaAvaliacoes');
-            if (metaAvaliacoesStorage) {
-                metaAvaliacoes = parseInt(metaAvaliacoesStorage);
+        // Salvar configurações
+        async function salvarConfiguracoes() {
+            try {
+                await db.collection('configuracoes').doc('sistema').set({
+                    lojaNome: lojaNome,
+                    metaCashback: metaCashback,
+                    metaAvaliacoes: metaAvaliacoes,
+                    atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.error('Erro ao salvar configurações:', error);
+                showToast('⚠️ Erro ao salvar configurações.', 'error');
             }
         }
 
-        function salvarAfazeresCadastrados() {
-            localStorage.setItem('afazeresCadastrados', JSON.stringify(afazeresCadastrados));
+        // Salvar vendedores
+        async function salvarVendedores() {
+            try {
+                const batch = db.batch();
+                
+                // Deletar todos os vendedores existentes
+                const snapshot = await db.collection('vendedores').get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Adicionar novos vendedores
+                vendedores.forEach(v => {
+                    const ref = db.collection('vendedores').doc();
+                    batch.set(ref, {
+                        id: v.id,
+                        nome: v.nome,
+                        cor: v.cor,
+                        icone: v.icone,
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+            } catch (error) {
+                console.error('Erro ao salvar vendedores:', error);
+                showToast('⚠️ Erro ao salvar vendedores.', 'error');
+            }
         }
 
-        function salvarLojaNome() {
-            localStorage.setItem('lojaNome', lojaNome);
-            document.getElementById('lojaNomeHeader').textContent = lojaNome;
+        // Salvar registros
+        async function salvarRegistros() {
+            try {
+                const batch = db.batch();
+                
+                // Deletar todos os registros existentes
+                const snapshot = await db.collection('registros').get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Adicionar novos registros
+                registros.forEach(r => {
+                    const ref = db.collection('registros').doc();
+                    batch.set(ref, {
+                        id: r.id,
+                        data: r.data,
+                        vendedorId: r.vendedorId,
+                        cashback: r.cashback,
+                        avaliacoes: r.avaliacoes,
+                        tarefas: r.tarefas || [],
+                        timestamp: r.timestamp,
+                        criadoEm: r.criadoEm || firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+            } catch (error) {
+                console.error('Erro ao salvar registros:', error);
+                showToast('⚠️ Erro ao salvar registros.', 'error');
+            }
         }
 
-        function salvarTarefas() {
-            localStorage.setItem('tarefas', JSON.stringify(tarefas));
+        // Salvar tarefas
+        async function salvarTarefas() {
+            try {
+                const batch = db.batch();
+                
+                // Deletar todas as tarefas existentes
+                const snapshot = await db.collection('tarefas').get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Adicionar novas tarefas
+                tarefas.forEach(t => {
+                    const ref = db.collection('tarefas').doc();
+                    batch.set(ref, {
+                        id: t.id,
+                        vendedorId: t.vendedorId,
+                        data: t.data,
+                        descricao: t.descricao,
+                        status: t.status,
+                        timestamp: t.timestamp,
+                        criadoEm: t.criadoEm || firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+            } catch (error) {
+                console.error('Erro ao salvar tarefas:', error);
+                showToast('⚠️ Erro ao salvar tarefas.', 'error');
+            }
         }
 
-        function salvarVendedores() {
-            localStorage.setItem('vendedores', JSON.stringify(vendedores));
+        // Salvar afazeres cadastrados
+        async function salvarAfazeresCadastrados() {
+            try {
+                const batch = db.batch();
+                
+                // Deletar todos os afazeres existentes
+                const snapshot = await db.collection('afazeresCadastrados').get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Adicionar novos afazeres
+                afazeresCadastrados.forEach(a => {
+                    const ref = db.collection('afazeresCadastrados').doc();
+                    batch.set(ref, {
+                        id: a.id,
+                        descricao: a.descricao,
+                        recorrencia: a.recorrencia,
+                        diasSemana: a.diasSemana || [],
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                await batch.commit();
+            } catch (error) {
+                console.error('Erro ao salvar afazeres:', error);
+                showToast('⚠️ Erro ao salvar afazeres.', 'error');
+            }
         }
 
-        function salvarRegistros() {
-            localStorage.setItem('registros', JSON.stringify(registros));
+        // Limpar dados antigos (mais de 180 dias)
+        async function limparDadosAntigos() {
+            try {
+                const dataLimite = new Date();
+                dataLimite.setDate(dataLimite.getDate() - DIAS_LIMPEZA_AUTOMATICA);
+                
+                // Limpar registros antigos
+                const registrosSnapshot = await db.collection('registros')
+                    .where('timestamp', '<', dataLimite.toISOString())
+                    .get();
+                
+                if (!registrosSnapshot.empty) {
+                    const batch = db.batch();
+                    registrosSnapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                    
+                    // Atualizar array local
+                    registros = registros.filter(r => {
+                        const rDate = new Date(r.timestamp);
+                        return rDate >= dataLimite;
+                    });
+                    
+                    console.log(`Limpeza: ${registrosSnapshot.size} registros antigos removidos`);
+                }
+                
+                // Limpar tarefas antigas
+                const tarefasSnapshot = await db.collection('tarefas')
+                    .where('timestamp', '<', dataLimite.toISOString())
+                    .get();
+                
+                if (!tarefasSnapshot.empty) {
+                    const batch = db.batch();
+                    tarefasSnapshot.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                    
+                    // Atualizar array local
+                    tarefas = tarefas.filter(t => {
+                        const tDate = new Date(t.timestamp);
+                        return tDate >= dataLimite;
+                    });
+                    
+                    console.log(`Limpeza: ${tarefasSnapshot.size} tarefas antigas removidas`);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao limpar dados antigos:', error);
+            }
+        }
+
+        // ============================
+        // INICIALIZAÇÃO
+        // ============================
+        async function init() {
+            try {
+                await carregarDados();
+                setupEventListeners();
+                setDataHoje();
+                document.getElementById('lojaNomeHeader').textContent = lojaNome;
+                atualizarMetasHeader();
+                renderVendedores();
+                atualizarResumoHoje();
+                atualizarSelectsVendedores();
+                renderDiasSemanaChecks();
+                renderDashboardEncarregado();
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                showToast('⚠️ Erro ao inicializar o sistema.', 'error');
+            } finally {
+                // Esconder loading overlay
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.classList.add('hidden');
+                    setTimeout(() => overlay.remove(), 300);
+                }
+            }
         }
 
         function setupEventListeners() {
@@ -1138,22 +1419,20 @@
                 document.getElementById('metaAvaliacoes').value = metaAvaliacoes;
                 document.getElementById('configModal').classList.add('active');
             });
-            document.getElementById('configForm').addEventListener('submit', (e) => {
+            document.getElementById('configForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 lojaNome = document.getElementById('lojaNome').value.trim() || 'Minha Loja';
                 metaCashback = parseInt(document.getElementById('metaCashback').value) || 100;
                 metaAvaliacoes = parseInt(document.getElementById('metaAvaliacoes').value) || 15;
                 
-                localStorage.setItem('lojaNome', lojaNome);
-                localStorage.setItem('metaCashback', metaCashback);
-                localStorage.setItem('metaAvaliacoes', metaAvaliacoes);
+                await salvarConfiguracoes();
                 
                 document.getElementById('lojaNomeHeader').textContent = lojaNome;
                 
                 closeConfigModal();
                 showToast('⚙️ Configurações salvas com sucesso!', 'success');
-                atualizarMetasHeader(); // Atualiza o cabeçalho com as novas metas e porcentagens
-                renderDashboardEncarregado(); // Atualiza dashboard com novas metas
+                atualizarMetasHeader();
+                renderDashboardEncarregado();
             });
 
             document.getElementById('registroForm').addEventListener('submit', salvarRegistro);
@@ -1323,7 +1602,7 @@
         function closeEditarVendedorModal() {
             document.getElementById('editarVendedorModal').classList.remove('active');
         }
-        function salvarEdicaoVendedor(e) {
+        async function salvarEdicaoVendedor(e) {
             e.preventDefault();
             const id = parseInt(document.getElementById('editarVendedorId').value);
             const nome = document.getElementById('editarVendedorNome').value.trim();
@@ -1336,7 +1615,7 @@
             if (!v) return;
             v.nome = nome;
             v.cor = cor;
-            salvarVendedores();
+            await salvarVendedores();
             renderVendedores();
             atualizarSelectsVendedores();
             if (typeof renderRelatorio === 'function') {
@@ -1437,7 +1716,7 @@
             return ageMs > 42 * 60 * 60 * 1000; // 42 horas em milissegundos
         }
 
-        function salvarRegistro(e) {
+        async function salvarRegistro(e) {
             e.preventDefault();
 
             const data = document.getElementById('dataRegistro').value;
@@ -1462,10 +1741,11 @@
                     data,
                     descricao: desc,
                     status: 'pendente',
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    criadoEm: new Date()
                 });
             });
-            salvarTarefas();
+            await salvarTarefas();
 
             const registro = {
                 id: Date.now() + 9999,
@@ -1474,11 +1754,15 @@
                 cashback,
                 avaliacoes,
                 tarefas: tarefasFeitas,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                criadoEm: new Date()
             };
 
             registros.push(registro);
-            salvarRegistros();
+            await salvarRegistros();
+
+            // Executar limpeza automática após salvar
+            await limparDadosAntigos();
 
             // Mostrar tela de sucesso
             document.getElementById('passo2').style.display = 'none';
@@ -1818,7 +2102,7 @@
             document.getElementById('editarRegistroModal').classList.add('active');
         }
 
-        function salvarEdicaoRegistro(e) {
+        async function salvarEdicaoRegistro(e) {
             e.preventDefault();
             
             const id = parseInt(document.getElementById('editarRegistroId').value);
@@ -1829,7 +2113,7 @@
                 registro.cashback = parseInt(document.getElementById('editarCashback').value);
                 registro.avaliacoes = parseInt(document.getElementById('editarAvaliacoes').value);
                 
-                salvarRegistros();
+                await salvarRegistros();
                 closeEditarRegistroModal();
                 renderGerenciarLista();
                 atualizarResumoHoje();
@@ -1837,11 +2121,11 @@
             }
         }
 
-        function excluirRegistro(id) {
-            customConfirm('Tem certeza que deseja excluir este registro?', '🗑️ Excluir registro').then(ok => {
+        async function excluirRegistro(id) {
+            customConfirm('Tem certeza que deseja excluir este registro?', '🗑️ Excluir registro').then(async (ok) => {
                 if (!ok) return;
                 registros = registros.filter(r => r.id !== id);
-                salvarRegistros();
+                await salvarRegistros();
                 renderGerenciarLista();
                 atualizarResumoHoje();
                 showToast('Registro excluído!', 'success');
@@ -2043,7 +2327,7 @@
             }
         }
 
-        function salvarTarefa(e) {
+        async function salvarTarefa(e) {
             e.preventDefault();
             const id = document.getElementById('tarefaId').value;
             const vendedorId = parseInt(document.getElementById('tarefaVendedor').value);
@@ -2071,7 +2355,7 @@
                         }
                     });
                     if (registroAtualizado) {
-                        salvarRegistros();
+                        await salvarRegistros();
                     }
                 }
             } else {
@@ -2081,11 +2365,12 @@
                     data,
                     descricao,
                     status,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    criadoEm: new Date()
                 });
             }
 
-            salvarTarefas();
+            await salvarTarefas();
             closeTarefaModal();
             renderTarefasLista();
             renderDashboardEncarregado();
@@ -2111,13 +2396,13 @@
             document.getElementById('tarefaModal').classList.add('active');
         }
 
-        function excluirTarefa(id) {
+        async function excluirTarefa(id) {
             const t = tarefas.find(x => x.id === id);
             if (t && isTaskLocked(t)) {
                 showToast('⚠️ Tarefa bloqueada: prazo de 42h expirado!', 'warning');
                 return;
             }
-            customConfirm('Excluir esta tarefa?', '🗑️ Excluir tarefa').then(ok => {
+            customConfirm('Excluir esta tarefa?', '🗑️ Excluir tarefa').then(async (ok) => {
                 if (!ok) return;
                 
                 // Remover também do array de registros para manter a consistência no relatório
@@ -2127,11 +2412,11 @@
                             r.tarefas = r.tarefas.filter(tDesc => tDesc !== t.descricao);
                         }
                     });
-                    salvarRegistros();
+                    await salvarRegistros();
                 }
                 
                 tarefas = tarefas.filter(task => task.id !== id);
-                salvarTarefas();
+                await salvarTarefas();
                 renderTarefasLista();
                 renderDashboardEncarregado();
                 atualizarRelatorioSeAtivo();
@@ -2139,7 +2424,7 @@
             });
         }
 
-        function alternarStatusTarefa(id) {
+        async function alternarStatusTarefa(id) {
             const t = tarefas.find(x => x.id === id);
             if (!t) return;
             if (isTaskLocked(t)) {
@@ -2149,7 +2434,7 @@
             const statuses = ['pendente', 'em_andamento', 'concluido', 'nao_realizado'];
             const currentIndex = statuses.indexOf(t.status);
             t.status = statuses[(currentIndex + 1) % statuses.length];
-            salvarTarefas();
+            await salvarTarefas();
             renderTarefasLista();
             renderDashboardEncarregado();
             atualizarRelatorioSeAtivo();
@@ -2407,7 +2692,7 @@
             document.getElementById('afazerCadastroModal').classList.add('active');
         }
 
-        function salvarAfazerCadastro(e) {
+        async function salvarAfazerCadastro(e) {
             e.preventDefault();
             const id = document.getElementById('afazerCadastroId').value;
             const descricao = document.getElementById('afazerCadastroDescricao').value.trim();
@@ -2431,7 +2716,7 @@
                     diasSemana
                 });
             }
-            salvarAfazeresCadastrados();
+            await salvarAfazeresCadastrados();
             closeAfazerCadastroModal();
             renderAfazeresCadastroLista();
             renderAfazeresCheckboxes();
@@ -2443,11 +2728,11 @@
             if (a) abrirAfazerCadastroModal(a);
         }
 
-        function excluirAfazerCadastro(id) {
-            customConfirm('Excluir este afazer cadastrado?', '🗑️ Excluir afazer').then(ok => {
+        async function excluirAfazerCadastro(id) {
+            customConfirm('Excluir este afazer cadastrado?', '🗑️ Excluir afazer').then(async (ok) => {
                 if (!ok) return;
                 afazeresCadastrados = afazeresCadastrados.filter(a => a.id !== id);
-                salvarAfazeresCadastrados();
+                await salvarAfazeresCadastrados();
                 renderAfazeresCadastroLista();
                 renderAfazeresCheckboxes();
                 showToast('Afazer excluído!', 'success');
