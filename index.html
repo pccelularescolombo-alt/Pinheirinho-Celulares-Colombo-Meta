@@ -1876,7 +1876,7 @@
             // Calcular totais por vendedor
             const totaisPorVendedor = {};
             vendedores.forEach(v => {
-                totaisPorVendedor[v.id] = { cashback: 0, avaliacoes: 0 };
+                totaisPorVendedor[v.id] = { cashback: 0, avaliacoes: 0, afazeres: 0 };
             });
             
             registrosMes.forEach(reg => {
@@ -1886,29 +1886,33 @@
                 }
             });
 
+            // Contar afazeres (tarefas) por vendedor no mês
+            const tarefasMes = tarefas.filter(t => {
+                const [tAno, tMes] = t.data.split('-');
+                return tAno === ano && tMes === mesNum;
+            });
+            
+            tarefasMes.forEach(t => {
+                if (totaisPorVendedor[t.vendedorId]) {
+                    totaisPorVendedor[t.vendedorId].afazeres += 1;
+                }
+            });
+
             const container = document.getElementById('graficosContainer');
             container.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 20px;">
                     <div class="card">
                         <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
-                            <i class="fas fa-gift"></i> Cashback por Vendedor
+                            <i class="fas fa-tasks"></i> Afazeres por Vendedor
                         </h3>
                         <div class="chart-container">
-                            <canvas id="chartCashback"></canvas>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
-                            <i class="fas fa-star"></i> Avaliações por Vendedor
-                        </h3>
-                        <div class="chart-container">
-                            <canvas id="chartAvaliacoes"></canvas>
+                            <canvas id="chartAfazeres"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="card" style="margin-top: 30px;">
                     <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
-                        <i class="fas fa-trophy"></i> Progresso das Metas Mensais
+                        <i class="fas fa-trophy"></i> Progresso das Metas Mensais (Total e %)
                     </h3>
                     <div class="chart-container" style="height: 400px;">
                         <canvas id="chartMetas"></canvas>
@@ -1919,26 +1923,26 @@
             // Preparar dados
             const labels = [];
             const datasetCashback = [];
-            const datasetAvaliacoes = [];
+            const datasetAfazeres = [];
             const cores = [];
 
             vendedores.forEach(vendedor => {
-                if (totaisPorVendedor[vendedor.id].cashback > 0 || totaisPorVendedor[vendedor.id].avaliacoes > 0) {
+                if (totaisPorVendedor[vendedor.id].cashback > 0 || totaisPorVendedor[vendedor.id].afazeres > 0) {
                     labels.push(vendedor.nome);
                     datasetCashback.push(totaisPorVendedor[vendedor.id].cashback);
-                    datasetAvaliacoes.push(totaisPorVendedor[vendedor.id].avaliacoes);
+                    datasetAfazeres.push(totaisPorVendedor[vendedor.id].afazeres);
                     cores.push(vendedor.cor);
                 }
             });
 
-            // Gráfico Cashback
-            new Chart(document.getElementById('chartCashback'), {
+            // Gráfico Afazeres
+            new Chart(document.getElementById('chartAfazeres'), {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Cashback',
-                        data: datasetCashback,
+                        label: 'Afazeres Realizados',
+                        data: datasetAfazeres,
                         backgroundColor: cores,
                         borderRadius: 8
                     }]
@@ -1969,75 +1973,28 @@
                 }
             });
 
-            // Gráfico Avaliações
-            new Chart(document.getElementById('chartAvaliacoes'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Avaliações',
-                        data: datasetAvaliacoes,
-                        backgroundColor: cores,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            titleColor: '#fff',
-                            bodyColor: '#fff'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
-                            ticks: { color: '#6b7280' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#6b7280' }
-                        }
-                    }
-                }
-            });
-
-            // Gráfico de Metas (Meta total dividida pelo número de funcionários para o progresso individual)
-            const numVendedores = vendedores.length || 1;
-            const metaPorVendedorCash = metaCashback / numVendedores;
-            const metaPorVendedorAval = metaAvaliacoes / numVendedores;
-
-            const datasetMetasCashback = labels.map((_, i) => {
-                const progresso = (datasetCashback[i] / metaPorVendedorCash) * 100;
-                return Math.min(progresso, 100);
-            });
-            
-            const datasetMetasAvaliacoes = labels.map((_, i) => {
-                const progresso = (datasetAvaliacoes[i] / metaPorVendedorAval) * 100;
-                return Math.min(progresso, 100);
-            });
+            // Gráfico consolidado de Metas (Total e %)
+            const totalCashMes = datasetCashback.reduce((a, b) => a + b, 0);
+            const pctCashMes = metaCashback > 0 ? ((totalCashMes / metaCashback) * 100).toFixed(1) : 0;
 
             new Chart(document.getElementById('chartMetas'), {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: ['Cashback'],
                     datasets: [
                         {
-                            label: 'Progresso Cashback (%)',
-                            data: datasetMetasCashback,
-                            backgroundColor: 'rgba(76, 175, 80, 0.7)',
+                            label: 'Total Alcançado',
+                            data: [totalCashMes],
+                            backgroundColor: ['rgba(76, 175, 80, 0.7)'],
                             borderRadius: 8
                         },
                         {
-                            label: 'Progresso Avaliações (%)',
-                            data: datasetMetasAvaliacoes,
-                            backgroundColor: 'rgba(255, 193, 7, 0.7)',
-                            borderRadius: 8
+                            label: 'Meta Mensal',
+                            data: [metaCashback],
+                            backgroundColor: ['rgba(76, 175, 80, 0.2)'],
+                            borderRadius: 8,
+                            borderColor: ['rgba(76, 175, 80, 1)'],
+                            borderWidth: 2
                         }
                     ]
                 },
@@ -2056,7 +2013,12 @@
                             bodyColor: '#fff',
                             callbacks: {
                                 label: function(context) {
-                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                    const label = context.dataset.label;
+                                    const value = context.parsed.y;
+                                    if (label === 'Total Alcançado') {
+                                        return `${label}: ${value} (${pctCashMes}% da meta)`;
+                                    }
+                                    return `${label}: ${value}`;
                                 }
                             }
                         }
@@ -2064,14 +2026,8 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 100,
                             grid: { color: 'rgba(0, 0, 0, 0.06)' },
-                            ticks: {
-                                color: '#6b7280',
-                                callback: function(value) {
-                                    return value + '%';
-                                }
-                            }
+                            ticks: { color: '#6b7280' }
                         },
                         x: {
                             grid: { display: false },
