@@ -886,6 +886,11 @@
                     <div id="passo1">
                         <div class="form-group">
                             <label>👤 Passo 1 — Selecione o Funcionário</label>
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                <button type="button" class="btn btn-primary btn-small" onclick="abrirAdicionarVendedorModal()">
+                                    <i class="fas fa-user-plus"></i> Novo Funcionário
+                                </button>
+                            </div>
                             <div id="vendedoresGrid" class="vendedores-grid"></div>
                             <input type="hidden" id="vendedorSelecionado" required>
                         </div>
@@ -1044,6 +1049,13 @@
                     </div>
                 </div>
                 <div id="relatorioResultado"></div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="observacaoRelatorio">📝 Observação do Relatório</label>
+                    <textarea id="observacaoRelatorio" rows="4" placeholder="Digite uma observação para adicionar ao final do relatório..." style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-elev); color: var(--text); font-size: 0.95rem; font-family: inherit; resize: vertical;"></textarea>
+                    <button type="button" class="btn btn-primary" style="margin-top: 10px;" onclick="adicionarObservacaoRelatorio()">
+                        <i class="fas fa-plus"></i> Adicionar Observação ao Relatório
+                    </button>
+                </div>
             </div>
 
             <div id="gerenciar" class="tab-content">
@@ -1123,6 +1135,49 @@
                         💾 Salvar
                     </button>
                     <button type="button" class="btn btn-secondary" onclick="closeEditarVendedorModal()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Funcionário -->
+    <div id="adicionarVendedorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>➕ Adicionar Funcionário</h3>
+                <button class="close-modal" onclick="closeAdicionarVendedorModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="adicionarVendedorForm">
+                <div class="form-group">
+                    <label for="novoVendedorNome">👤 Nome</label>
+                    <input type="text" id="novoVendedorNome" required placeholder="Nome do funcionário" maxlength="40">
+                </div>
+                <div class="form-group">
+                    <label for="novoVendedorCor">🎨 Cor</label>
+                    <input type="color" id="novoVendedorCor" value="#6366f1" style="width:60px; height:40px; padding:2px; cursor:pointer;">
+                </div>
+                <div class="form-group">
+                    <label for="novoVendedorIcone">🎭 Ícone</label>
+                    <select id="novoVendedorIcone" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.95rem;">
+                        <option value="fa-user">👤 Usuário</option>
+                        <option value="fa-user-tie">👔 Formal</option>
+                        <option value="fa-user-ninja">🥷 Ninja</option>
+                        <option value="fa-user-astronaut">👨‍🚀 Astronauta</option>
+                        <option value="fa-user-secret">🕵️ Agente</option>
+                        <option value="fa-user-graduate">🎓 Graduado</option>
+                        <option value="fa-user-cog">⚙️ Técnico</option>
+                        <option value="fa-user-check">✅ Verificado</option>
+                    </select>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="submit" class="btn btn-primary" style="flex:1;">
+                        💾 Adicionar
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAdicionarVendedorModal()">
                         Cancelar
                     </button>
                 </div>
@@ -1788,8 +1843,11 @@
                 card.className = 'vendedor-card';
                 card.style.color = vendedor.cor;
                 card.innerHTML = `
-                    <button type="button" class="vendedor-edit-btn" title="Editar nome">
+                    <button type="button" class="vendedor-edit-btn" title="Editar nome" style="top: 6px; right: 32px;">
                         <i class="fas fa-pen"></i>
+                    </button>
+                    <button type="button" class="vendedor-edit-btn" title="Excluir funcionário" style="top: 6px; right: 6px; color: var(--danger);" onclick="event.stopPropagation(); excluirVendedor(${vendedor.id});">
+                        <i class="fas fa-times"></i>
                     </button>
                     <div class="vendedor-icon">
                         <i class="fas ${vendedor.icone}"></i>
@@ -1865,7 +1923,64 @@
             if (modal) modal.addEventListener('click', e => {
                 if (e.target === modal) closeEditarVendedorModal();
             });
+
+            // Adicionar vendedor form
+            const fAdd = document.getElementById('adicionarVendedorForm');
+            if (fAdd) fAdd.addEventListener('submit', salvarNovoVendedor);
+            const modalAdd = document.getElementById('adicionarVendedorModal');
+            if (modalAdd) modalAdd.addEventListener('click', e => {
+                if (e.target === modalAdd) closeAdicionarVendedorModal();
+            });
         });
+
+        // ===== Adicionar novo funcionário =====
+        function abrirAdicionarVendedorModal() {
+            document.getElementById('novoVendedorNome').value = '';
+            document.getElementById('novoVendedorCor').value = '#6366f1';
+            document.getElementById('novoVendedorIcone').value = 'fa-user';
+            document.getElementById('adicionarVendedorModal').classList.add('active');
+            setTimeout(() => document.getElementById('novoVendedorNome').focus(), 50);
+        }
+        function closeAdicionarVendedorModal() {
+            document.getElementById('adicionarVendedorModal').classList.remove('active');
+        }
+        async function salvarNovoVendedor(e) {
+            e.preventDefault();
+            const nome = document.getElementById('novoVendedorNome').value.trim();
+            const cor = document.getElementById('novoVendedorCor').value;
+            const icone = document.getElementById('novoVendedorIcone').value;
+            if (!nome) {
+                showToast('⚠️ Nome obrigatório', 'warning');
+                return;
+            }
+            // Verificar nome duplicado
+            if (vendedores.some(v => v.nome.toLowerCase() === nome.toLowerCase())) {
+                showToast('⚠️ Já existe um funcionário com este nome!', 'warning');
+                return;
+            }
+            const novoId = vendedores.length > 0 ? Math.max(...vendedores.map(v => v.id)) + 1 : 1;
+            vendedores.push({ id: novoId, nome, cor, icone });
+            await salvarVendedores();
+            renderVendedores();
+            atualizarSelectsVendedores();
+            closeAdicionarVendedorModal();
+            showToast('✅ Funcionário adicionado com sucesso!', 'success');
+        }
+
+        // ===== Excluir funcionário =====
+        async function excluirVendedor(id) {
+            const v = vendedores.find(x => x.id === id);
+            if (!v) return;
+            customConfirm(`Tem certeza que deseja excluir o funcionário "${v.nome}"? Os registros existentes não serão afetados.`, '🗑️ Excluir funcionário').then(async (ok) => {
+                if (!ok) return;
+                vendedores = vendedores.filter(x => x.id !== id);
+                await salvarVendedores();
+                renderVendedores();
+                atualizarSelectsVendedores();
+                atualizarResumoHoje();
+                showToast('Funcionário excluído!', 'success');
+            });
+        }
 
         // Renderiza os checkboxes do passo 2 baseados nos afazeres cadastrados
         // e na data + dia da semana (filtrando recorrência)
@@ -1947,7 +2062,7 @@
         function isTaskLocked(task) {
             if (!task.timestamp) return false;
             const ageMs = Date.now() - new Date(task.timestamp).getTime();
-            return ageMs > 42 * 60 * 60 * 1000; // 42 horas em milissegundos
+            return ageMs > 72 * 60 * 60 * 1000; // 72 horas em milissegundos
         }
 
         async function salvarRegistro(e) {
@@ -2236,6 +2351,18 @@
                 html += `</div>`;
             });
 
+            // Adicionar observação ao final do relatório, se houver
+            const obs = document.getElementById('observacaoRelatorio').value.trim();
+            if (obs) {
+                html += `
+                    <div class="dashboard-card" style="background: #fffbeb; border-color: #fde68a; margin-top: 16px;">
+                        <h4 style="color: #92400e;"><i class="fas fa-comment-dots"></i> Observação</h4>
+                        <p style="color: #78350f; white-space: pre-wrap; margin: 0;">${obs.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                    </div>
+                `;
+                textoCopia += `\n📝 Observação:\n${obs}\n`;
+            }
+
             // Botão copiar
             html = `
                 <div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
@@ -2259,6 +2386,19 @@
             }
             ta.style.position = 'absolute';
             ta.style.left = '-9999px';
+        }
+
+        let observacaoRelatorioGlobal = '';
+
+        function adicionarObservacaoRelatorio() {
+            const obs = document.getElementById('observacaoRelatorio').value.trim();
+            if (!obs) {
+                showToast('⚠️ Digite uma observação antes de adicionar.', 'warning');
+                return;
+            }
+            observacaoRelatorioGlobal = obs;
+            gerarRelatorio();
+            showToast('📝 Observação adicionada ao relatório!', 'success');
         }
 
         function renderGerenciarLista() {
@@ -2617,7 +2757,7 @@
             const t = tarefas.find(x => x.id === id);
             if (!t) return;
             if (isTaskLocked(t)) {
-                showToast('⚠️ Tarefa bloqueada: prazo de 42h expirado!', 'warning');
+                showToast('⚠️ Tarefa bloqueada: prazo de 72h expirado!', 'warning');
                 return;
             }
             document.getElementById('tarefaModalTitle').textContent = 'Editar Tarefa';
@@ -2634,7 +2774,7 @@
         async function excluirTarefa(id) {
             const t = tarefas.find(x => x.id === id);
             if (t && isTaskLocked(t)) {
-                showToast('⚠️ Tarefa bloqueada: prazo de 42h expirado!', 'warning');
+                showToast('⚠️ Tarefa bloqueada: prazo de 72h expirado!', 'warning');
                 return;
             }
             customConfirm('Excluir esta tarefa?', '🗑️ Excluir tarefa').then(async (ok) => {
@@ -2663,7 +2803,7 @@
             const t = tarefas.find(x => x.id === id);
             if (!t) return;
             if (isTaskLocked(t)) {
-                showToast('⚠️ Tarefa bloqueada: prazo de 42h para alteração expirado!', 'warning');
+                showToast('⚠️ Tarefa bloqueada: prazo de 72h para alteração expirado!', 'warning');
                 return;
             }
             const statuses = ['pendente', 'em_andamento', 'concluido', 'nao_realizado'];
@@ -2728,7 +2868,7 @@
                 const badge = `<span class="status-badge ${badgeClass}"><i class="fas ${icon}"></i> ${badgeText}</span>${lockedBadge}`;
 
                 const editBtn = locked 
-                    ? `<button class="btn btn-secondary btn-small" disabled title="Prazo de 42h expirado"><i class="fas fa-lock"></i> Bloqueado</button>`
+                    ? `<button class="btn btn-secondary btn-small" disabled title="Prazo de 72h expirado"><i class="fas fa-lock"></i> Bloqueado</button>`
                     : `<button class="btn btn-secondary btn-small" onclick="editarTarefa(${t.id})"><i class="fas fa-edit"></i> Editar</button>`;
                     
                 const deleteBtn = locked
@@ -2736,7 +2876,7 @@
                     : `<button class="btn btn-danger btn-small" onclick="excluirTarefa(${t.id})"><i class="fas fa-trash"></i> Excluir</button>`;
 
                 const toggleBtn = locked
-                    ? `<button class="btn btn-secondary btn-small" disabled title="Prazo de 42h expirado"><i class="fas fa-lock"></i></button>`
+                    ? `<button class="btn btn-secondary btn-small" disabled title="Prazo de 72h expirado"><i class="fas fa-lock"></i></button>`
                     : `<button class="btn btn-secondary btn-small" onclick="alternarStatusTarefa(${t.id})" title="Alternar status"><i class="fas fa-exchange-alt"></i> Alternar</button>`;
 
                 html += `
@@ -3071,6 +3211,7 @@
         // Inicializar
         init();
     </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
