@@ -666,6 +666,14 @@
         }
 
         /* ====== LISTA DE AFAZERES — VERSÃO AJUSTADA ====== */
+        #pesquisaAfazeres {
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        #pesquisaAfazeres:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+        }
         #afazeresCheckboxes {
             display: flex;
             flex-direction: column;
@@ -907,6 +915,10 @@
 
                         <div class="form-group">
                             <label>📋 Selecione dos cadastrados</label>
+                            <div style="position: relative; margin-bottom: 10px;">
+                                <input type="text" id="pesquisaAfazeres" placeholder="🔍 Pesquisar afazeres..." style="width: 100%; padding: 10px 12px 10px 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.9rem;">
+                                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;"></i>
+                            </div>
                             <div id="afazeresCheckboxes"></div>
                             <div class="afazeres-summary">
                                 <span><span class="count" id="afazeresSelCount">0</span> selecionado(s)</span>
@@ -1761,12 +1773,19 @@
                 document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
                 document.getElementById('vendedorSelecionado').value = '';
                 avulsasTemp = [];
+                const pesquisaAfazeres = document.getElementById('pesquisaAfazeres');
+                if (pesquisaAfazeres) pesquisaAfazeres.value = '';
             });
 
             // Tarefa avulsa no form principal
             document.getElementById('btnAddAvulsa').addEventListener('click', adicionarAvulsa);
             document.getElementById('tarefaAvulsa').addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') { e.preventDefault(); adicionarAvulsa(); }
+            });
+
+            // Pesquisa de afazeres
+            document.getElementById('pesquisaAfazeres').addEventListener('input', () => {
+                renderAfazeresCheckboxes();
             });
 
             // Tabs (lazy render)
@@ -1910,6 +1929,8 @@
             passo2.classList.add('fade-in');
             
             avulsasTemp = [];
+            const pesquisaAfazeres = document.getElementById('pesquisaAfazeres');
+            if (pesquisaAfazeres) pesquisaAfazeres.value = '';
             renderAvulsasList();
             renderAfazeresCheckboxes();
         }
@@ -2019,8 +2040,16 @@
         // e na data + dia da semana (filtrando recorrência)
         function renderAfazeresCheckboxes() {
             const container = document.getElementById('afazeresCheckboxes');
+            const pesquisaInput = document.getElementById('pesquisaAfazeres');
+            const termoPesquisa = pesquisaInput ? pesquisaInput.value.toLowerCase().trim() : '';
             const data = document.getElementById('dataRegistro').value;
             const diaSemana = data ? new Date(data + 'T00:00:00').getDay() : null;
+
+            // Guardar checkboxes marcados antes de renderizar
+            const checkboxesMarcados = new Set();
+            container.querySelectorAll('.afazerCheck:checked').forEach(chk => {
+                checkboxesMarcados.add(chk.value);
+            });
 
             const relevantes = afazeresCadastrados.filter(a => {
                 if (a.recorrencia === 'diaria') return true;
@@ -2029,22 +2058,34 @@
                 return false;
             });
 
-            const totalLabel = document.getElementById('afazeresTotalLabel');
-            if (totalLabel) totalLabel.textContent = `${relevantes.length} disponíveis`;
+            // Filtrar por pesquisa
+            const filtrados = termoPesquisa 
+                ? relevantes.filter(a => a.descricao.toLowerCase().includes(termoPesquisa))
+                : relevantes;
 
-            if (relevantes.length === 0) {
-                container.innerHTML = '<div class="afazeres-empty"><i class="fas fa-inbox"></i>Nenhum afazer cadastrado.<br>Cadastre na aba "Cadastrar Afazeres".</div>';
+            const totalLabel = document.getElementById('afazeresTotalLabel');
+            if (totalLabel) {
+                totalLabel.textContent = termoPesquisa 
+                    ? `${filtrados.length} de ${relevantes.length} encontrados`
+                    : `${relevantes.length} disponíveis`;
+            }
+
+            if (filtrados.length === 0) {
+                container.innerHTML = termoPesquisa
+                    ? '<div class="afazeres-empty"><i class="fas fa-search"></i>Nenhum afazer encontrado para esta pesquisa.</div>'
+                    : '<div class="afazeres-empty"><i class="fas fa-inbox"></i>Nenhum afazer cadastrado.<br>Cadastre na aba "Cadastrar Afazeres".</div>';
                 atualizarContadorAfazeres();
                 return;
             }
 
-            container.innerHTML = relevantes.map(a => {
+            container.innerHTML = filtrados.map(a => {
                 const desc = String(a.descricao).replace(/"/g,'&quot;');
                 const badge = a.recorrencia;
                 const label = badge.charAt(0).toUpperCase() + badge.slice(1);
+                const checked = checkboxesMarcados.has(desc) ? 'checked' : '';
                 return `
-                    <label class="afazer-item">
-                        <input type="checkbox" class="afazerCheck" value="${desc}">
+                    <label class="afazer-item ${checked ? 'checked' : ''}">
+                        <input type="checkbox" class="afazerCheck" value="${desc}" ${checked}>
                         <span class="afazer-text">${a.descricao}</span>
                         <span class="afazer-badge ${badge}">${label}</span>
                     </label>
@@ -2171,6 +2212,8 @@
                 document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
                 document.getElementById('vendedorSelecionado').value = '';
                 avulsasTemp = [];
+                const pesquisaAfazeres = document.getElementById('pesquisaAfazeres');
+                if (pesquisaAfazeres) pesquisaAfazeres.value = '';
             }, 2500);
         }
 
