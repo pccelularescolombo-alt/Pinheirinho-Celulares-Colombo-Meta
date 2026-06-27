@@ -46,7 +46,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        .container { max-width: 1280px; margin: 0 auto; }
+        .container { max-width: 1280px; margin: 0 auto; overflow-x: hidden; }
 
         header {
             background: var(--bg-elev);
@@ -394,38 +394,43 @@
             .main-content { grid-template-columns: 1fr; }
             .metas-info { flex-wrap: wrap; }
             .meta-item { flex: 1 1 calc(50% - 8px); min-width: 140px; }
+            #dashboardEncResultado .stats-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
         }
 
         @media (max-width: 768px) {
-            body { padding: 12px; }
+            body { padding: 10px; overflow-x: hidden; }
             
             /* Header */
-            header { padding: 16px; margin-bottom: 16px; }
-            h1 { font-size: 1.15rem; margin-bottom: 12px; }
+            header { padding: 14px; margin-bottom: 14px; }
+            h1 { font-size: 1.1rem; margin-bottom: 10px; }
             .header-info { flex-direction: column; align-items: stretch; gap: 10px; }
             
             /* Metas no header */
             .metas-info { 
                 flex-wrap: wrap; 
-                gap: 8px;
+                gap: 6px;
             }
             .meta-item { 
                 flex: 1 1 100%; 
                 min-width: 0;
-                padding: 8px 12px;
-                gap: 10px;
+                padding: 8px 10px;
+                gap: 8px;
             }
-            .meta-item i { font-size: 1.1rem; width: 20px; }
-            .meta-item span { font-size: 0.7rem; }
-            .meta-item strong { font-size: 0.95rem; }
+            .meta-item i { font-size: 1rem; width: 18px; }
+            .meta-item span { font-size: 0.68rem; }
+            .meta-item strong { font-size: 0.9rem; }
+            
+            /* Config button */
+            .header-info > div:last-child { text-align: center; }
+            .header-info > div:last-child .btn { width: 100%; justify-content: center; }
             
             /* Conteúdo principal */
             .main-content { 
                 grid-template-columns: 1fr; 
-                gap: 16px;
+                gap: 14px;
             }
-            .card { padding: 16px; }
-            .card h2 { font-size: 0.95rem; margin-bottom: 14px; }
+            .card { padding: 14px; }
+            .card h2 { font-size: 0.92rem; margin-bottom: 12px; }
             
             /* Vendedores grid */
             .vendedores-grid { 
@@ -433,38 +438,36 @@
                 gap: 8px;
             }
             .vendedor-card { padding: 12px 8px; }
-            .vendedor-icon { font-size: 1.5rem; margin-bottom: 4px; }
-            .vendedor-name { font-size: 0.8rem; }
+            .vendedor-icon { font-size: 1.4rem; margin-bottom: 4px; }
+            .vendedor-name { font-size: 0.78rem; }
             
             /* Tabs */
             .tabs { 
-                gap: 2px;
+                gap: 0;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
                 flex-wrap: nowrap;
-                padding-bottom: 4px;
+                padding-bottom: 2px;
+                margin-bottom: 16px;
             }
             .tabs::-webkit-scrollbar { display: none; }
             .tab { 
-                padding: 8px 12px; 
-                font-size: 0.82rem;
+                padding: 8px 10px; 
+                font-size: 0.78rem;
                 white-space: nowrap;
                 flex-shrink: 0;
             }
             
             /* Tabelas responsivas */
-            table { font-size: 0.82rem; }
-            table th, table td { padding: 8px 6px; }
-            table th { font-size: 0.7rem; }
-            
-            /* Wrapper para scroll horizontal em tabelas */
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
-                margin: 0 -16px;
-                padding: 0 16px;
+                margin-bottom: 10px;
             }
+            table { font-size: 0.8rem; min-width: 500px; }
+            table th, table td { padding: 8px 6px; }
+            table th { font-size: 0.68rem; }
             
             /* Ações em tabelas */
             .actions { 
@@ -473,48 +476,50 @@
             }
             .btn-small { 
                 padding: 4px 8px; 
-                font-size: 0.75rem; 
+                font-size: 0.72rem; 
             }
             
             /* Stats grid */
             .stats-grid { 
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 10px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
             }
-            .stat-card { padding: 12px; }
-            .stat-card .value { font-size: 1.3rem; }
-            .stat-card .label { font-size: 0.72rem; }
+            .stat-card { padding: 10px; }
+            .stat-card .value { font-size: 1.2rem; }
+            .stat-card .label { font-size: 0.7rem; }
             
             /* Gráficos */
-            .chart-container { height: 250px; }
+            .chart-container { height: 220px; }
             
             /* Modais */
             .modal-content { 
-                padding: 18px;
+                padding: 16px;
                 width: 95%;
                 max-width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
             }
-            .modal-header h3 { font-size: 1rem; }
+            .modal-header h3 { font-size: 0.95rem; }
             
             /* Formulários */
             .form-group { margin-bottom: 12px; }
-            .form-group label { font-size: 0.82rem; }
+            .form-group label { font-size: 0.8rem; }
             .form-group input,
             .form-group select,
             .form-group textarea { 
                 padding: 9px 10px;
-                font-size: 0.9rem;
+                font-size: 0.88rem;
             }
             
             /* Botões */
             .btn { 
-                padding: 9px 14px;
-                font-size: 0.85rem;
+                padding: 9px 12px;
+                font-size: 0.82rem;
             }
             
             /* Dashboard cards */
-            .dashboard-card { padding: 14px; margin-bottom: 10px; }
-            .dashboard-card h4 { font-size: 0.9rem; }
+            .dashboard-card { padding: 12px; margin-bottom: 10px; }
+            .dashboard-card h4 { font-size: 0.88rem; }
             
             /* Totais row */
             .totais-row { 
@@ -522,94 +527,104 @@
                 gap: 6px;
             }
             .totais-row span { 
-                font-size: 0.78rem;
+                font-size: 0.75rem;
                 padding: 4px 8px;
             }
             
             /* Tarefa item */
             .tarefa-item { 
                 padding: 8px 10px;
-                font-size: 0.85rem;
+                font-size: 0.82rem;
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 6px;
             }
             
             /* Status badge */
-            .status-badge { font-size: 0.72rem; padding: 2px 8px; }
+            .status-badge { font-size: 0.7rem; padding: 2px 6px; }
             
             /* Afazeres checkboxes */
-            #afazeresCheckboxes { max-height: 240px; }
-            .afazer-item { padding: 9px 10px; gap: 8px; }
-            .afazer-item .afazer-text { font-size: 0.85rem; }
-            .afazer-item .afazer-badge { font-size: 0.62rem; padding: 2px 6px; }
+            #afazeresCheckboxes { max-height: 220px; }
+            .afazer-item { padding: 8px 10px; gap: 8px; }
+            .afazer-item .afazer-text { font-size: 0.82rem; }
+            .afazer-item .afazer-badge { font-size: 0.6rem; padding: 2px 5px; }
+            
+            /* Relatórios grid */
+            #relatorios > div[style*="grid"] { 
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Dashboard encarregado grid */
+            #dashboardEnc > div[style*="grid"] {
+                grid-template-columns: 1fr !important;
+            }
             
             /* Toast */
             #toastContainer {
-                top: 10px;
-                right: 10px;
-                left: 10px;
+                top: 8px;
+                right: 8px;
+                left: 8px;
             }
             .toast { 
                 min-width: 0;
                 max-width: 100%;
-                font-size: 0.85rem;
+                font-size: 0.82rem;
                 padding: 10px 12px;
             }
         }
 
         @media (max-width: 480px) {
-            body { padding: 8px; }
+            body { padding: 6px; }
             
-            header { padding: 12px; }
-            h1 { font-size: 1rem; }
+            header { padding: 10px; }
+            h1 { font-size: 0.95rem; }
             
             .meta-item { 
-                padding: 6px 10px;
-                gap: 8px;
+                padding: 6px 8px;
+                gap: 6px;
             }
-            .meta-item i { font-size: 1rem; }
-            .meta-item strong { font-size: 0.88rem; }
+            .meta-item i { font-size: 0.9rem; }
+            .meta-item strong { font-size: 0.85rem; }
             
-            .card { padding: 12px; }
-            .card h2 { font-size: 0.9rem; }
+            .card { padding: 10px; border-radius: 10px; }
+            .card h2 { font-size: 0.85rem; }
             
             .vendedores-grid { 
                 grid-template-columns: repeat(2, 1fr);
                 gap: 6px;
             }
             .vendedor-card { padding: 10px 6px; }
-            .vendedor-icon { font-size: 1.3rem; }
-            .vendedor-name { font-size: 0.75rem; }
+            .vendedor-icon { font-size: 1.2rem; }
+            .vendedor-name { font-size: 0.72rem; }
             
             .tab { 
-                padding: 6px 10px; 
-                font-size: 0.78rem;
+                padding: 6px 8px; 
+                font-size: 0.75rem;
             }
             
-            table { font-size: 0.78rem; }
+            table { font-size: 0.75rem; min-width: 450px; }
             table th, table td { padding: 6px 4px; }
             
             .stats-grid { 
                 grid-template-columns: 1fr 1fr;
-                gap: 8px;
+                gap: 6px;
             }
-            .stat-card { padding: 10px; }
-            .stat-card .value { font-size: 1.1rem; }
-            .stat-card i { font-size: 1rem; }
+            .stat-card { padding: 8px; }
+            .stat-card .value { font-size: 1rem; }
+            .stat-card i { font-size: 0.9rem; }
             
-            .chart-container { height: 220px; }
+            .chart-container { height: 200px; }
             
             .btn { 
-                padding: 8px 12px;
-                font-size: 0.8rem;
+                padding: 8px 10px;
+                font-size: 0.78rem;
             }
             .btn-small { 
                 padding: 3px 6px; 
-                font-size: 0.72rem; 
+                font-size: 0.7rem; 
             }
             
-            .modal-content { padding: 14px; }
+            .modal-content { padding: 12px; }
             
             .form-group input,
             .form-group select { 
@@ -619,11 +634,14 @@
             
             .tarefa-item { 
                 padding: 6px 8px;
-                font-size: 0.8rem;
+                font-size: 0.78rem;
             }
             
-            .afazer-item { padding: 8px; }
-            .afazer-item .afazer-text { font-size: 0.8rem; }
+            .afazer-item { padding: 7px 8px; }
+            .afazer-item .afazer-text { font-size: 0.78rem; }
+            
+            .dashboard-card { padding: 10px; }
+            .dashboard-card h4 { font-size: 0.82rem; gap: 6px; }
         }
 
         /* Melhorias para telas muito grandes */
@@ -1043,14 +1061,10 @@
                         <option value="">Todos os Vendedores</option>
                     </select>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                     <div class="form-group" style="margin-bottom: 0;">
-                        <label for="dataInicio">Data Início</label>
-                        <input type="date" id="dataInicio">
-                    </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="dataFim">Data Fim</label>
-                        <input type="date" id="dataFim">
+                        <label for="dataRelatorio">Data do Relatório</label>
+                        <input type="date" id="dataRelatorio">
                     </div>
                     <div class="form-group" style="margin-bottom: 0;">
                         <label style="opacity: 0;">.</label>
@@ -1400,6 +1414,7 @@
         let gerenciarDesbloqueado = false;
         let tarefasDesbloqueado = false;
         let dadosCarregados = false;
+        let afazeresSelecionados = new Set(); // Track selected afazeres across re-renders
 
         // ============================
         // UI helpers (toast + confirm)
@@ -1773,6 +1788,7 @@
                 document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
                 document.getElementById('vendedorSelecionado').value = '';
                 avulsasTemp = [];
+                afazeresSelecionados.clear(); // Limpar seleções de afazeres
                 const pesquisaAfazeres = document.getElementById('pesquisaAfazeres');
                 if (pesquisaAfazeres) pesquisaAfazeres.value = '';
             });
@@ -1805,7 +1821,14 @@
                     tab.classList.add('active');
                     document.getElementById(target).classList.add('active');
                     if (target === 'dashboardEnc') renderDashboardEncarregado();
-                    else if (target === 'tarefas') renderTarefasLista();
+                    if (target === 'tarefas') {
+                        // Auto-carregar para o dia atual (Fix #4)
+                        const filtroData = document.getElementById('filtroTarefaData');
+                        if (filtroData && !filtroData.value) {
+                            filtroData.value = obterDataLocal();
+                        }
+                        renderTarefasLista();
+                    }
                     else if (target === 'gerenciar') renderGerenciarLista();
                     else if (target === 'cadastroAfazeres') renderAfazeresCadastroLista();
                     else if (target === 'relatorios') gerarRelatorio(); // Atualiza relatório ao abrir a aba
@@ -1872,6 +1895,8 @@
             const hoje = obterDataLocal();
             document.getElementById('dataRegistro').value = hoje;
             document.getElementById('dashboardData').value = hoje;
+            document.getElementById('dataRelatorio').value = hoje; // Fix #5: auto-set report date
+            document.getElementById('filtroTarefaData').value = hoje; // Fix #4: auto-set tasks filter
 
             // Set current month for charts
             const mesAtual = hoje.slice(0, 7);
@@ -1928,7 +1953,9 @@
             passo2.style.display = 'block';
             passo2.classList.add('fade-in');
             
+            // Resetar seleções de afazeres para o novo funcionário (Fix #2)
             avulsasTemp = [];
+            afazeresSelecionados.clear();
             const pesquisaAfazeres = document.getElementById('pesquisaAfazeres');
             if (pesquisaAfazeres) pesquisaAfazeres.value = '';
             renderAvulsasList();
@@ -2012,7 +2039,8 @@
                 showToast('⚠️ Já existe um funcionário com este nome!', 'warning');
                 return;
             }
-            const novoId = vendedores.length > 0 ? Math.max(...vendedores.map(v => v.id)) + 1 : 1;
+            // Gerar ID único baseado no maior ID já existente (Fix #3)
+            const novoId = Math.max(0, ...vendedores.map(v => v.id), ...registros.map(r => r.vendedorId || 0), ...tarefas.map(t => t.vendedorId || 0)) + 1;
             vendedores.push({ id: novoId, nome, cor, icone });
             await salvarVendedores();
             renderVendedores();
@@ -2025,13 +2053,19 @@
         async function excluirVendedor(id) {
             const v = vendedores.find(x => x.id === id);
             if (!v) return;
-            customConfirm(`Tem certeza que deseja excluir o funcionário "${v.nome}"? Os registros existentes não serão afetados.`, '🗑️ Excluir funcionário').then(async (ok) => {
+            customConfirm(`Tem certeza que deseja excluir o funcionário "${v.nome}"? Todos os registros e tarefas associados serão removidos.`, '🗑️ Excluir funcionário').then(async (ok) => {
                 if (!ok) return;
                 vendedores = vendedores.filter(x => x.id !== id);
+                // Limpar registros e tarefas associados ao funcionário excluído (Fix #3)
+                registros = registros.filter(r => r.vendedorId !== id);
+                tarefas = tarefas.filter(t => t.vendedorId !== id);
                 await salvarVendedores();
+                await salvarRegistros();
+                await salvarTarefas();
                 renderVendedores();
                 atualizarSelectsVendedores();
                 atualizarResumoHoje();
+                atualizarMetasHeader();
                 showToast('Funcionário excluído!', 'success');
             });
         }
@@ -2045,12 +2079,7 @@
             const data = document.getElementById('dataRegistro').value;
             const diaSemana = data ? new Date(data + 'T00:00:00').getDay() : null;
 
-            // Guardar checkboxes marcados antes de renderizar
-            const checkboxesMarcados = new Set();
-            container.querySelectorAll('.afazerCheck:checked').forEach(chk => {
-                checkboxesMarcados.add(chk.value);
-            });
-
+            // Usar o Set global afazeresSelecionados para preservar seleções (Fix #1)
             const relevantes = afazeresCadastrados.filter(a => {
                 if (a.recorrencia === 'diaria') return true;
                 if (a.recorrencia === 'avulsa') return true;
@@ -2082,7 +2111,7 @@
                 const desc = String(a.descricao).replace(/"/g,'&quot;');
                 const badge = a.recorrencia;
                 const label = badge.charAt(0).toUpperCase() + badge.slice(1);
-                const checked = checkboxesMarcados.has(desc) ? 'checked' : '';
+                const checked = afazeresSelecionados.has(a.descricao) ? 'checked' : '';
                 return `
                     <label class="afazer-item ${checked ? 'checked' : ''}">
                         <input type="checkbox" class="afazerCheck" value="${desc}" ${checked}>
@@ -2094,6 +2123,12 @@
 
             container.querySelectorAll('.afazerCheck').forEach(chk => {
                 chk.addEventListener('change', e => {
+                    const desc = e.target.value;
+                    if (e.target.checked) {
+                        afazeresSelecionados.add(desc);
+                    } else {
+                        afazeresSelecionados.delete(desc);
+                    }
                     e.target.closest('.afazer-item').classList.toggle('checked', e.target.checked);
                     atualizarContadorAfazeres();
                 });
@@ -2103,7 +2138,7 @@
 
         function atualizarContadorAfazeres() {
             const el = document.getElementById('afazeresSelCount');
-            if (el) el.textContent = document.querySelectorAll('.afazerCheck:checked').length;
+            if (el) el.textContent = afazeresSelecionados.size;
         }
 
         function adicionarAvulsa() {
@@ -2152,7 +2187,7 @@
                 return;
             }
 
-            const checadas = Array.from(document.querySelectorAll('.afazerCheck:checked')).map(c => c.value);
+            const checadas = Array.from(afazeresSelecionados);
             const tarefasFeitas = [...checadas, ...avulsasTemp];
 
             // Adicionar tarefas ao array de tarefas com status pendente
@@ -2212,6 +2247,7 @@
                 document.querySelectorAll('.vendedor-card').forEach(c => c.classList.remove('selected'));
                 document.getElementById('vendedorSelecionado').value = '';
                 avulsasTemp = [];
+                afazeresSelecionados.clear(); // Limpar seleções de afazeres
                 const pesquisaAfazeres = document.getElementById('pesquisaAfazeres');
                 if (pesquisaAfazeres) pesquisaAfazeres.value = '';
             }, 2500);
@@ -2320,17 +2356,12 @@
 
         function gerarRelatorio() {
             const vendedorId = document.getElementById('vendedorRelatorio').value;
-            let dataInicio = document.getElementById('dataInicio').value;
-            let dataFim = document.getElementById('dataFim').value;
+            let dataRelatorio = document.getElementById('dataRelatorio').value;
 
-            // Carregar automático do dia se não estiver preenchido
-            if (!dataInicio) {
-                dataInicio = obterDataLocal();
-                document.getElementById('dataInicio').value = dataInicio;
-            }
-            if (!dataFim) {
-                dataFim = obterDataLocal();
-                document.getElementById('dataFim').value = dataFim;
+            // Carregar automático do dia se não estiver preenchido (Fix #5)
+            if (!dataRelatorio) {
+                dataRelatorio = obterDataLocal();
+                document.getElementById('dataRelatorio').value = dataRelatorio;
             }
 
             let registrosFiltrados = [...registros];
@@ -2338,12 +2369,8 @@
             if (vendedorId) {
                 registrosFiltrados = registrosFiltrados.filter(r => r.vendedorId == vendedorId);
             }
-            if (dataInicio) {
-                registrosFiltrados = registrosFiltrados.filter(r => r.data >= dataInicio);
-            }
-            if (dataFim) {
-                registrosFiltrados = registrosFiltrados.filter(r => r.data <= dataFim);
-            }
+            // Filtrar por um único dia (Fix #5)
+            registrosFiltrados = registrosFiltrados.filter(r => r.data === dataRelatorio);
 
             const container = document.getElementById('relatorioResultado');
 
@@ -3463,6 +3490,7 @@
         // Inicializar
         init();
     </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
