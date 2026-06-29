@@ -1415,6 +1415,7 @@
         let tarefasDesbloqueado = false;
         let dadosCarregados = false;
         let afazeresSelecionados = new Set(); // Track selected afazeres across re-renders
+        let observacoes = []; // Observações do relatório por data
 
         // ============================
         // UI helpers (toast + confirm)
@@ -1516,6 +1517,15 @@
                     descricao: doc.data().descricao,
                     recorrencia: doc.data().recorrencia,
                     diasSemana: doc.data().diasSemana || []
+                }));
+
+                // Carregar observações do relatório
+                const observacoesSnapshot = await db.collection('observacoes').get();
+                observacoes = observacoesSnapshot.docs.map(doc => ({
+                    id: doc.data().id,
+                    data: doc.data().data,
+                    texto: doc.data().texto,
+                    timestamp: doc.data().timestamp
                 }));
 
                 dadosCarregados = true;
@@ -1666,6 +1676,36 @@
             } catch (error) {
                 console.error('Erro ao salvar afazeres:', error);
                 showToast('⚠️ Erro ao salvar afazeres.', 'error');
+            }
+        }
+
+        // Salvar observações do relatório
+        async function salvarObservacoes() {
+            try {
+                const batch = db.batch();
+
+                // Deletar todas as observações existentes
+                const snapshot = await db.collection('observacoes').get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+
+                // Adicionar novas observações
+                observacoes.forEach(o => {
+                    const ref = db.collection('observacoes').doc();
+                    batch.set(ref, {
+                        id: o.id,
+                        data: o.data,
+                        texto: o.texto,
+                        timestamp: o.timestamp,
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+
+                await batch.commit();
+            } catch (error) {
+                console.error('Erro ao salvar observações:', error);
+                showToast('⚠️ Erro ao salvar observações.', 'error');
             }
         }
 
@@ -1837,6 +1877,12 @@
 
             // Relatórios
             document.getElementById('gerarRelatorio').addEventListener('click', gerarRelatorio);
+            // Ao mudar a data do relatório, carregar a observação salva do Firestore
+            document.getElementById('dataRelatorio').addEventListener('change', () => {
+                const dataRel = document.getElementById('dataRelatorio').value;
+                const obsSalva = observacoes.find(o => o.data === dataRel);
+                document.getElementById('observacaoRelatorio').value = obsSalva ? obsSalva.texto : '';
+            });
 
             // Gráficos
             document.getElementById('gerarGraficos').addEventListener('click', gerarGraficos);
@@ -2375,12 +2421,31 @@
             const container = document.getElementById('relatorioResultado');
 
             if (registrosFiltrados.length === 0) {
-                container.innerHTML = `
+                const dataF = new Date(dataRelatorio + 'T00:00:00').toLocaleDateString('pt-BR');
+                let html = `
                     <div class="empty-state">
                         📭
                         <p>Nenhum registro encontrado para os filtros selecionados</p>
                     </div>
                 `;
+                // Se não foi filtrado por vendedor específico, mostrar todos que não registraram
+                if (!vendedorId && vendedores.length > 0) {
+                    html += `
+                        <div class="dashboard-card" style="background: #fef2f2; border-color: #fecaca; margin-top: 16px;">
+                            <h4 style="color: #991b1b;"><i class="fas fa-exclamation-triangle"></i> Funcionário(s) sem registro em ${dataF}</h4>
+                            <div style="margin-top: 10px;">
+                                ${vendedores.map(v => `
+                                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fff; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid ${v.cor};">
+                                        <i class="fas ${v.icone}" style="color: ${v.cor}; font-size: 1.1rem;"></i>
+                                        <span style="font-weight: 600; color: #991b1b;">${v.nome}</span>
+                                        <span style="color: #b91c1c; font-size: 0.85rem; margin-left: auto;">— não registrou afazeres neste dia</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+                container.innerHTML = html;
                 return;
             }
 
@@ -2472,8 +2537,45 @@
                 html += `</div>`;
             });
 
+            // Identificar funcionários que não registraram nada no dia
+            if (!vendedorId) {
+                const datasParaVerificar = datasOrdenadas.length > 0 ? datasOrdenadas : [dataRelatorio];
+                datasParaVerificar.forEach(data => {
+                    const vendedoresComRegistro = porData[data] ? Object.keys(porData[data]) : [];
+                    const vendedoresSemRegistro = vendedores.filter(v => !vendedoresComRegistro.includes(String(v.id)));
+
+                    if (vendedoresSemRegistro.length > 0) {
+                        const dataF = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+                        html += `
+                            <div class="dashboard-card" style="background: #fef2f2; border-color: #fecaca; margin-top: 16px;">
+                                <h4 style="color: #991b1b;"><i class="fas fa-exclamation-triangle"></i> Funcionário(s) sem registro em ${dataF}</h4>
+                                <div style="margin-top: 10px;">
+                                    ${vendedoresSemRegistro.map(v => `
+                                        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fff; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid ${v.cor};">
+                                            <i class="fas ${v.icone}" style="color: ${v.cor}; font-size: 1.1rem;"></i>
+                                            <span style="font-weight: 600; color: #991b1b;">${v.nome}</span>
+                                            <span style="color: #b91c1c; font-size: 0.85rem; margin-left: auto;">— não registrou afazeres neste dia</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                        textoCopia += `\n⚠️ Funcionário(s) sem registro em ${dataF}:\n`;
+                        vendedoresSemRegistro.forEach(v => {
+                            textoCopia += `  • ${v.nome} — não registrou afazeres neste dia\n`;
+                        });
+                    }
+                });
+            }
+
             // Adicionar observação ao final do relatório, se houver
-            const obs = document.getElementById('observacaoRelatorio').value.trim();
+            // Primeiro tenta carregar do Firestore para a data selecionada, senão usa o textarea
+            const obsDoFirestore = observacoes.find(o => o.data === dataRelatorio);
+            const obs = obsDoFirestore ? obsDoFirestore.texto : document.getElementById('observacaoRelatorio').value.trim();
+            // Preencher o textarea com a observação salva (se existir)
+            if (obsDoFirestore && document.getElementById('observacaoRelatorio').value.trim() !== obsDoFirestore.texto) {
+                document.getElementById('observacaoRelatorio').value = obsDoFirestore.texto;
+            }
             if (obs) {
                 html += `
                     <div class="dashboard-card" style="background: #fffbeb; border-color: #fde68a; margin-top: 16px;">
@@ -2511,15 +2613,32 @@
 
         let observacaoRelatorioGlobal = '';
 
-        function adicionarObservacaoRelatorio() {
+        async function adicionarObservacaoRelatorio() {
             const obs = document.getElementById('observacaoRelatorio').value.trim();
             if (!obs) {
                 showToast('⚠️ Digite uma observação antes de adicionar.', 'warning');
                 return;
             }
+            const dataRelatorio = document.getElementById('dataRelatorio').value || obterDataLocal();
             observacaoRelatorioGlobal = obs;
+
+            // Salvar/Atualizar observação no Firestore para a data selecionada
+            const obsExistente = observacoes.find(o => o.data === dataRelatorio);
+            if (obsExistente) {
+                obsExistente.texto = obs;
+                obsExistente.timestamp = new Date().toISOString();
+            } else {
+                observacoes.push({
+                    id: Date.now(),
+                    data: dataRelatorio,
+                    texto: obs,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            await salvarObservacoes();
+
             gerarRelatorio();
-            showToast('📝 Observação adicionada ao relatório!', 'success');
+            showToast('📝 Observação salva e adicionada ao relatório!', 'success');
         }
 
         function renderGerenciarLista() {
@@ -3494,5 +3613,6 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
