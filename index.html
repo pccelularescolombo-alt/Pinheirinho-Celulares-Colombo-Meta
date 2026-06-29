@@ -2497,13 +2497,12 @@
                     const listaTarefas = todasTarefas.map(tDesc => {
                         const tObj = tarefas.find(t => t.data === data && t.vendedorId == vid && t.descricao === tDesc);
                         let icon = '⏳';
-                        let statusText = 'Pendente';
                         if (tObj) {
-                            if (tObj.status === 'concluido') { icon = '✅'; statusText = 'Concluído'; }
-                            else if (tObj.status === 'em_andamento') { icon = '🔄'; statusText = 'Em andamento'; }
-                            else if (tObj.status === 'nao_realizado') { icon = '❌'; statusText = 'Não realizado'; }
+                            if (tObj.status === 'concluido') { icon = '✅'; }
+                            else if (tObj.status === 'em_andamento') { icon = '🔄'; }
+                            else if (tObj.status === 'nao_realizado') { icon = '❌'; }
                         }
-                        return `${icon} ${tDesc} [${statusText}]`;
+                        return `${icon} ${tDesc}`;
                     });
 
                     html += `
