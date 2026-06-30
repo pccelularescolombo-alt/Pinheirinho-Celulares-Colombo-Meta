@@ -1074,6 +1074,18 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Status do Funcionário (Falta / Atestado) -->
+                <div id="funcionarioStatusSection" style="margin-bottom: 20px; padding: 16px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                    <h4 style="margin-bottom: 12px; font-size: 0.95rem; font-weight: 600; color: var(--text);">
+                        <i class="fas fa-user-check"></i> Status do Funcionário no Dia
+                    </h4>
+                    <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 12px;">
+                        Marque funcionários que faltaram ou tiveram atestado na data selecionada.
+                    </p>
+                    <div id="funcionarioStatusLista" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
                 <div id="relatorioResultado"></div>
                 <div class="form-group" style="margin-top: 20px;">
                     <label for="observacaoRelatorio">📝 Observação do Relatório</label>
@@ -1416,6 +1428,7 @@
         let dadosCarregados = false;
         let afazeresSelecionados = new Set(); // Track selected afazeres across re-renders
         let observacoes = []; // Observações do relatório por data
+        let funcionarioStatus = []; // Status do funcionário por dia: { id, data, vendedorId, status: 'falta'|'atestado' }
 
         // ============================
         // UI helpers (toast + confirm)
@@ -1525,6 +1538,16 @@
                     id: doc.data().id,
                     data: doc.data().data,
                     texto: doc.data().texto,
+                    timestamp: doc.data().timestamp
+                }));
+
+                // Carregar funcionarioStatus
+                const funcionarioStatusSnapshot = await db.collection('funcionarioStatus').get();
+                funcionarioStatus = funcionarioStatusSnapshot.docs.map(doc => ({
+                    id: doc.data().id,
+                    data: doc.data().data,
+                    vendedorId: doc.data().vendedorId,
+                    status: doc.data().status,
                     timestamp: doc.data().timestamp
                 }));
 
@@ -1709,6 +1732,35 @@
             }
         }
 
+        // Salvar funcionarioStatus
+        async function salvarFuncionarioStatus() {
+            try {
+                const batch = db.batch();
+
+                const snapshot = await db.collection('funcionarioStatus').get();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+
+                funcionarioStatus.forEach(fs => {
+                    const ref = db.collection('funcionarioStatus').doc();
+                    batch.set(ref, {
+                        id: fs.id,
+                        data: fs.data,
+                        vendedorId: fs.vendedorId,
+                        status: fs.status,
+                        timestamp: fs.timestamp || new Date().toISOString(),
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+
+                await batch.commit();
+            } catch (error) {
+                console.error('Erro ao salvar funcionarioStatus:', error);
+                showToast('⚠️ Erro ao salvar status do funcionário.', 'error');
+            }
+        }
+
         // Limpar dados antigos (mais de 180 dias)
         async function limparDadosAntigos() {
             try {
@@ -1882,6 +1934,7 @@
                 const dataRel = document.getElementById('dataRelatorio').value;
                 const obsSalva = observacoes.find(o => o.data === dataRel);
                 document.getElementById('observacaoRelatorio').value = obsSalva ? obsSalva.texto : '';
+                renderFuncionarioStatusSection();
             });
 
             // Gráficos
@@ -2400,190 +2453,212 @@
             }
         }
 
+        function renderFuncionarioStatusSection() {
+            const dataRel = document.getElementById('dataRelatorio').value || obterDataLocal();
+            const container = document.getElementById('funcionarioStatusLista');
+            if (!container) return;
+
+            if (vendedores.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Nenhum funcionário cadastrado.</p>';
+                return;
+            }
+
+            container.innerHTML = vendedores.map(v => {
+                const statusEntry = funcionarioStatus.find(fs => fs.data === dataRel && fs.vendedorId === v.id);
+                const statusVal = statusEntry ? statusEntry.status : 'normal';
+                return `
+                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-elev); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); border-left: 4px solid ${v.cor};">
+                        <i class="fas ${v.icone}" style="color: ${v.cor}; font-size: 1.1rem; flex-shrink: 0;"></i>
+                        <span style="font-weight: 600; font-size: 0.88rem; min-width: 80px; color: var(--text);">${v.nome}</span>
+                        <div style="display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap;">
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.82rem; color: var(--text-muted);">
+                                <input type="radio" name="status_${v.id}" value="normal" ${statusVal === 'normal' ? 'checked' : ''} onchange="setFuncionarioStatus(${v.id}, 'normal')"> Normal
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.82rem; color: var(--warning);">
+                                <input type="radio" name="status_${v.id}" value="falta" ${statusVal === 'falta' ? 'checked' : ''} onchange="setFuncionarioStatus(${v.id}, 'falta')"> ❌ Falta
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.82rem; color: var(--primary);">
+                                <input type="radio" name="status_${v.id}" value="atestado" ${statusVal === 'atestado' ? 'checked' : ''} onchange="setFuncionarioStatus(${v.id}, 'atestado')"> 🩺 Atestado
+                            </label>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function setFuncionarioStatus(vendedorId, status) {
+            const dataRel = document.getElementById('dataRelatorio').value || obterDataLocal();
+            // Remove any existing status for this date/employee
+            funcionarioStatus = funcionarioStatus.filter(fs => !(fs.data === dataRel && fs.vendedorId === vendedorId));
+            // Add new status only if not normal
+            if (status !== 'normal') {
+                funcionarioStatus.push({
+                    id: Date.now(),
+                    data: dataRel,
+                    vendedorId: vendedorId,
+                    status: status,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            await salvarFuncionarioStatus();
+            gerarRelatorio();
+        }
+
         function gerarRelatorio() {
             const vendedorId = document.getElementById('vendedorRelatorio').value;
             let dataRelatorio = document.getElementById('dataRelatorio').value;
 
-            // Carregar automático do dia se não estiver preenchido (Fix #5)
+            // Carregar automático do dia se não estiver preenchido
             if (!dataRelatorio) {
                 dataRelatorio = obterDataLocal();
                 document.getElementById('dataRelatorio').value = dataRelatorio;
             }
+
+            // Atualizar a seção de status do funcionário
+            renderFuncionarioStatusSection();
 
             let registrosFiltrados = [...registros];
 
             if (vendedorId) {
                 registrosFiltrados = registrosFiltrados.filter(r => r.vendedorId == vendedorId);
             }
-            // Filtrar por um único dia (Fix #5)
             registrosFiltrados = registrosFiltrados.filter(r => r.data === dataRelatorio);
 
             const container = document.getElementById('relatorioResultado');
 
-            if (registrosFiltrados.length === 0) {
-                const dataF = new Date(dataRelatorio + 'T00:00:00').toLocaleDateString('pt-BR');
-                let html = `
-                    <div class="empty-state">
-                        📭
-                        <p>Nenhum registro encontrado para os filtros selecionados</p>
-                    </div>
-                `;
-                // Se não foi filtrado por vendedor específico, mostrar todos que não registraram
-                if (!vendedorId && vendedores.length > 0) {
-                    html += `
-                        <div class="dashboard-card" style="background: #fef2f2; border-color: #fecaca; margin-top: 16px;">
-                            <h4 style="color: #991b1b;"><i class="fas fa-exclamation-triangle"></i> Funcionário(s) sem registro em ${dataF}</h4>
-                            <div style="margin-top: 10px;">
-                                ${vendedores.map(v => `
-                                    <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fff; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid ${v.cor};">
-                                        <i class="fas ${v.icone}" style="color: ${v.cor}; font-size: 1.1rem;"></i>
-                                        <span style="font-weight: 600; color: #991b1b;">${v.nome}</span>
-                                        <span style="color: #b91c1c; font-size: 0.85rem; margin-left: auto;">— não registrou afazeres neste dia</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-                container.innerHTML = html;
-                return;
-            }
+            const dataF = new Date(dataRelatorio + 'T00:00:00').toLocaleDateString('pt-BR');
 
-            // Agrupa por data, depois por funcionário
-            const porData = {};
+            // Agrupa por funcionário
+            const porFuncionario = {};
             registrosFiltrados.forEach(r => {
-                if (!porData[r.data]) porData[r.data] = {};
-                if (!porData[r.data][r.vendedorId]) {
-                    porData[r.data][r.vendedorId] = { cashback: 0, avaliacoes: 0, tarefas: [] };
+                if (!porFuncionario[r.vendedorId]) {
+                    porFuncionario[r.vendedorId] = { cashback: 0, avaliacoes: 0, tarefas: [] };
                 }
-                porData[r.data][r.vendedorId].cashback += r.cashback;
-                porData[r.data][r.vendedorId].avaliacoes += r.avaliacoes;
+                porFuncionario[r.vendedorId].cashback += r.cashback;
+                porFuncionario[r.vendedorId].avaliacoes += r.avaliacoes;
                 if (Array.isArray(r.tarefas)) {
-                    porData[r.data][r.vendedorId].tarefas.push(...r.tarefas);
+                    porFuncionario[r.vendedorId].tarefas.push(...r.tarefas);
                 }
             });
 
-            // Também agrega tarefas avulsas da coleção "tarefas" (afazeres lançados separadamente)
-            const datasOrdenadas = Object.keys(porData).sort((a, b) => new Date(b) - new Date(a));
+            // Determinar quais funcionários exibir
+            const vendedoresParaExibir = vendedorId
+                ? vendedores.filter(v => v.id == vendedorId)
+                : vendedores;
 
             let html = '';
             let textoCopia = '';
 
-            datasOrdenadas.forEach(data => {
-                const dataF = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
-                const tituloRel = `📋 Relatório ${lojaNome} — ${dataF}`;
+            // Cabeçalho do relatório
+            const tituloRel = `📋 Relatório ${lojaNome} — ${dataF}`;
+            textoCopia += `${tituloRel}\n`;
+            textoCopia += `${'─'.repeat(40)}\n`;
+
+            html += `
+                <div class="dashboard-card" style="background: #eef2ff; border-color: #c7d2fe;">
+                    <h3 style="color:#1f2937; margin-bottom:18px; font-size:1.25rem; font-weight:600;">${tituloRel}</h3>
+            `;
+
+            // Status de tarefas — legenda
+            html += `
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted);">
+                    <span>✅ Concluído</span>
+                    <span>🔄 Em Andamento</span>
+                    <span>❌ Não Realizado</span>
+                </div>
+                <div style="border-bottom: 1px solid #c7d2fe; margin-bottom: 16px;"></div>
+            `;
+
+            textoCopia += `✅ Concluído. 🔄 Em Andamento. ❌ Não Realizado.\n`;
+            textoCopia += `${'─'.repeat(40)}\n`;
+
+            vendedoresParaExibir.forEach(v => {
+                const fsEntry = funcionarioStatus.find(fs => fs.data === dataRelatorio && fs.vendedorId === v.id);
+                const statusVal = fsEntry ? fsEntry.status : null;
 
                 html += `
-                    <div class="dashboard-card" style="background: #eef2ff; border-color: #c7d2fe;">
-                        <h3 style="color:#1f2937; margin-bottom:18px; font-size:1.25rem; font-weight:600;">${tituloRel}</h3>
+                    <div style="margin: 12px 0; padding: 12px; background: #ffffff; border: 1px solid #eef0f4; border-radius: 8px; border-left: 4px solid ${v.cor};">
+                        <h4 style="color:${v.cor}; margin-bottom:8px; font-size:1rem;">
+                            👤 ${v.nome}
+                        </h4>
                 `;
-                textoCopia += `\n${tituloRel}\n${'─'.repeat(40)}\n`;
+                textoCopia += `\n👤 *${v.nome}*\n`;
 
-                const vendedoresNaData = porData[data];
-                Object.keys(vendedoresNaData).forEach(vid => {
-                    const v = vendedores.find(x => x.id == vid);
-                    if (!v) return;
-                    const dadosV = vendedoresNaData[vid];
+                if (statusVal === 'falta') {
+                    html += `<p style="color: #ef4444; font-weight: 600; margin: 0;">❌ Faltou.</p>`;
+                    textoCopia += `❌ Faltou.\n`;
+                } else if (statusVal === 'atestado') {
+                    html += `<p style="color: #4f46e5; font-weight: 600; margin: 0;">🩺 Atestado.</p>`;
+                    textoCopia += `🩺 Atestado.\n`;
+                } else if (!porFuncionario[v.id]) {
+                    // Sem registro — não registrou tarefas
+                    html += `<p style="color: #9ca3af; font-style: italic; margin: 0;">⚠️ Funcionário não registrou suas tarefas.</p>`;
+                    textoCopia += `⚠️ Funcionário não registrou suas tarefas.\n`;
+                } else {
+                    const dadosV = porFuncionario[v.id];
 
-                    // Combinar tarefas do registro diário e tarefas da aba "Tarefas Lançadas"
+                    // Combinar tarefas do registro e da aba tarefas
                     const tarefasDoRegistro = dadosV.tarefas || [];
                     const tarefasDaAba = tarefas
-                        .filter(t => t.data === data && t.vendedorId == vid)
+                        .filter(t => t.data === dataRelatorio && t.vendedorId == v.id)
                         .map(t => t.descricao);
-                    
-                    // Unir e remover duplicatas
                     const todasTarefas = [...new Set([...tarefasDoRegistro, ...tarefasDaAba])];
 
-                    const listaTarefas = todasTarefas.map(tDesc => {
-                        const tObj = tarefas.find(t => t.data === data && t.vendedorId == vid && t.descricao === tDesc);
-                        let icon = '⏳';
-                        if (tObj) {
-                            if (tObj.status === 'concluido') { icon = '✅'; }
-                            else if (tObj.status === 'em_andamento') { icon = '🔄'; }
-                            else if (tObj.status === 'nao_realizado') { icon = '❌'; }
-                        }
-                        return `${icon} ${tDesc}`;
-                    });
-
-                    html += `
-                        <div style="margin: 15px 0; padding: 12px; background: #ffffff; border: 1px solid #eef0f4; border-radius: 8px; border-left: 4px solid ${v.cor};">
-                            <h4 style="color:${v.cor}; margin-bottom:10px; font-size:1.1rem;">
-                                <i class="fas ${v.icone}"></i> 👤 ${v.nome}
-                            </h4>
-                            <div style="margin-left:10px;">
-                                ${listaTarefas.length === 0
-                                    ? '<p style="color:#9ca3af; font-style:italic;">— nenhuma tarefa registrada —</p>'
-                                    : listaTarefas.map(t => `<div>• ${t}</div>`).join('')
-                                }
-                            </div>
-                            <div class="totais-row" style="margin-top:12px;">
-                                <span>🎁 Cashback do dia: <strong>${dadosV.cashback}</strong></span>
-                                <span>⭐ Avaliações do dia: <strong>${dadosV.avaliacoes}</strong></span>
-                            </div>
-                        </div>
-                    `;
-
-                    textoCopia += `\n👤 ${v.nome}\n`;
-                    if (listaTarefas.length === 0) {
-                        textoCopia += `  — nenhuma tarefa registrada —\n`;
+                    if (todasTarefas.length === 0) {
+                        html += `<p style="color: #9ca3af; font-style: italic; margin: 0;">⚠️ Funcionário não registrou suas tarefas.</p>`;
+                        textoCopia += `⚠️ Funcionário não registrou suas tarefas.\n`;
                     } else {
+                        const listaTarefas = todasTarefas.map(tDesc => {
+                            const tObj = tarefas.find(t => t.data === dataRelatorio && t.vendedorId == v.id && t.descricao === tDesc);
+                            let icon = '⏳';
+                            if (tObj) {
+                                if (tObj.status === 'concluido') icon = '✅';
+                                else if (tObj.status === 'em_andamento') icon = '🔄';
+                                else if (tObj.status === 'nao_realizado') icon = '❌';
+                            }
+                            return `${icon} ${tDesc}`;
+                        });
+
+                        html += `<div style="margin-left:8px; margin-bottom: 8px;">`;
+                        html += listaTarefas.map(t => `<div style="font-size: 0.9rem;">${t}</div>`).join('');
+                        html += `</div>`;
+
+                        textoCopia += `✅ Afazeres:\n`;
                         listaTarefas.forEach(t => { textoCopia += `  • ${t}\n`; });
                     }
-                    textoCopia += `  🎁 Cashback do dia: ${dadosV.cashback}\n`;
-                    textoCopia += `  ⭐ Avaliações do dia: ${dadosV.avaliacoes}\n`;
-                });
+
+                    html += `
+                        <div style="margin-top:8px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 0.88rem;">🎁 Cashback: <strong>${dadosV.cashback}</strong></span>
+                            <span style="font-size: 0.88rem;">⭐ Avaliação: <strong>${dadosV.avaliacoes}</strong></span>
+                        </div>
+                    `;
+                    textoCopia += `🎁 Cashback: ${dadosV.cashback}\n`;
+                    textoCopia += `⭐ Avaliação: ${dadosV.avaliacoes}\n`;
+                }
 
                 html += `</div>`;
+                textoCopia += `${'─'.repeat(40)}\n`;
             });
 
-            // Identificar funcionários que não registraram nada no dia
-            if (!vendedorId) {
-                const datasParaVerificar = datasOrdenadas.length > 0 ? datasOrdenadas : [dataRelatorio];
-                datasParaVerificar.forEach(data => {
-                    const vendedoresComRegistro = porData[data] ? Object.keys(porData[data]) : [];
-                    const vendedoresSemRegistro = vendedores.filter(v => !vendedoresComRegistro.includes(String(v.id)));
+            html += `</div>`;
 
-                    if (vendedoresSemRegistro.length > 0) {
-                        const dataF = new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
-                        html += `
-                            <div class="dashboard-card" style="background: #fef2f2; border-color: #fecaca; margin-top: 16px;">
-                                <h4 style="color: #991b1b;"><i class="fas fa-exclamation-triangle"></i> Funcionário(s) sem registro em ${dataF}</h4>
-                                <div style="margin-top: 10px;">
-                                    ${vendedoresSemRegistro.map(v => `
-                                        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #fff; border: 1px solid #fecaca; border-radius: 8px; margin-bottom: 6px; border-left: 4px solid ${v.cor};">
-                                            <i class="fas ${v.icone}" style="color: ${v.cor}; font-size: 1.1rem;"></i>
-                                            <span style="font-weight: 600; color: #991b1b;">${v.nome}</span>
-                                            <span style="color: #b91c1c; font-size: 0.85rem; margin-left: auto;">— não registrou afazeres neste dia</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                        textoCopia += `\n⚠️ Funcionário(s) sem registro em ${dataF}:\n`;
-                        vendedoresSemRegistro.forEach(v => {
-                            textoCopia += `  • ${v.nome} — não registrou afazeres neste dia\n`;
-                        });
-                    }
-                });
-            }
-
-            // Adicionar observação ao final do relatório, se houver
-            // Primeiro tenta carregar do Firestore para a data selecionada, senão usa o textarea
+            // Adicionar observação ao final do relatório
             const obsDoFirestore = observacoes.find(o => o.data === dataRelatorio);
             const obs = obsDoFirestore ? obsDoFirestore.texto : document.getElementById('observacaoRelatorio').value.trim();
-            // Preencher o textarea com a observação salva (se existir)
             if (obsDoFirestore && document.getElementById('observacaoRelatorio').value.trim() !== obsDoFirestore.texto) {
                 document.getElementById('observacaoRelatorio').value = obsDoFirestore.texto;
             }
             if (obs) {
                 html += `
                     <div class="dashboard-card" style="background: #fffbeb; border-color: #fde68a; margin-top: 16px;">
-                        <h4 style="color: #92400e;"><i class="fas fa-comment-dots"></i> Observação</h4>
+                        <h4 style="color: #92400e;"><i class="fas fa-comment-dots"></i> Obs. Do dia</h4>
                         <p style="color: #78350f; white-space: pre-wrap; margin: 0;">${obs.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                     </div>
                 `;
-                textoCopia += `\n📝 Observação:\n${obs}\n`;
+                textoCopia += `\n*Obs. Do dia:* ${obs}\n`;
             }
+            textoCopia += `${'─'.repeat(40)}\n`;
 
             // Botão copiar
             html = `
@@ -3612,6 +3687,7 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
