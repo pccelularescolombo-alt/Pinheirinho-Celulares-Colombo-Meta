@@ -2552,34 +2552,36 @@
             // Cabeçalho do relatório
             const tituloRel = `📋 Relatório ${lojaNome} — ${dataF}`;
             textoCopia += `${tituloRel}\n`;
-            textoCopia += `${'─'.repeat(40)}\n`;
+            textoCopia += `${'─'.repeat(11)}\n`;
 
             html += `
                 <div class="dashboard-card" style="background: #eef2ff; border-color: #c7d2fe;">
-                    <h3 style="color:#1f2937; margin-bottom:18px; font-size:1.25rem; font-weight:600;">${tituloRel}</h3>
+                    <h3 style="color:#1f2937; margin-bottom:14px; font-size:1.25rem; font-weight:600;">${tituloRel}</h3>
             `;
 
-            // Status de tarefas — legenda
+            // Status de tarefas — legenda (um por linha)
             html += `
-                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted);">
-                    <span>✅ Concluído</span>
-                    <span>🔄 Em Andamento</span>
-                    <span>❌ Não Realizado</span>
+                <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; font-size: 0.88rem; color: var(--text-muted);">
+                    <span>✅ Concluído.</span>
+                    <span>🔄 Em Andamento.</span>
+                    <span>❌ Não Realizado.</span>
                 </div>
                 <div style="border-bottom: 1px solid #c7d2fe; margin-bottom: 16px;"></div>
             `;
 
-            textoCopia += `✅ Concluído. 🔄 Em Andamento. ❌ Não Realizado.\n`;
-            textoCopia += `${'─'.repeat(40)}\n`;
+            textoCopia += `✅ Concluído.\n`;
+            textoCopia += `🔄 Em Andamento.\n`;
+            textoCopia += `❌ Não Realizado.\n`;
+            textoCopia += `${'─'.repeat(11)}\n`;
 
             vendedoresParaExibir.forEach(v => {
                 const fsEntry = funcionarioStatus.find(fs => fs.data === dataRelatorio && fs.vendedorId === v.id);
                 const statusVal = fsEntry ? fsEntry.status : null;
 
                 html += `
-                    <div style="margin: 12px 0; padding: 12px; background: #ffffff; border: 1px solid #eef0f4; border-radius: 8px; border-left: 4px solid ${v.cor};">
+                    <div style="margin: 10px 0; padding: 12px; background: #ffffff; border: 1px solid #eef0f4; border-radius: 8px; border-left: 4px solid ${v.cor};">
                         <h4 style="color:${v.cor}; margin-bottom:8px; font-size:1rem;">
-                            👤 ${v.nome}
+                            👤 <em>${v.nome}</em>
                         </h4>
                 `;
                 textoCopia += `\n👤 *${v.nome}*\n`;
@@ -2591,7 +2593,6 @@
                     html += `<p style="color: #4f46e5; font-weight: 600; margin: 0;">🩺 Atestado.</p>`;
                     textoCopia += `🩺 Atestado.\n`;
                 } else if (!porFuncionario[v.id]) {
-                    // Sem registro — não registrou tarefas
                     html += `<p style="color: #9ca3af; font-style: italic; margin: 0;">⚠️ Funcionário não registrou suas tarefas.</p>`;
                     textoCopia += `⚠️ Funcionário não registrou suas tarefas.\n`;
                 } else {
@@ -2608,6 +2609,7 @@
                         html += `<p style="color: #9ca3af; font-style: italic; margin: 0;">⚠️ Funcionário não registrou suas tarefas.</p>`;
                         textoCopia += `⚠️ Funcionário não registrou suas tarefas.\n`;
                     } else {
+                        // Formato: "✅ Afazeres:" como cabeçalho, depois bullet points por tarefa
                         const listaTarefas = todasTarefas.map(tDesc => {
                             const tObj = tarefas.find(t => t.data === dataRelatorio && t.vendedorId == v.id && t.descricao === tDesc);
                             let icon = '⏳';
@@ -2616,15 +2618,18 @@
                                 else if (tObj.status === 'em_andamento') icon = '🔄';
                                 else if (tObj.status === 'nao_realizado') icon = '❌';
                             }
-                            return `${icon} ${tDesc}`;
+                            return { icon, desc: tDesc };
                         });
 
-                        html += `<div style="margin-left:8px; margin-bottom: 8px;">`;
-                        html += listaTarefas.map(t => `<div style="font-size: 0.9rem;">${t}</div>`).join('');
+                        // HTML: cabeçalho "✅ Afazeres:" + lista com bullets
+                        html += `<div style="margin-left:8px; margin-bottom: 4px; font-weight:600; font-size:0.9rem; color:#1f2937;">✅ Afazeres:</div>`;
+                        html += `<div style="margin-left:16px; margin-bottom: 8px;">`;
+                        html += listaTarefas.map(t => `<div style="font-size: 0.9rem;">${t.icon} ${t.desc}.</div>`).join('');
                         html += `</div>`;
 
+                        // Texto copiado: "✅ Afazeres:" + bullets sem ícones individuais
                         textoCopia += `✅ Afazeres:\n`;
-                        listaTarefas.forEach(t => { textoCopia += `  • ${t}\n`; });
+                        listaTarefas.forEach(t => { textoCopia += `  • ${t.desc}.\n`; });
                     }
 
                     html += `
@@ -2638,7 +2643,7 @@
                 }
 
                 html += `</div>`;
-                textoCopia += `${'─'.repeat(40)}\n`;
+                textoCopia += `${'─'.repeat(11)}\n`;
             });
 
             html += `</div>`;
@@ -2652,13 +2657,13 @@
             if (obs) {
                 html += `
                     <div class="dashboard-card" style="background: #fffbeb; border-color: #fde68a; margin-top: 16px;">
-                        <h4 style="color: #92400e;"><i class="fas fa-comment-dots"></i> Obs. Do dia</h4>
+                        <h4 style="color: #92400e;"><i class="fas fa-comment-dots"></i> Obg do dia</h4>
                         <p style="color: #78350f; white-space: pre-wrap; margin: 0;">${obs.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                     </div>
                 `;
-                textoCopia += `\n*Obs. Do dia:* ${obs}\n`;
+                textoCopia += `\n*Obg do dia*: ${obs}\n`;
             }
-            textoCopia += `${'─'.repeat(40)}\n`;
+            textoCopia += `${'─'.repeat(11)}\n`;
 
             // Botão copiar
             html = `
@@ -3687,6 +3692,7 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
