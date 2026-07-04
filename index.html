@@ -217,12 +217,51 @@
         .admin-panel { display: none; }
         .admin-panel.active { display: block; }
 
+        /* Botão hambúrguer (mobile) para abrir o drawer de tabs */
+        .tabs-toggle {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            background: var(--bg-elev);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+        }
+        .tabs-toggle i { color: var(--primary); }
+
+        /* Overlay do drawer (mobile) */
+        .tabs-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 998;
+        }
+        .tabs-overlay.active { display: block; }
+
         .tabs {
             display: flex;
             gap: 4px;
             margin-bottom: 22px;
             border-bottom: 1px solid var(--border);
             flex-wrap: wrap;
+        }
+        .tabs-close {
+            display: none;
+            background: transparent;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px 8px;
         }
         .tab {
             padding: 10px 14px;
@@ -441,22 +480,51 @@
             .vendedor-icon { font-size: 1.4rem; margin-bottom: 4px; }
             .vendedor-name { font-size: 0.78rem; }
             
-            /* Tabs */
-            .tabs { 
-                gap: 0;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: none;
+            /* Tabs viram drawer lateral no mobile */
+            .tabs-toggle { display: flex; }
+
+            .tabs {
+                position: fixed;
+                top: 0;
+                left: -85%;
+                width: 80%;
+                max-width: 320px;
+                height: 100vh;
+                background: var(--bg-elev);
+                border-right: 1px solid var(--border);
+                border-bottom: none;
+                box-shadow: 4px 0 16px rgba(15, 23, 42, 0.12);
+                z-index: 999;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                padding: 60px 12px 20px;
+                margin-bottom: 0;
+                overflow-y: auto;
+                transition: left 0.25s ease;
                 flex-wrap: nowrap;
-                padding-bottom: 2px;
-                margin-bottom: 16px;
             }
-            .tabs::-webkit-scrollbar { display: none; }
-            .tab { 
-                padding: 8px 10px; 
-                font-size: 0.78rem;
-                white-space: nowrap;
-                flex-shrink: 0;
+            .tabs.open { left: 0; }
+            .tabs-close {
+                display: block;
+                position: absolute;
+                top: 12px;
+                right: 12px;
+            }
+            .tab {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+                white-space: normal;
+                text-align: left;
+                border-bottom: 1px solid var(--border-soft);
+                border-radius: var(--radius-sm);
+                margin-bottom: 0;
+                width: 100%;
+            }
+            .tab.active {
+                background: var(--primary-soft);
+                border-bottom-color: transparent;
+                color: var(--primary);
             }
             
             /* Tabelas responsivas */
@@ -556,6 +624,17 @@
             
             /* Dashboard encarregado grid */
             #dashboardEnc > div[style*="grid"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Evita corte lateral do conteúdo do dashboard/relatório */
+            #dashboardEncResultado,
+            #relatorioResultado {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            #dashboardEncResultado > div[style*="grid"],
+            #relatorioResultado > div[style*="grid"] {
                 grid-template-columns: 1fr !important;
             }
             
@@ -990,7 +1069,14 @@
         <div id="adminPanel" class="admin-panel card full-width active">
             <h2>🛠️ Painel de Gestão</h2>
 
-            <div class="tabs">
+            <button type="button" class="tabs-toggle" id="tabsToggle" aria-label="Abrir menu de seções">
+                <span><i class="fas fa-bars"></i> &nbsp; <span id="tabsToggleLabel">Menu de Seções</span></span>
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="tabs-overlay" id="tabsOverlay"></div>
+
+            <div class="tabs" id="adminTabs">
+                <button type="button" class="tabs-close" id="tabsClose" aria-label="Fechar menu">&times;</button>
                 <div class="tab active" data-tab="dashboardEnc">
                     📋 Dashboard Encarregado
                 </div>
@@ -1896,6 +1982,31 @@
                 renderAfazeresCheckboxes();
             });
 
+            // Drawer lateral de tabs (mobile)
+            const adminTabsEl = document.getElementById('adminTabs');
+            const tabsOverlayEl = document.getElementById('tabsOverlay');
+            const tabsToggleEl = document.getElementById('tabsToggle');
+            const tabsCloseEl = document.getElementById('tabsClose');
+            const tabsToggleLabel = document.getElementById('tabsToggleLabel');
+            function abrirTabsDrawer() {
+                if (adminTabsEl) adminTabsEl.classList.add('open');
+                if (tabsOverlayEl) tabsOverlayEl.classList.add('active');
+            }
+            function fecharTabsDrawer() {
+                if (adminTabsEl) adminTabsEl.classList.remove('open');
+                if (tabsOverlayEl) tabsOverlayEl.classList.remove('active');
+            }
+            function atualizarLabelTab() {
+                const ativa = document.querySelector('.tab.active');
+                if (ativa && tabsToggleLabel) {
+                    tabsToggleLabel.textContent = ativa.textContent.trim();
+                }
+            }
+            if (tabsToggleEl) tabsToggleEl.addEventListener('click', abrirTabsDrawer);
+            if (tabsCloseEl) tabsCloseEl.addEventListener('click', fecharTabsDrawer);
+            if (tabsOverlayEl) tabsOverlayEl.addEventListener('click', fecharTabsDrawer);
+            atualizarLabelTab();
+
             // Tabs (lazy render)
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -1907,11 +2018,13 @@
                         setTimeout(() => document.getElementById('senhaAbaInput').focus(), 50);
                         return; // Don't switch tab yet
                     }
-                    
+
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
                     tab.classList.add('active');
                     document.getElementById(target).classList.add('active');
+                    atualizarLabelTab();
+                    fecharTabsDrawer();
                     if (target === 'dashboardEnc') renderDashboardEncarregado();
                     if (target === 'tarefas') {
                         // Auto-carregar para o dia atual (Fix #4)
@@ -3671,6 +3784,14 @@
                     document.getElementById('gerenciar').classList.add('active');
                     renderGerenciarLista();
                 }
+                // Atualiza label e fecha drawer mobile
+                const _ativa = document.querySelector('.tab.active');
+                const _lbl = document.getElementById('tabsToggleLabel');
+                if (_ativa && _lbl) _lbl.textContent = _ativa.textContent.trim();
+                const _drawer = document.getElementById('adminTabs');
+                const _ov = document.getElementById('tabsOverlay');
+                if (_drawer) _drawer.classList.remove('open');
+                if (_ov) _ov.classList.remove('active');
                 showToast('✅ Acesso concedido!', 'success');
             } else {
                 showToast('⚠️ Senha incorreta!', 'error');
@@ -3692,6 +3813,7 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
