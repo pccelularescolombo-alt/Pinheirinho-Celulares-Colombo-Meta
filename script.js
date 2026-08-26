@@ -1002,42 +1002,66 @@
         }
 
         function atualizarResumoHoje() {
-            const hoje = obterDataLocal();
-            const registrosHoje = registros.filter(r => r.data === hoje);
-            
             const container = document.getElementById('resumoHoje');
-            
-            if (registrosHoje.length === 0) {
+            if (!container) return;
+
+            if (vendedores.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-calendar-times"></i>
-                        <p>Nenhum registro hoje</p>
+                        <i class="fas fa-users-slash"></i>
+                        <p>Nenhum funcionário cadastrado</p>
                     </div>
                 `;
                 return;
             }
 
+            const hoje = obterDataLocal();
+            const mesAtual = hoje.slice(0, 7); // YYYY-MM
+            const [anoRef, mesRef] = mesAtual.split('-').map(Number);
+            const diasNoMes = new Date(anoRef, mesRef, 0).getDate(); // total de dias do mês atual
+
+            const registrosMes = registros.filter(r => r.data.startsWith(mesAtual));
+
+            // Meta mensal individual = meta total da loja dividida por todos os funcionários
+            const metaIndividualMensal = metaCashback / vendedores.length;
+            // Meta diária individual = meta mensal individual dividida pelos dias do mês atual
+            const metaDiariaIndividual = metaIndividualMensal / diasNoMes;
+
             let html = '<div class="stats-grid">';
-            
+
             vendedores.forEach(vendedor => {
-                const regsVendedor = registrosHoje.filter(r => r.vendedorId === vendedor.id);
-                if (regsVendedor.length > 0) {
-                    const totalCashback = regsVendedor.reduce((sum, r) => sum + r.cashback, 0);
-                    const totalAvaliacoes = regsVendedor.reduce((sum, r) => sum + r.avaliacoes, 0);
-                    
-                    html += `
-                        <div class="stat-card" style="border-top: 3px solid ${vendedor.cor};">
-                            <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor};"></i>
-                            <div class="label">${vendedor.nome}</div>
-                            <div class="value" style="color: ${vendedor.cor};">${totalCashback}</div>
-                            <div class="label">Cashback</div>
-                            <div class="value" style="color: ${vendedor.cor}; font-size: 1.5rem;">${totalAvaliacoes}</div>
-                            <div class="label">Avaliações</div>
+                const regsVendedor = registrosMes.filter(r => r.vendedorId === vendedor.id);
+                const realizadoMes = regsVendedor.reduce((sum, r) => sum + r.cashback, 0);
+
+                const falta = Math.max(0, metaIndividualMensal - realizadoMes);
+                const pct = metaIndividualMensal > 0
+                    ? Math.min(100, (realizadoMes / metaIndividualMensal) * 100)
+                    : 0;
+                const pctFmt = pct.toFixed(1);
+                const bateuMeta = realizadoMes >= metaIndividualMensal;
+
+                html += `
+                    <div class="stat-card" style="border-top: 3px solid ${vendedor.cor};">
+                        <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor};"></i>
+                        <div class="label">${vendedor.nome}</div>
+                        <div class="value" style="color: ${bateuMeta ? '#2ecc71' : vendedor.cor};">
+                            ${bateuMeta ? '🎉 Meta batida!' : falta.toFixed(1)}
                         </div>
-                    `;
-                }
+                        <div class="label">${bateuMeta ? 'Parabéns!' : 'Falta para a meta'}</div>
+                        <div style="width:100%; background:var(--border-soft); border-radius:6px; height:8px; margin:8px 0; overflow:hidden;">
+                            <div style="width:${pct}%; background:${bateuMeta ? '#2ecc71' : vendedor.cor}; height:100%;"></div>
+                        </div>
+                        <div class="label" style="font-weight:600; color:${vendedor.cor};">${pctFmt}% da meta</div>
+                        <div class="label" style="margin-top:6px; font-size:0.75rem; opacity:0.85;">
+                            Meta mensal: ${metaIndividualMensal.toFixed(1)} · Meta diária: ${metaDiariaIndividual.toFixed(2)}
+                        </div>
+                        <div class="label" style="font-size:0.75rem; opacity:0.85;">
+                            Realizado no mês: ${realizadoMes}
+                        </div>
+                    </div>
+                `;
             });
-            
+
             html += '</div>';
             container.innerHTML = html;
         }
