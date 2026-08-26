@@ -1022,9 +1022,12 @@
 
             const registrosMes = registros.filter(r => r.data.startsWith(mesAtual));
 
+            const diaAtual = Number(hoje.slice(8, 10));
+            const diasRestantes = Math.max(1, diasNoMes - diaAtual + 1); // inclui hoje
+
             // Meta mensal individual = meta total da loja dividida por todos os funcionários
             const metaIndividualMensal = metaCashback / vendedores.length;
-            // Meta diária individual = meta mensal individual dividida pelos dias do mês atual
+            // Meta diária individual (referência fixa) = meta mensal individual dividida pelos dias do mês atual
             const metaDiariaIndividual = metaIndividualMensal / diasNoMes;
 
             let html = '<div class="stats-grid">';
@@ -1040,6 +1043,9 @@
                 const pctFmt = pct.toFixed(1);
                 const bateuMeta = realizadoMes >= metaIndividualMensal;
 
+                // Quanto precisa fazer por dia (nos dias restantes) já descontando o que já realizou
+                const metaDiariaRestante = bateuMeta ? 0 : (falta / diasRestantes);
+
                 html += `
                     <div class="stat-card" style="border-top: 3px solid ${vendedor.cor};">
                         <i class="fas ${vendedor.icone}" style="color: ${vendedor.cor};"></i>
@@ -1052,8 +1058,14 @@
                             <div style="width:${pct}%; background:${bateuMeta ? '#2ecc71' : vendedor.cor}; height:100%;"></div>
                         </div>
                         <div class="label" style="font-weight:600; color:${vendedor.cor};">${pctFmt}% da meta</div>
+                        ${!bateuMeta ? `
+                        <div style="margin-top:8px; padding:6px 8px; background:${vendedor.cor}18; border-radius:6px;">
+                            <div class="value" style="font-size:1.1rem; color:${vendedor.cor};">${metaDiariaRestante.toFixed(2)}</div>
+                            <div class="label" style="font-size:0.72rem;">por dia nos ${diasRestantes} dia(s) restantes</div>
+                        </div>
+                        ` : ''}
                         <div class="label" style="margin-top:6px; font-size:0.75rem; opacity:0.85;">
-                            Meta mensal: ${metaIndividualMensal.toFixed(1)} · Meta diária: ${metaDiariaIndividual.toFixed(2)}
+                            Meta mensal: ${metaIndividualMensal.toFixed(1)} · Meta diária fixa: ${metaDiariaIndividual.toFixed(2)}
                         </div>
                         <div class="label" style="font-size:0.75rem; opacity:0.85;">
                             Realizado no mês: ${realizadoMes}
