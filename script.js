@@ -434,6 +434,7 @@
                 popularSelectVendedorGrafico();
                 renderDiasSemanaChecks();
                 renderDashboardEncarregado();
+                iniciarRoteamento();
             } catch (error) {
                 console.error('Erro na inicialização:', error);
                 showToast('⚠️ Erro ao inicializar o sistema.', 'error');
@@ -569,8 +570,6 @@
             });
 
             // Gráficos
-            document.getElementById('gerarGraficos').addEventListener('click', gerarGraficos);
-            document.getElementById('gerarGraficoTarefas').addEventListener('click', gerarGraficoTarefas);
 
             document.getElementById('editarRegistroForm').addEventListener('submit', salvarEdicaoRegistro);
 
@@ -630,7 +629,6 @@
 
             // Set current month for charts
             const mesAtual = hoje.slice(0, 7);
-            document.getElementById('mesGrafico').value = mesAtual;
 
             document.getElementById('dataRegistro').addEventListener('change', () => {
                 if (document.getElementById('vendedorSelecionado').value) {
@@ -962,7 +960,7 @@
             atualizarMetasHeader();
             // Re-renders pesados acontecem só quando a aba estiver ativa
             if (document.getElementById('gerenciar').classList.contains('active')) renderGerenciarLista();
-            if (document.getElementById('dashboardEnc').classList.contains('active')) renderDashboardEncarregado();
+            renderDashboardEncarregado();
 
             // Retornar ao Passo 1 após 2.5 segundos
             setTimeout(() => {
@@ -1002,6 +1000,10 @@
         }
 
         function atualizarResumoHoje() {
+            _resumoCards();
+            renderGraficoCashback();
+        }
+        function _resumoCards() {
             const container = document.getElementById('resumoHoje');
             if (!container) return;
 
@@ -1134,7 +1136,7 @@
                 const statusEntry = funcionarioStatus.find(fs => fs.data === dataRel && fs.vendedorId === v.id);
                 const statusVal = statusEntry ? statusEntry.status : 'normal';
                 return `
-                    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-elev); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); border-left: 4px solid ${v.cor};">
+                    <div class="func-status-row" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--bg-elev); border: 1px solid var(--border-soft); border-radius: var(--radius-sm); border-left: 4px solid ${v.cor};">
                         <i class="fas ${v.icone}" style="color: ${v.cor}; font-size: 1.1rem; flex-shrink: 0;"></i>
                         <span style="font-weight: 600; font-size: 0.88rem; min-width: 80px; color: var(--text);">${v.nome}</span>
                         <div style="display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap;">
@@ -1427,13 +1429,13 @@
                     const dataFormatada = new Date(reg.data + 'T00:00:00').toLocaleDateString('pt-BR');
                     html += `
                         <tr>
-                            <td>${dataFormatada}</td>
-                            <td style="color: ${vendedor.cor}; font-weight: 600;">
+                            <td data-label="Data">${dataFormatada}</td>
+                            <td data-label="Vendedor" style="color: ${vendedor.cor}; font-weight: 600;">
                                 <i class="fas ${vendedor.icone}"></i> ${vendedor.nome}
                             </td>
-                            <td>${reg.cashback}</td>
-                            <td>${reg.avaliacoes}</td>
-                            <td>
+                            <td data-label="Cashback">${reg.cashback}</td>
+                            <td data-label="Avaliações">${reg.avaliacoes}</td>
+                            <td data-label="Ações" class="td-actions">
                                 <div class="actions">
                                     <button class="btn btn-secondary btn-small" onclick="editarRegistro(${reg.id})">
                                         <i class="fas fa-edit"></i> Editar
@@ -1494,326 +1496,6 @@
         }
 
         // Funções de gerenciamento de vendedores foram removidas — funcionários são fixos.
-
-        function gerarGraficos() {
-            const mes = document.getElementById('mesGrafico').value;
-            if (!mes) {
-                showToast('Por favor, selecione um mês!', 'warning');
-                return;
-            }
-            
-            const [ano, mesNum] = mes.split('-');
-            const registrosMes = registros.filter(r => {
-                const [regAno, regMes] = r.data.split('-');
-                return regAno === ano && regMes === mesNum;
-            });
-            
-            if (registrosMes.length === 0) {
-                document.getElementById('graficosContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Nenhum registro encontrado para este mês</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Calcular totais por vendedor
-            const totaisPorVendedor = {};
-            vendedores.forEach(v => {
-                totaisPorVendedor[v.id] = { cashback: 0, avaliacoes: 0, afazeres: 0 };
-            });
-            
-            registrosMes.forEach(reg => {
-                if (totaisPorVendedor[reg.vendedorId]) {
-                    totaisPorVendedor[reg.vendedorId].cashback += reg.cashback;
-                    totaisPorVendedor[reg.vendedorId].avaliacoes += reg.avaliacoes;
-                }
-            });
-
-            // Contar afazeres (tarefas) por vendedor no mês
-            const tarefasMes = tarefas.filter(t => {
-                const [tAno, tMes] = t.data.split('-');
-                return tAno === ano && tMes === mesNum;
-            });
-            
-            tarefasMes.forEach(t => {
-                if (totaisPorVendedor[t.vendedorId]) {
-                    totaisPorVendedor[t.vendedorId].afazeres += 1;
-                }
-            });
-
-            const container = document.getElementById('graficosContainer');
-            container.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr; gap: 30px; margin-top: 20px;">
-                    <div class="card">
-                        <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
-                            <i class="fas fa-gift"></i> Cashback por Vendedor
-                        </h3>
-                        <div class="chart-container" style="height: 400px;">
-                            <canvas id="chartMetas"></canvas>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <h3 style="margin-bottom: 14px; color: #1f2937; font-size: 0.95rem; font-weight: 600;">
-                            <i class="fas fa-tasks"></i> Afazeres por Vendedor
-                        </h3>
-                        <div class="chart-container">
-                            <canvas id="chartAfazeres"></canvas>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Preparar dados
-            const labels = [];
-            const datasetCashback = [];
-            const datasetAfazeres = [];
-            const cores = [];
-
-            vendedores.forEach(vendedor => {
-                if (totaisPorVendedor[vendedor.id].cashback > 0 || totaisPorVendedor[vendedor.id].avaliacoes > 0 || totaisPorVendedor[vendedor.id].afazeres > 0) {
-                    labels.push(vendedor.nome);
-                    datasetCashback.push(totaisPorVendedor[vendedor.id].cashback);
-                    datasetAfazeres.push(totaisPorVendedor[vendedor.id].afazeres);
-                    cores.push(vendedor.cor);
-                }
-            });
-
-            // Gráfico Afazeres
-            new Chart(document.getElementById('chartAfazeres'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Afazeres Realizados',
-                        data: datasetAfazeres,
-                        backgroundColor: cores,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            titleColor: '#fff',
-                            bodyColor: '#fff'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
-                            ticks: { color: '#6b7280' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#6b7280' }
-                        }
-                    }
-                }
-            });
-
-            // Gráfico de Cashback por Vendedor
-            new Chart(document.getElementById('chartMetas'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Cashback',
-                        data: datasetCashback,
-                        backgroundColor: cores,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            titleColor: '#fff',
-                            bodyColor: '#fff'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
-                            ticks: { color: '#6b7280' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#6b7280' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ============================
-        // NOVO GRÁFICO: Análise de Tarefas por Funcionário
-        // ============================
-        function gerarGraficoTarefas() {
-            const vendedorId = document.getElementById('vendedorGraficoTarefas').value;
-            if (!vendedorId) {
-                showToast('⚠️ Por favor, selecione um funcionário!', 'warning');
-                return;
-            }
-
-            const vendedor = vendedores.find(v => v.id == vendedorId);
-            if (!vendedor) {
-                showToast('⚠️ Funcionário não encontrado!', 'error');
-                return;
-            }
-
-            // Calcular data de 4 semanas atrás
-            const hoje = new Date(obterDataLocal());
-            const quatroSemanasAtras = new Date(hoje);
-            quatroSemanasAtras.setDate(quatroSemanasAtras.getDate() - 28);
-
-            // Filtrar tarefas do vendedor nos últimos 28 dias
-            const tarefasFiltradas = tarefas.filter(t => {
-                if (t.vendedorId != vendedorId) return false;
-                const dataTarefa = new Date(t.data);
-                return dataTarefa >= quatroSemanasAtras && dataTarefa <= hoje;
-            });
-
-            if (tarefasFiltradas.length === 0) {
-                document.getElementById('graficoTarefasContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-chart-line"></i>
-                        <p>Nenhuma tarefa encontrada para este funcionário nas últimas 4 semanas</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Agrupar por descrição e contar ocorrências
-            const tarefasPorDescricao = {};
-            const diasSemanaPorTarefa = {};
-
-            tarefasFiltradas.forEach(t => {
-                if (!tarefasPorDescricao[t.descricao]) {
-                    tarefasPorDescricao[t.descricao] = 0;
-                    diasSemanaPorTarefa[t.descricao] = new Set();
-                }
-                tarefasPorDescricao[t.descricao]++;
-                
-                // Pegar dia da semana da tarefa (0 = Domingo, 6 = Sábado)
-                const diaSemana = new Date(t.data + 'T00:00:00').getDay();
-                diasSemanaPorTarefa[t.descricao].add(diaSemana);
-            });
-
-            // Ordenar tarefas por quantidade (mais realizadas primeiro)
-            const tarefasOrdenadas = Object.keys(tarefasPorDescricao)
-                .sort((a, b) => tarefasPorDescricao[b] - tarefasPorDescricao[a]);
-
-            // Preparar dados para o gráfico
-            const labels = tarefasOrdenadas;
-            const data = tarefasOrdenadas.map(desc => tarefasPorDescricao[desc]);
-            const cores = tarefasOrdenadas.map((_, i) => {
-                const coresPaleta = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
-                return coresPaleta[i % coresPaleta.length];
-            });
-
-            // Gerar HTML do gráfico
-            const container = document.getElementById('graficoTarefasContainer');
-            container.innerHTML = `
-                <div class="card" style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 14px; color: var(--text); font-size: 0.95rem; font-weight: 600;">
-                        <i class="fas fa-user" style="color: ${vendedor.cor};"></i> ${vendedor.nome} — Tarefas Mais Realizadas
-                    </h3>
-                    <div class="chart-container" style="height: 400px;">
-                        <canvas id="chartTarefasFuncionario"></canvas>
-                    </div>
-                </div>
-
-                <div class="card" style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 14px; color: var(--text); font-size: 0.95rem; font-weight: 600;">
-                        <i class="fas fa-calendar-week"></i> Dias da Semana por Tarefa
-                    </h3>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Tarefa</th>
-                                    <th>Quantidade</th>
-                                    <th>Dias da Semana</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${tarefasOrdenadas.map(desc => {
-                                    const quantidade = tarefasPorDescricao[desc];
-                                    const dias = Array.from(diasSemanaPorTarefa[desc]).sort((a, b) => a - b);
-                                    const diasNomes = dias.map(d => DIAS_SEMANA[d]).join(', ');
-                                    return `
-                                        <tr>
-                                            <td><strong>${desc}</strong></td>
-                                            <td><span class="status-badge status-concluido">${quantidade}x</span></td>
-                                            <td>${diasNomes}</td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-
-            // Criar gráfico
-            new Chart(document.getElementById('chartTarefasFuncionario'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Quantidade de Realizações',
-                        data: data,
-                        backgroundColor: cores,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                            padding: 12,
-                            titleColor: '#fff',
-                            bodyColor: '#fff'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0, 0, 0, 0.06)' },
-                            ticks: { 
-                                color: '#6b7280',
-                                stepSize: 1
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { 
-                                color: '#6b7280',
-                                maxRotation: 45,
-                                minRotation: 45
-                            }
-                        }
-                    }
-                }
-            });
-
-            showToast('📊 Gráfico gerado com sucesso!', 'success');
-        }
 
         // ============================
         // TAREFAS (afazeres)
@@ -2025,13 +1707,13 @@
 
                 html += `
                     <tr>
-                        <td>${dataF}</td>
-                        <td style="color:${v.cor}; font-weight:600;">
+                        <td data-label="Data">${dataF}</td>
+                        <td data-label="Funcionário" style="color:${v.cor}; font-weight:600;">
                             <i class="fas ${v.icone}"></i> ${v.nome}
                         </td>
-                        <td>${t.descricao}</td>
-                        <td>${badge}</td>
-                        <td>
+                        <td data-label="Descrição">${t.descricao}</td>
+                        <td data-label="Status">${badge}</td>
+                        <td data-label="Ações" class="td-actions">
                             <div class="actions">
                                 ${toggleBtn}
                                 ${editBtn}
@@ -2289,10 +1971,10 @@
                     : '—';
                 html += `
                     <tr>
-                        <td>${a.descricao}</td>
-                        <td>${recLabel}</td>
-                        <td>${dias}</td>
-                        <td>
+                        <td data-label="Descrição">${a.descricao}</td>
+                        <td data-label="Recorrência">${recLabel}</td>
+                        <td data-label="Dias">${dias}</td>
+                        <td data-label="Ações" class="td-actions">
                             <div class="actions">
                                 <button class="btn btn-secondary btn-small" onclick="editarAfazerCadastro(${a.id})">✏️ Editar</button>
                                 <button class="btn btn-danger btn-small" onclick="excluirAfazerCadastro(${a.id})">🗑️ Excluir</button>
@@ -2360,6 +2042,105 @@
 
         function togglePassword() { /* removido */ }
 
+        // ============================
+        // PÁGINAS (Dashboard / Registrar / Configuração)
+        // ============================
+        const PAGINAS = ['dashboard', 'registrar', 'configuracao'];
+        let paginaAtual = 'dashboard';
+
+        function irParaPagina(p) {
+            if (!PAGINAS.includes(p)) p = 'dashboard';
+            paginaAtual = p;
+            document.querySelectorAll('.page').forEach(sec => sec.classList.toggle('active', sec.id === 'page-' + p));
+            document.querySelectorAll('[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === p));
+            window.scrollTo(0, 0);
+            if (p === 'dashboard') { atualizarMetasHeader(); atualizarResumoHoje(); }
+            if (p === 'registrar') renderDashboardEncarregado();
+            if (p === 'configuracao') {
+                const t = document.querySelector('.tab.active');
+                if (t && t.dataset.tab === 'relatorios') gerarRelatorio();
+            }
+        }
+
+        function iniciarRoteamento() {
+            window.addEventListener('hashchange', () => irParaPagina(location.hash.slice(1)));
+            document.getElementById('gfSemanas').addEventListener('change', renderGraficoCashback);
+            document.getElementById('gfFuncionario').addEventListener('change', renderGraficoCashback);
+            document.getElementById('dashboardData').addEventListener('change', renderDashboardEncarregado);
+            irParaPagina(location.hash.slice(1));
+        }
+
+        // ============================
+        // GRÁFICO: Meta de Cashback por Funcionário (semanal, pré-filtrado: 4 semanas / todos)
+        // ============================
+        let chartCashback = null;
+        function somarDias(str, n) {
+            const d = new Date(str + 'T00:00:00Z');
+            d.setUTCDate(d.getUTCDate() + n);
+            return d.toISOString().slice(0, 10);
+        }
+        const fmtDM = s => s.slice(8, 10) + '/' + s.slice(5, 7);
+
+        function renderGraficoCashback() {
+            const cv = document.getElementById('chartCashback4s');
+            if (!cv || typeof Chart === 'undefined' || paginaAtual !== 'dashboard') return;
+
+            const selF = document.getElementById('gfFuncionario');
+            const fAtual = selF.value;
+            selF.innerHTML = '<option value="">Todos os funcionários</option>' +
+                vendedores.map(v => `<option value="${v.id}">${v.nome}</option>`).join('');
+            selF.value = fAtual;
+
+            const n = parseInt(document.getElementById('gfSemanas').value) || 4;
+            const fid = selF.value;
+            const hoje = obterDataLocal();
+
+            // n blocos de 7 dias, terminando hoje
+            const semanas = [];
+            for (let i = 0; i < n; i++) {
+                const fim = somarDias(hoje, -7 * (n - 1 - i));
+                semanas.push({ ini: somarDias(fim, -6), fim });
+            }
+            const lista = fid ? vendedores.filter(v => v.id == fid) : vendedores;
+
+            // Meta semanal individual = meta diária fixa (mesma regra dos cards) x 7
+            const [ano, mes] = hoje.split('-').map(Number);
+            const diasMes = new Date(ano, mes, 0).getDate();
+            const metaSemanal = vendedores.length ? (metaCashback / vendedores.length / diasMes) * 7 : 0;
+
+            const datasets = lista.map(v => ({
+                label: v.nome,
+                data: semanas.map(s => registros
+                    .filter(r => r.vendedorId === v.id && r.data >= s.ini && r.data <= s.fim)
+                    .reduce((t, r) => t + (r.cashback || 0), 0)),
+                backgroundColor: v.cor,
+                borderRadius: 6,
+                maxBarThickness: 38
+            }));
+            datasets.push({
+                type: 'line', label: 'Meta semanal por funcionário',
+                data: semanas.map(() => +metaSemanal.toFixed(2)),
+                borderColor: '#ef4444', borderDash: [6, 4], borderWidth: 2, pointRadius: 0, fill: false
+            });
+
+            if (chartCashback) chartCashback.destroy();
+            chartCashback = new Chart(cv, {
+                type: 'bar',
+                data: { labels: semanas.map((s, i) => [`Sem ${i + 1}`, `${fmtDM(s.ini)}–${fmtDM(s.fim)}`]), datasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0, color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.06)' } },
+                        x: { grid: { display: false }, ticks: { color: '#6b7280', autoSkip: false, maxRotation: 0 } }
+                    }
+                }
+            });
+
+            document.getElementById('gfTotais').innerHTML =
+                lista.map((v, i) => `<span class="chip"><i class="dot" style="background:${v.cor}"></i>${v.nome}: <strong>${datasets[i].data.reduce((x, y) => x + y, 0)}</strong></span>`).join('') +
+                `<span class="chip muted">${fmtDM(semanas[0].ini)} a ${fmtDM(hoje)}</span>`;
+        }
+
         // Inicializar
         init();
-    
