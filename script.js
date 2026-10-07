@@ -472,6 +472,24 @@
                 renderDashboardEncarregado();
             });
 
+            // Atualizar metas (página Configuração)
+            document.getElementById('metasForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const c = parseInt(document.getElementById('metaCashbackInput').value);
+                const a = parseInt(document.getElementById('metaAvaliacoesInput').value);
+                if (!(c > 0) || !(a > 0)) {
+                    showToast('⚠️ Informe metas maiores que zero.', 'warning');
+                    return;
+                }
+                metaCashback = c;
+                metaAvaliacoes = a;
+                await salvarConfiguracoes();
+                atualizarMetasHeader();
+                atualizarResumoHoje();
+                renderDashboardEncarregado();
+                showToast('🎯 Metas atualizadas com sucesso!', 'success');
+            });
+
             document.getElementById('registroForm').addEventListener('submit', salvarRegistro);
             
             // Botão Voltar para o Passo 1
@@ -985,18 +1003,24 @@
             const hoje = obterDataLocal();
             const mesAtual = hoje.slice(0, 7);
             const registrosMes = registros.filter(r => r.data.startsWith(mesAtual));
-            
+
             const totalCashMes = registrosMes.reduce((sum, r) => sum + r.cashback, 0);
             const totalAvalMes = registrosMes.reduce((sum, r) => sum + r.avaliacoes, 0);
-            
+
             const pctCashMes = metaCashback > 0 ? ((totalCashMes / metaCashback) * 100).toFixed(1) : 0;
             const pctAvalMes = metaAvaliacoes > 0 ? ((totalAvalMes / metaAvaliacoes) * 100).toFixed(1) : 0;
-            
-            document.getElementById('metaCashbackHeader').textContent = metaCashback;
-            document.getElementById('metaCashbackPctHeader').textContent = `(${totalCashMes} - ${pctCashMes}%)`;
-            
-            document.getElementById('metaAvaliacoesHeader').textContent = metaAvaliacoes;
-            document.getElementById('metaAvaliacoesPctHeader').textContent = `(${totalAvalMes} - ${pctAvalMes}%)`;
+
+            const inC = document.getElementById('metaCashbackInput');
+            const inA = document.getElementById('metaAvaliacoesInput');
+            if (inC && document.activeElement !== inC) inC.value = metaCashback;
+            if (inA && document.activeElement !== inA) inA.value = metaAvaliacoes;
+
+            const prog = document.getElementById('metasProgresso');
+            if (prog) {
+                prog.innerHTML =
+                    `<span class="chip"><i class="fas fa-gift"></i> Cashback no mês: <strong>${totalCashMes} / ${metaCashback}</strong> (${pctCashMes}%)</span>` +
+                    `<span class="chip"><i class="fas fa-star"></i> Avaliações no mês: <strong>${totalAvalMes} / ${metaAvaliacoes}</strong> (${pctAvalMes}%)</span>`;
+            }
         }
 
         function atualizarResumoHoje() {
@@ -2064,7 +2088,7 @@
 
         function iniciarRoteamento() {
             window.addEventListener('hashchange', () => irParaPagina(location.hash.slice(1)));
-            document.getElementById('gfSemanas').addEventListener('change', renderGraficoCashback);
+            document.getElementById('gfModo').addEventListener('change', renderGraficoCashback);
             document.getElementById('gfFuncionario').addEventListener('change', renderGraficoCashback);
             document.getElementById('dashboardData').addEventListener('change', renderDashboardEncarregado);
             irParaPagina(location.hash.slice(1));
@@ -2085,61 +2109,91 @@
             const cv = document.getElementById('chartCashback4s');
             if (!cv || typeof Chart === 'undefined' || paginaAtual !== 'dashboard') return;
 
+            const modo = document.getElementById('gfModo').value; // 'total' | 'func'
             const selF = document.getElementById('gfFuncionario');
             const fAtual = selF.value;
-            selF.innerHTML = '<option value="">Todos os funcionários</option>' +
+            selF.innerHTML = '<option value="">Todos (separados)</option>' +
                 vendedores.map(v => `<option value="${v.id}">${v.nome}</option>`).join('');
             selF.value = fAtual;
+            document.getElementById('gfFuncGroup').style.display = modo === 'func' ? 'block' : 'none';
 
-            const n = parseInt(document.getElementById('gfSemanas').value) || 4;
-            const fid = selF.value;
             const hoje = obterDataLocal();
-
-            // n blocos de 7 dias, terminando hoje
-            const semanas = [];
-            for (let i = 0; i < n; i++) {
-                const fim = somarDias(hoje, -7 * (n - 1 - i));
-                semanas.push({ ini: somarDias(fim, -6), fim });
-            }
-            const lista = fid ? vendedores.filter(v => v.id == fid) : vendedores;
-
-            // Meta semanal individual = meta diária fixa (mesma regra dos cards) x 7
+            const mesAtual = hoje.slice(0, 7);
             const [ano, mes] = hoje.split('-').map(Number);
+            const mm = String(mes).padStart(2, '0');
             const diasMes = new Date(ano, mes, 0).getDate();
-            const metaSemanal = vendedores.length ? (metaCashback / vendedores.length / diasMes) * 7 : 0;
+            const dias = Array.from({ length: diasMes }, (_, i) => `${mesAtual}-${String(i + 1).padStart(2, '0')}`);
+            const labels = dias.map(d => d.slice(8, 10));
+            const regsMes = registros.filter(r => r.data && r.data.startsWith(mesAtual));
+            const somaDia = (lista, dia) => lista.filter(r => r.data === dia).reduce((t, r) => t + (r.cashback || 0), 0);
 
-            const datasets = lista.map(v => ({
-                label: v.nome,
-                data: semanas.map(s => registros
-                    .filter(r => r.vendedorId === v.id && r.data >= s.ini && r.data <= s.fim)
-                    .reduce((t, r) => t + (r.cashback || 0), 0)),
-                backgroundColor: v.cor,
-                borderRadius: 6,
-                maxBarThickness: 38
-            }));
+            let datasets = [];
+            let metaDia = 0;
+            let chips = '';
+
+            if (modo === 'total') {
+                // Soma de todos os funcionários por dia lançado
+                const dados = dias.map(d => somaDia(regsMes, d));
+                datasets.push({
+                    label: 'Total do dia (todos)',
+                    data: dados,
+                    backgroundColor: '#4f46e5',
+                    borderRadius: 4,
+                    maxBarThickness: 22
+                });
+                metaDia = metaCashback / diasMes;
+                const total = dados.reduce((x, y) => x + y, 0);
+                chips = `<span class="chip"><i class="dot" style="background:#4f46e5"></i>Total do mês: <strong>${total}</strong></span>` +
+                        `<span class="chip">Meta do mês: <strong>${metaCashback}</strong></span>`;
+            } else {
+                const fid = selF.value;
+                const lista = fid ? vendedores.filter(v => v.id == fid) : vendedores;
+                datasets = lista.map(v => {
+                    const regsV = regsMes.filter(r => r.vendedorId === v.id);
+                    return {
+                        label: v.nome,
+                        data: dias.map(d => somaDia(regsV, d)),
+                        backgroundColor: v.cor,
+                        borderRadius: 4,
+                        maxBarThickness: fid ? 22 : 12
+                    };
+                });
+                // Meta diária individual (mesma regra dos cards)
+                metaDia = vendedores.length ? metaCashback / vendedores.length / diasMes : 0;
+                chips = lista.map((v, i) => `<span class="chip"><i class="dot" style="background:${v.cor}"></i>${v.nome}: <strong>${datasets[i].data.reduce((x, y) => x + y, 0)}</strong></span>`).join('');
+            }
+
             datasets.push({
-                type: 'line', label: 'Meta semanal por funcionário',
-                data: semanas.map(() => +metaSemanal.toFixed(2)),
+                type: 'line',
+                label: modo === 'total' ? 'Meta diária (loja)' : 'Meta diária por funcionário',
+                data: dias.map(() => +metaDia.toFixed(2)),
                 borderColor: '#ef4444', borderDash: [6, 4], borderWidth: 2, pointRadius: 0, fill: false
             });
 
             if (chartCashback) chartCashback.destroy();
             chartCashback = new Chart(cv, {
                 type: 'bar',
-                data: { labels: semanas.map((s, i) => [`Sem ${i + 1}`, `${fmtDM(s.ini)}–${fmtDM(s.fim)}`]), datasets },
+                data: { labels, datasets },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } } },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } },
+                        tooltip: { callbacks: { title: items => `Dia ${items[0].label}/${mm}` } }
+                    },
                     scales: {
                         y: { beginAtZero: true, ticks: { precision: 0, color: '#6b7280' }, grid: { color: 'rgba(0,0,0,0.06)' } },
-                        x: { grid: { display: false }, ticks: { color: '#6b7280', autoSkip: false, maxRotation: 0 } }
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#6b7280', autoSkip: false, maxRotation: 0, font: { size: 10 } },
+                            title: { display: true, text: `Dias de ${mm}/${ano}`, color: '#6b7280' }
+                        }
                     }
                 }
             });
 
-            document.getElementById('gfTotais').innerHTML =
-                lista.map((v, i) => `<span class="chip"><i class="dot" style="background:${v.cor}"></i>${v.nome}: <strong>${datasets[i].data.reduce((x, y) => x + y, 0)}</strong></span>`).join('') +
-                `<span class="chip muted">${fmtDM(semanas[0].ini)} a ${fmtDM(hoje)}</span>`;
+            document.getElementById('gfTotais').innerHTML = chips +
+                `<span class="chip muted">01/${mm} a ${String(diasMes).padStart(2, '0')}/${mm}</span>`;
         }
 
         // Inicializar

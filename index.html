@@ -33,14 +33,6 @@
 
         <!-- PÁGINA 1: DASHBOARD -->
         <section id="page-dashboard" class="page active">
-            <div class="metas-info">
-                <div class="meta-item"><i class="fas fa-gift"></i><div><span>Meta Cashback</span>
-                    <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><strong id="metaCashbackHeader">100</strong>
-                    <span id="metaCashbackPctHeader" style="font-size:0.8rem;color:var(--primary);font-weight:600;">(0%)</span></div></div></div>
-                <div class="meta-item"><i class="fas fa-star"></i><div><span>Meta Avaliações</span>
-                    <div style="display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;"><strong id="metaAvaliacoesHeader">15</strong>
-                    <span id="metaAvaliacoesPctHeader" style="font-size:0.8rem;color:var(--primary);font-weight:600;">(0%)</span></div></div></div>
-            </div>
             <div class="card">
                 <h2>🎯 Meta de Cashback por Funcionário</h2>
                 <div id="resumoHoje"></div>
@@ -48,10 +40,10 @@
             <div class="card">
                 <h2>📈 Meta de Cashback por Funcionário</h2>
                 <div class="chart-filters">
-                    <div class="form-group"><label for="gfSemanas">Período</label>
-                        <select id="gfSemanas"><option value="4" selected>Últimas 4 semanas</option><option value="8">Últimas 8 semanas</option></select></div>
-                    <div class="form-group"><label for="gfFuncionario">Funcionário</label>
-                        <select id="gfFuncionario"><option value="">Todos os funcionários</option></select></div>
+                    <div class="form-group"><label for="gfModo">Visualização</label>
+                        <select id="gfModo"><option value="total" selected>Total do dia (todos os funcionários)</option><option value="func">Por funcionário</option></select></div>
+                    <div class="form-group" id="gfFuncGroup" style="display:none;"><label for="gfFuncionario">Funcionário</label>
+                        <select id="gfFuncionario"><option value="">Todos (separados)</option></select></div>
                 </div>
                 <div class="chart-container tall"><canvas id="chartCashback4s"></canvas></div>
                 <div id="gfTotais" class="chart-totais"></div>
@@ -155,6 +147,19 @@
 
         <!-- PÁGINA 3: CONFIGURAÇÃO -->
         <section id="page-configuracao" class="page">
+            <div class="card">
+                <h2>🎯 Metas Mensais</h2>
+                <form id="metasForm">
+                    <div class="filters-grid">
+                        <div class="form-group"><label for="metaCashbackInput">🎁 Meta Mensal Total de Cashback</label>
+                            <input type="number" id="metaCashbackInput" min="1" required placeholder="Ex: 100"></div>
+                        <div class="form-group"><label for="metaAvaliacoesInput">⭐ Meta Mensal Total de Avaliações</label>
+                            <input type="number" id="metaAvaliacoesInput" min="1" required placeholder="Ex: 15"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Atualizar Metas</button>
+                </form>
+                <div id="metasProgresso" class="chart-totais"></div>
+            </div>
             <div class="card">
                 <div class="page-toolbar">
                     <h2>⚙️ Configuração</h2>
